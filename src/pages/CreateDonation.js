@@ -715,7 +715,7 @@ const CreateDonation = () => {
         </Button>
         
         <Typography variant="h4" gutterBottom>
-          {isEditing ? 'Edit Donation' : 'Create Food Donation'}
+          {isEditing ? 'Edit Donation' : 'Create Food '}
         </Typography>
         <Typography variant="body1" color="text.secondary">
           Share your surplus food with those who need it
