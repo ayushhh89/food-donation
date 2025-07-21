@@ -19,9 +19,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Register = () => {
-  const { signup } = useAuth();
+  // --- FIX: Use 'register' instead of 'signup' ---
+  const { register } = useAuth(); 
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -42,8 +43,13 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      setLoading(false);
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
@@ -51,20 +57,32 @@ const Register = () => {
       return;
     }
 
+    setLoading(true);
+
     try {
-      await signup(formData.email, formData.password, {
+      // --- FIX: Call 'register' instead of 'signup' ---
+      await register(formData.email, formData.password, {
         name: formData.name,
         role: formData.role,
         phone: formData.phone
       });
       navigate('/dashboard');
     } catch (error) {
-      setError('Failed to create account. Please try again.');
+      console.error("Signup failed:", error.code, error.message);
+      if (error.code === 'auth/email-already-in-use') {
+        setError('This email address is already in use by another account.');
+      } else if (error.code === 'auth/invalid-email') {
+        setError('The email address is not valid.');
+      } else if (error.code === 'auth/weak-password') {
+        setError('The password is too weak. Please use at least 6 characters.');
+      } else {
+        setError('Failed to create account. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
       <Card>
