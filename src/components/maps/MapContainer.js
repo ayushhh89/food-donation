@@ -1,36 +1,23 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import {
-  Box,
-  Container,
-  Typography,
-  Paper,
-  Card,
-  CardContent,
-  Chip,
-  Button,
-  Avatar,
-  CircularProgress,
+  Box, Container, Typography, Card, CardContent,
+  Button, Chip, CircularProgress
 } from '@mui/material';
-import { Person, Restaurant } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  doc,
-  updateDoc,
-  arrayUnion,
+  collection, query, where, onSnapshot,
+  doc, updateDoc, arrayUnion
 } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
 
-import { MapContainer as LeafletMap, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer as LeafletMap, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import axios from 'axios';
 
-// Fix Leaflet default marker icon path issue
+// Fix default marker icon
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -38,179 +25,124 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-// Mock geolocation for demo
-const mockCoordinates = {
-  'New York': { lat: 40.7128, lng: -74.006 },
-  'Los Angeles': { lat: 34.0522, lng: -118.2437 },
-  'Chicago': { lat: 41.8781, lng: -87.6298 },
-  'Houston': { lat: 29.7604, lng: -95.3698 },
-  'Miami': { lat: 25.7617, lng: -80.1918 },
-};
+const OPENCAGE_KEY = '335eadc8a0804915a48c44699d28f946'; // 🔁 Replace with your actual key
 
 const MapContainer = () => {
   const { currentUser, userProfile } = useAuth();
-  const mapRef = useRef(null);
+  const mapRef = useRef();
   const markerRefs = useRef({});
   const [donations, setDonations] = useState([]);
-  const [selectedDonation, setSelectedDonation] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch available donations
   useEffect(() => {
     const q = query(collection(db, 'donations'), where('status', '==', 'available'));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const donationList = snapshot.docs.map((docSnap) => {
+    const unsubscribe = onSnapshot(q, async snap => {
+      const geocoded = await Promise.all(snap.docs.map(async docSnap => {
         const data = docSnap.data();
-
-        // Assign coordinates based on city name in pickup address
-        let coordinates = null;
-        if (data.pickupAddress) {
-          Object.entries(mockCoordinates).forEach(([city, coords]) => {
-            if (data.pickupAddress.toLowerCase().includes(city.toLowerCase())) {
-              coordinates = coords;
+        const address = data.pickupAddress;
+        let coords = null;
+        if (address) {
+          try {
+            const resp = await axios.get(
+              `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(address)}&key=${OPENCAGE_KEY}`
+            );
+            if (resp.data.results.length > 0) {
+              const g = resp.data.results[0].geometry;
+              coords = { lat: g.lat, lng: g.lng };
+            } else {
+              console.warn(`No result for ${address}`);
             }
-          });
+          } catch (err) {
+            console.error('Geocoding error:', err);
+          }
         }
+        return { id: docSnap.id, ...data, coordinates: coords };
+      }));
 
-        return {
-          id: docSnap.id,
-          ...data,
-          coordinates,
-        };
-      });
-
-      setDonations(donationList.filter((d) => d));
+      setDonations(geocoded.filter(d => d.coordinates));
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Get current location
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          setUserLocation(loc);
-        },
-        () => toast.info('Could not get your location.')
-      );
-    }
-  }, []);
-
-  const handleShowInterest = async (donation) => {
+  const handleInterest = async donation => {
     if (!currentUser) return;
     try {
-      const donationRef = doc(db, 'donations', donation.id);
-      await updateDoc(donationRef, {
-        interestedReceivers: arrayUnion(currentUser.uid),
+      await updateDoc(doc(db, 'donations', donation.id), {
+        interestedReceivers: arrayUnion(currentUser.uid)
       });
       toast.success('Interest registered!');
-    } catch (error) {
-      toast.error('Error registering interest.');
+    } catch {
+      toast.error('Error.');
     }
   };
 
-  const flyToDonation = (donation) => {
-    if (donation.coordinates && mapRef.current) {
-      mapRef.current.flyTo(donation.coordinates, 14, { duration: 1.5 });
-      const marker = markerRefs.current[donation.id];
-      if (marker) marker.openPopup();
-    } else {
-      toast.warning('Invalid location for this donation.');
+  const flyTo = donation => {
+    if (!donation.coordinates || !mapRef.current) {
+      toast.warning('Invalid location');
+      return;
     }
+    mapRef.current.flyTo(donation.coordinates, 14, { duration: 1.5 });
+    markerRefs.current[donation.id]?.openPopup();
   };
+
+  if (loading) return (
+    <Container><CircularProgress /></Container>
+  );
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Donation Map (Leaflet)
-      </Typography>
-
-      {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="400px">
-          <CircularProgress />
+    <Container sx={{ py: 4 }}>
+      <Typography variant="h4" gutterBottom>Donation Map</Typography>
+      <Box sx={{ display: 'flex', height: '70vh', gap: 2 }}>
+        {/* List Section */}
+        <Box sx={{ width: 300, overflowY: 'auto', bgcolor: 'grey.100', p: 2 }}>
+          <Typography variant="h6">Nearby Donations</Typography>
+          {donations.map(d => (
+            <Card key={d.id} sx={{ my:1, cursor:'pointer' }} onClick={() => flyTo(d)}>
+              <CardContent>
+                <Typography>{d.title}</Typography>
+                <Typography variant="body2" color="text.secondary">{d.pickupAddress}</Typography>
+                <Chip label={d.category} size="small" sx={{ mt:1 }} />
+              </CardContent>
+            </Card>
+          ))}
         </Box>
-      ) : (
-        <Box sx={{ display: 'flex', height: '70vh', gap: 2 }}>
-          {/* Sidebar List */}
-          <Box sx={{ width: 300, overflowY: 'auto', bgcolor: 'grey.100', p: 2 }}>
-            <Typography variant="h6">Nearby Donations</Typography>
-            {donations.map((donation) => (
-              <Card
-                key={donation.id}
-                sx={{ my: 1, cursor: 'pointer' }}
-                onClick={() => {
-                  setSelectedDonation(donation);
-                  flyToDonation(donation);
-                }}
-              >
-                <CardContent>
-                  <Typography variant="subtitle1">{donation.title}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {donation.pickupAddress || 'Invalid location'}
-                  </Typography>
-                  <Chip label={donation.category} size="small" sx={{ mt: 1 }} />
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
 
-          {/* Leaflet Map */}
-          <Box sx={{ flexGrow: 1 }}>
-            <LeafletMap
-              center={userLocation || [40.7128, -74.006]}
-              zoom={12}
-              scrollWheelZoom
-              style={{ height: '100%', width: '100%' }}
-              whenCreated={(map) => (mapRef.current = map)}
+        {/* Map Section */}
+        <LeafletMap
+          center={donations[0]?.coordinates || [20.5937, 78.9629]}
+          zoom={5}
+          style={{ flexGrow:1 }}
+          whenCreated={m => mapRef.current = m}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution="© OpenStreetMap contributors"
+          />
+          {donations.map(d => (
+            <Marker
+              key={d.id}
+              position={d.coordinates}
+              ref={ref => { if(ref) markerRefs.current[d.id] = ref; }}
             >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution="&copy; OpenStreetMap contributors"
-              />
-
-              {donations.map((donation) => {
-                if (!donation.coordinates) return null;
-                return (
-                  <Marker
-                    key={donation.id}
-                    position={donation.coordinates}
-                    ref={(ref) => {
-                      if (ref) markerRefs.current[donation.id] = ref;
-                    }}
+              <Popup>
+                <Typography>{d.title}</Typography>
+                <Typography variant="body2">{d.pickupAddress}</Typography>
+                {userProfile?.role === 'receiver' && (
+                  <Button
+                    size="small"
+                    onClick={() => handleInterest(d)}
+                    disabled={d.interestedReceivers?.includes(currentUser?.uid)}
                   >
-                    <Popup>
-                      <Typography variant="subtitle1">{donation.title}</Typography>
-                      <Typography variant="body2">{donation.pickupAddress}</Typography>
-                      <Button
-                        size="small"
-                        onClick={() => handleShowInterest(donation)}
-                        disabled={
-                          donation.interestedReceivers?.includes(currentUser?.uid)
-                        }
-                      >
-                        {donation.interestedReceivers?.includes(currentUser?.uid)
-                          ? 'Interested'
-                          : 'Show Interest'}
-                      </Button>
-                    </Popup>
-                  </Marker>
-                );
-              })}
-
-              {userLocation && (
-                <Marker position={userLocation}>
-                  <Popup>Your Location</Popup>
-                </Marker>
-              )}
-            </LeafletMap>
-          </Box>
-        </Box>
-      )}
+                    {d.interestedReceivers?.includes(currentUser?.uid) ? 'Interested' : 'Show Interest'}
+                  </Button>
+                )}
+              </Popup>
+            </Marker>
+          ))}
+        </LeafletMap>
+      </Box>
     </Container>
   );
 };
