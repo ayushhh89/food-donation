@@ -119,10 +119,10 @@ const HomePage = () => {
   ];
 
   const impactStats = [
-    { number: "2,500+", label: "Meals Shared", icon: Restaurant, color: "#00C853" },
-    { number: "850+", label: "Active Members", icon: People, color: "#667eea" },
-    { number: "1.2K kg", label: "Waste Prevented", icon: EnergySavingsLeaf, color: "#FF9800" },
-    { number: "95%", label: "Success Rate", icon: EmojiEvents, color: "#E91E63" }
+    { number: "2,500+", label: "Meals Shared", icon: Restaurant, color: "#00C853", gradient: "linear-gradient(135deg, #00C853 0%, #69F0AE 100%)" },
+    { number: "850+", label: "Active Members", icon: People, color: "#667eea", gradient: "linear-gradient(135deg, #667eea 0%, #9C9EFE 100%)" },
+    { number: "1.2K kg", label: "Waste Prevented", icon: EnergySavingsLeaf, color: "#FF9800", gradient: "linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)" },
+    { number: "95%", label: "Success Rate", icon: EmojiEvents, color: "#E91E63", gradient: "linear-gradient(135deg, #E91E63 0%, #F48FB1 100%)" }
   ];
 
   const features = [
@@ -180,10 +180,10 @@ const HomePage = () => {
   ];
 
   const communityHighlights = [
-    { icon: Groups, label: "Active Communities", value: "120+", color: "#667eea" },
-    { icon: Public, label: "Cities Served", value: "45+", color: "#00C853" },
-    { icon: Handshake, label: "Partnerships", value: "200+", color: "#FF9800" },
-    { icon: Diversity3, label: "Volunteers", value: "500+", color: "#E91E63" }
+    { icon: Groups, label: "Active Communities", value: "120+", color: "#667eea", gradient: "linear-gradient(135deg, #667eea 0%, #9C9EFE 100%)" },
+    { icon: Public, label: "Cities Served", value: "45+", color: "#00C853", gradient: "linear-gradient(135deg, #00C853 0%, #69F0AE 100%)" },
+    { icon: Handshake, label: "Partnerships", value: "200+", color: "#FF9800", gradient: "linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)" },
+    { icon: Diversity3, label: "Volunteers", value: "500+", color: "#E91E63", gradient: "linear-gradient(135deg, #E91E63 0%, #F48FB1 100%)" }
   ];
 
   const faqs = [
@@ -270,7 +270,7 @@ const HomePage = () => {
                       fontSize: '1rem'
                     }}
                   />
-                  
+
                   <Typography
                     variant="h1"
                     sx={{
@@ -568,149 +568,478 @@ const HomePage = () => {
         </Container>
       </Box>
 
-      {/* Enhanced Impact Stats */}
-      <Container maxWidth="xl" sx={{ py: 10, position: 'relative', zIndex: 1 }}>
-        <Box textAlign="center" sx={{ mb: 8 }}>
-          <Typography
-            variant="h2"
+      {/* ENHANCED IMPACT STATS - STUNNING REDESIGN */}
+      {/* COMPLETELY REDESIGNED IMPACT STATS - STUNNING & CENTERED */}
+      <Container maxWidth="xl" sx={{ py: 15, position: 'relative', zIndex: 1 }}>
+        {/* Enhanced Header Section */}
+        <Box textAlign="center" sx={{ mb: 12 }}>
+          <Chip
+            label="📊 Live Impact Dashboard"
             sx={{
-              fontWeight: 800,
-              fontSize: { xs: '2.5rem', md: '3.5rem' },
+              mb: 4,
+              px: 4,
+              py: 1.5,
+              borderRadius: 5,
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
               color: 'white',
-              mb: 3
+              fontWeight: 700,
+              fontSize: '1.1rem',
+              boxShadow: '0 8px 32px rgba(255, 255, 255, 0.1)'
+            }}
+          />
+
+          <Typography
+            variant="h1"
+            sx={{
+              fontWeight: 900,
+              fontSize: { xs: '3rem', md: '4.5rem', lg: '5.5rem' },
+              background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.7) 50%, #FFD700 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              mb: 4,
+              textShadow: '0 8px 32px rgba(255,255,255,0.1)',
+              letterSpacing: '-0.02em'
             }}
           >
             Our Community Impact
           </Typography>
+
           <Typography
-            variant="h6"
+            variant="h4"
             sx={{
-              fontSize: '1.3rem',
-              color: 'rgba(255,255,255,0.8)',
-              maxWidth: 600,
-              mx: 'auto'
+              fontSize: { xs: '1.3rem', md: '1.8rem' },
+              color: 'rgba(255,255,255,0.9)',
+              maxWidth: 800,
+              mx: 'auto',
+              fontWeight: 300,
+              lineHeight: 1.6,
+              mb: 6
             }}
           >
-            Real numbers, real impact, real change happening every day
+            Real numbers, real impact, real change happening every single day
           </Typography>
+
+          {/* Decorative Elements */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 3, mb: 8 }}>
+            <Box sx={{ width: 60, height: 2, background: 'linear-gradient(90deg, transparent, #FFD700, transparent)' }} />
+            <Box sx={{
+              width: 20,
+              height: 20,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, #FFD700 0%, rgba(255, 215, 0, 0.3) 100%)',
+              animation: 'pulse 2s ease-in-out infinite'
+            }} />
+            <Box sx={{ width: 60, height: 2, background: 'linear-gradient(90deg, transparent, #FFD700, transparent)' }} />
+          </Box>
         </Box>
 
-        <Grid container spacing={4} sx={{ mb: 8 }}>
-          {impactStats.map((stat, index) => (
-            <Grid item xs={12} sm={6} lg={3} key={index}>
-              <Card
-                sx={{
-                  p: 4,
-                  textAlign: 'center',
-                  borderRadius: 4,
-                  background: 'rgba(255, 255, 255, 0.15)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  '&:hover': {
-                    transform: 'translateY(-8px) scale(1.02)',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
-                  },
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: 4,
-                    background: `linear-gradient(135deg, ${stat.color} 0%, ${stat.color}CC 100%)`
-                  }
-                }}
-              >
-                <Box
+        {/* MAIN IMPACT CARDS - COMPLETELY REDESIGNED WITH PERFECT CENTERING */}
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          mb: 12,
+          px: { xs: 2, md: 4 }
+        }}>
+          <Grid container spacing={5} sx={{ maxWidth: 1400 }} justifyContent="center">
+            {impactStats.map((stat, index) => (
+              <Grid item xs={12} sm={6} lg={3} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Card
                   sx={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: '50%',
-                    background: `linear-gradient(135deg, ${stat.color}20 0%, ${stat.color}10 100%)`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    mx: 'auto',
-                    mb: 3,
-                    border: `2px solid ${stat.color}30`
-                  }}
-                >
-                  <stat.icon sx={{ fontSize: 40, color: stat.color }} />
-                </Box>
-                <Typography
-                  variant="h3"
-                  sx={{
-                    color: 'white',
-                    fontWeight: 800,
-                    mb: 1,
-                    fontSize: '2.5rem'
-                  }}
-                >
-                  {stat.number}
-                </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    color: 'rgba(255,255,255,0.9)',
-                    fontWeight: 600
-                  }}
-                >
-                  {stat.label}
-                </Typography>
-                <LinearProgress
-                  variant="determinate"
-                  value={75 + (index * 5)}
-                  sx={{
-                    mt: 2,
-                    height: 4,
-                    borderRadius: 2,
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    '& .MuiLinearProgress-bar': {
-                      background: `linear-gradient(90deg, ${stat.color} 0%, ${stat.color}CC 100%)`,
-                      borderRadius: 2
+                    width: '100%',
+                    maxWidth: 320,
+                    height: 350,
+                    borderRadius: 8,
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    backdropFilter: 'blur(60px)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    boxShadow: '0 40px 120px rgba(0,0,0,0.15)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      transform: 'translateY(-20px) scale(1.05)',
+                      boxShadow: '0 60px 160px rgba(0,0,0,0.25)',
+                      '& .stat-icon-container': {
+                        transform: 'scale(1.15) rotate(5deg)',
+                      },
+                      '& .stat-number': {
+                        transform: 'scale(1.1)',
+                      },
+                      '& .glow-effect': {
+                        opacity: 1,
+                        transform: 'scale(1.4)',
+                      },
+                      '& .floating-particles': {
+                        opacity: 1,
+                      }
+                    },
+                    transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 8,
+                      background: stat.gradient,
+                      borderRadius: '32px 32px 0 0'
+                    },
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: `radial-gradient(circle at 50% 30%, ${stat.color}12 0%, transparent 60%)`,
+                      pointerEvents: 'none'
                     }
                   }}
-                />
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                >
+                  {/* Enhanced Animated Background Effects */}
+                  <Box
+                    className="glow-effect"
+                    sx={{
+                      position: 'absolute',
+                      top: '40%',
+                      left: '50%',
+                      width: 250,
+                      height: 250,
+                      transform: 'translate(-50%, -50%)',
+                      background: `radial-gradient(circle, ${stat.color}20 0%, ${stat.color}05 40%, transparent 70%)`,
+                      borderRadius: '50%',
+                      opacity: 0.6,
+                      transition: 'all 0.8s ease',
+                      animation: 'pulse 6s ease-in-out infinite'
+                    }}
+                  />
 
-        {/* Community Highlights */}
-        <Grid container spacing={3}>
-          {communityHighlights.map((highlight, index) => (
-            <Grid item xs={6} sm={3} key={index}>
-              <Card
-                sx={{
-                  p: 3,
-                  textAlign: 'center',
-                  borderRadius: 3,
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    background: 'rgba(255, 255, 255, 0.15)'
-                  },
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                <highlight.icon sx={{ fontSize: 32, color: highlight.color, mb: 1 }} />
-                <Typography variant="h6" sx={{ color: 'white', fontWeight: 700 }}>
-                  {highlight.value}
-                </Typography>
-                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  {highlight.label}
-                </Typography>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                  {/* Floating Particles Effect */}
+                  {[...Array(3)].map((_, i) => (
+                    <Box
+                      key={i}
+                      className="floating-particles"
+                      sx={{
+                        position: 'absolute',
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        background: stat.gradient,
+                        opacity: 0,
+                        transition: 'all 0.6s ease',
+                        animation: `float ${3 + i}s ease-in-out infinite ${i * 0.5}s`,
+                        top: `${20 + i * 15}%`,
+                        left: `${10 + i * 30}%`
+                      }}
+                    />
+                  ))}
+
+                  <CardContent sx={{
+                    p: 5,
+                    textAlign: 'center',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    position: 'relative',
+                    zIndex: 2
+                  }}>
+                    {/* Completely Redesigned Icon Container */}
+                    <Box
+                      className="stat-icon-container"
+                      sx={{
+                        width: 120,
+                        height: 120,
+                        borderRadius: '50%',
+                        background: stat.gradient,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mx: 'auto',
+                        mb: 4,
+                        boxShadow: `0 25px 60px ${stat.color}50, 0 0 0 8px rgba(255,255,255,0.05)`,
+                        border: `4px solid rgba(255, 255, 255, 0.1)`,
+                        transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: -8,
+                          left: -8,
+                          right: -8,
+                          bottom: -8,
+                          background: stat.gradient,
+                          borderRadius: '50%',
+                          opacity: 0.2,
+                          filter: 'blur(16px)',
+                          zIndex: -1
+                        },
+                        '&::after': {
+                          content: '""',
+                          position: 'absolute',
+                          top: -4,
+                          left: -4,
+                          right: -4,
+                          bottom: -4,
+                          background: `conic-gradient(from 0deg, ${stat.color}, transparent, ${stat.color})`,
+                          borderRadius: '50%',
+                          opacity: 0.3,
+                          animation: 'rotate 8s linear infinite',
+                          zIndex: -1
+                        }
+                      }}
+                    >
+                      <stat.icon sx={{
+                        fontSize: 55,
+                        color: 'white',
+                        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
+                      }} />
+                    </Box>
+
+                    {/* Enhanced Number Display */}
+                    <Typography
+                      className="stat-number"
+                      variant="h1"
+                      sx={{
+                        fontWeight: 900,
+                        fontSize: '3.5rem',
+                        mb: 2,
+                        background: `linear-gradient(135deg, ${stat.color} 0%, white 50%, ${stat.color} 100%)`,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        textShadow: '0 8px 32px rgba(255,255,255,0.1)',
+                        transition: 'all 0.6s ease',
+                        letterSpacing: '-0.02em'
+                      }}
+                    >
+                      {stat.number}
+                    </Typography>
+
+                    {/* Enhanced Label */}
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        color: 'rgba(255,255,255,0.95)',
+                        fontWeight: 700,
+                        fontSize: '1.3rem',
+                        mb: 3,
+                        letterSpacing: '0.5px'
+                      }}
+                    >
+                      {stat.label}
+                    </Typography>
+
+                    {/* Enhanced Progress Indicator */}
+                    <Box sx={{ width: '100%' }}>
+                      <LinearProgress
+                        variant="determinate"
+                        value={88 + (index * 2)}
+                        sx={{
+                          height: 8,
+                          borderRadius: 4,
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)',
+                          '& .MuiLinearProgress-bar': {
+                            background: stat.gradient,
+                            borderRadius: 4,
+                            boxShadow: `0 0 20px ${stat.color}60, inset 0 1px 2px rgba(255,255,255,0.2)`,
+                            animation: 'progressGlow 3s ease-in-out infinite'
+                          }
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: 'rgba(255,255,255,0.6)',
+                          fontSize: '0.8rem',
+                          fontWeight: 500,
+                          mt: 1,
+                          display: 'block'
+                        }}
+                      >
+                        Growing daily
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
+        {/* ENHANCED COMMUNITY HIGHLIGHTS - PERFECTLY CENTERED */}
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Grid container spacing={4} sx={{ maxWidth: 1000 }} justifyContent="center">
+            {communityHighlights.map((highlight, index) => (
+              <Grid item xs={6} sm={3} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Card
+                  sx={{
+                    p: 4,
+                    width: '100%',
+                    maxWidth: 220,
+                    textAlign: 'center',
+                    borderRadius: 6,
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    backdropFilter: 'blur(40px)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.1)',
+                    '&:hover': {
+                      transform: 'translateY(-12px) scale(1.05)',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      boxShadow: '0 30px 80px rgba(0,0,0,0.2)',
+                      '& .highlight-icon': {
+                        transform: 'scale(1.2) rotate(10deg)',
+                        color: highlight.color
+                      },
+                      '& .highlight-glow': {
+                        opacity: 0.8,
+                        transform: 'scale(1.2)'
+                      }
+                    },
+                    transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 4,
+                      background: highlight.gradient,
+                      borderRadius: '24px 24px 0 0'
+                    }
+                  }}
+                >
+                  {/* Background Glow Effect */}
+                  <Box
+                    className="highlight-glow"
+                    sx={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      width: 150,
+                      height: 150,
+                      transform: 'translate(-50%, -50%)',
+                      background: `radial-gradient(circle, ${highlight.color}15 0%, transparent 70%)`,
+                      borderRadius: '50%',
+                      opacity: 0.4,
+                      transition: 'all 0.6s ease'
+                    }}
+                  />
+
+                  {/* Enhanced Icon with Container */}
+                  <Box sx={{ position: 'relative', zIndex: 1 }}>
+                    <Box
+                      sx={{
+                        width: 70,
+                        height: 70,
+                        borderRadius: '50%',
+                        background: `linear-gradient(135deg, ${highlight.color}20 0%, ${highlight.color}10 100%)`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mx: 'auto',
+                        mb: 3,
+                        border: `2px solid ${highlight.color}30`,
+                        boxShadow: `0 12px 30px ${highlight.color}25`
+                      }}
+                    >
+                      <highlight.icon
+                        className="highlight-icon"
+                        sx={{
+                          fontSize: 40,
+                          color: highlight.color,
+                          transition: 'all 0.4s ease',
+                          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
+                        }}
+                      />
+                    </Box>
+
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        fontWeight: 900,
+                        mb: 1,
+                        fontSize: '2rem',
+                        background: highlight.gradient,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text'
+                      }}
+                    >
+                      {highlight.value}
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'rgba(255,255,255,0.8)',
+                        fontWeight: 600,
+                        fontSize: '0.9rem',
+                        letterSpacing: '0.5px'
+                      }}
+                    >
+                      {highlight.label}
+                    </Typography>
+                  </Box>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
+        {/* Decorative Bottom Element */}
+        <Box sx={{ textAlign: 'center', mt: 10 }}>
+          <Box sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 2,
+            px: 4,
+            py: 2,
+            borderRadius: 5,
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <TrendingUp sx={{ color: '#00C853', fontSize: 24 }} />
+            <Typography sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+              Growing stronger every day
+            </Typography>
+            <Box sx={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: '#00C853',
+              animation: 'pulse 2s ease-in-out infinite'
+            }} />
+          </Box>
+        </Box>
       </Container>
+
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.4; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+@keyframes progressGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.6), inset 0 1px 2px rgba(255,255,255,0.2); }
+  50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.8), inset 0 1px 2px rgba(255,255,255,0.3); }
+}
+      `}</style>
 
       {/* Success Stories Section */}
       <Container maxWidth="xl" sx={{ py: 10, position: 'relative', zIndex: 1 }}>
@@ -833,28 +1162,33 @@ const HomePage = () => {
         </Grid>
       </Container>
 
-      {/* Enhanced How It Works */}
-      <Container maxWidth="xl" sx={{ py: 10, position: 'relative', zIndex: 1 }}>
-        <Box textAlign="center" sx={{ mb: 8 }}>
+      {/* ENHANCED HOW IT WORKS SECTION - STUNNING REDESIGN */}
+      <Container maxWidth="xl" sx={{ py: 12, position: 'relative', zIndex: 1 }}>
+        <Box textAlign="center" sx={{ mb: 10 }}>
           <Typography
             variant="h2"
             sx={{
-              fontWeight: 800,
-              fontSize: { xs: '2.5rem', md: '3.5rem' },
-              color: 'white',
-              mb: 3
+              fontWeight: 900,
+              fontSize: { xs: '2.8rem', md: '4rem' },
+              background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              mb: 3,
+              textShadow: '0 4px 20px rgba(255,255,255,0.1)'
             }}
           >
             How It Works
           </Typography>
           <Typography
-            variant="h6"
+            variant="h5"
             sx={{
-              fontSize: '1.3rem',
+              fontSize: '1.4rem',
               color: 'rgba(255,255,255,0.8)',
-              maxWidth: 600,
+              maxWidth: 700,
               mx: 'auto',
-              fontWeight: 400
+              fontWeight: 300,
+              lineHeight: 1.6
             }}
           >
             Three simple steps to start making a difference in your community
@@ -862,203 +1196,411 @@ const HomePage = () => {
         </Box>
 
         <Grid container spacing={6}>
-          {/* For Donors */}
+          {/* ENHANCED FOR DONORS CARD */}
           <Grid item xs={12} lg={6}>
             <Card
               sx={{
-                p: 6,
+                p: 0,
                 height: '100%',
-                borderRadius: 4,
-                background: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: 6,
+                background: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(40px)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
                 position: 'relative',
                 overflow: 'hidden',
+                boxShadow: '0 30px 90px rgba(0,0,0,0.2)',
+                '&:hover': {
+                  transform: 'translateY(-8px) scale(1.01)',
+                  boxShadow: '0 40px 120px rgba(0,0,0,0.3)',
+                  '& .donor-icon': {
+                    transform: 'scale(1.1) rotate(5deg)',
+                  }
+                },
+                transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&::before': {
                   content: '""',
                   position: 'absolute',
                   top: 0,
                   left: 0,
                   right: 0,
-                  height: 6,
-                  background: 'linear-gradient(90deg, #00C853 0%, #4CAF50 100%)'
+                  height: 8,
+                  background: 'linear-gradient(90deg, #00C853 0%, #69F0AE 100%)',
+                  borderRadius: '24px 24px 0 0'
+                },
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'radial-gradient(circle at 20% 20%, rgba(0, 200, 83, 0.1) 0%, transparent 60%)',
+                  pointerEvents: 'none'
                 }
               }}
             >
-              <Stack direction="row" alignItems="center" spacing={3} sx={{ mb: 4 }}>
-                <Box
-                  sx={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 8px 32px rgba(0, 200, 83, 0.4)'
-                  }}
-                >
-                  <Restaurant sx={{ fontSize: 40, color: 'white' }} />
-                </Box>
-                <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
-                  For Food Donors
-                </Typography>
-              </Stack>
-
-              <Stack spacing={4} sx={{ mb: 4 }}>
-                {[
-                  "📱 Post your surplus food with photos and details",
-                  "👥 Connect with interested community members",
-                  "🤝 Coordinate pickup and make an impact"
-                ].map((step, index) => (
-                  <Stack key={index} direction="row" alignItems="center" spacing={3}>
-                    <Chip
-                      label={index + 1}
-                      sx={{
-                        width: 48,
-                        height: 48,
-                        fontSize: '1.2rem',
-                        fontWeight: 700,
-                        background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
-                        color: 'white'
-                      }}
-                    />
+              <CardContent sx={{ p: 6, position: 'relative', zIndex: 1 }}>
+                {/* Enhanced Header */}
+                <Stack direction="row" alignItems="center" spacing={3} sx={{ mb: 6 }}>
+                  <Box
+                    className="donor-icon"
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #00C853 0%, #69F0AE 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 20px 50px rgba(0, 200, 83, 0.4)',
+                      border: '4px solid rgba(255, 255, 255, 0.2)',
+                      transition: 'all 0.4s ease',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: -4,
+                        left: -4,
+                        right: -4,
+                        bottom: -4,
+                        background: 'linear-gradient(135deg, #00C853 0%, #69F0AE 100%)',
+                        borderRadius: '50%',
+                        opacity: 0.3,
+                        filter: 'blur(12px)',
+                        zIndex: -1
+                      }
+                    }}
+                  >
+                    <Restaurant sx={{ fontSize: 50, color: 'white' }} />
+                  </Box>
+                  <Box>
                     <Typography
-                      variant="h6"
+                      variant="h3"
                       sx={{
-                        color: 'rgba(255,255,255,0.9)',
-                        fontWeight: 500,
-                        fontSize: '1.1rem'
+                        color: 'white',
+                        fontWeight: 800,
+                        background: 'linear-gradient(135deg, #00C853 0%, #69F0AE 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        fontSize: { xs: '1.8rem', md: '2.2rem' }
                       }}
                     >
-                      {step}
+                      For Food Donors
                     </Typography>
-                  </Stack>
-                ))}
-              </Stack>
+                    <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.7)', mt: 1 }}>
+                      Turn waste into hope
+                    </Typography>
+                  </Box>
+                </Stack>
 
-              <Button
-                variant="contained"
-                fullWidth
-                startIcon={<Restaurant />}
-                onClick={() => navigate('/register')}
-                sx={{
-                  py: 2,
-                  borderRadius: 3,
-                  background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
-                  fontWeight: 700,
-                  fontSize: '1.1rem',
-                  textTransform: 'none',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 32px rgba(0, 200, 83, 0.4)'
-                  },
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
-              >
-                Start Donating Food
-              </Button>
+                {/* Enhanced Steps */}
+                <Stack spacing={5} sx={{ mb: 6 }}>
+                  {[
+                    { emoji: "📱", text: "Post your surplus food with photos and details", desc: "Simple upload process with smart categorization" },
+                    { emoji: "👥", text: "Connect with interested community members", desc: "AI-powered matching with nearby recipients" },
+                    { emoji: "🤝", text: "Coordinate pickup and make an impact", desc: "Secure messaging and flexible scheduling" }
+                  ].map((step, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        p: 3,
+                        borderRadius: 3,
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        backdropFilter: 'blur(20px)',
+                        '&:hover': {
+                          background: 'rgba(255, 255, 255, 0.08)',
+                          transform: 'translateX(8px)',
+                          '& .step-number': {
+                            transform: 'scale(1.1)',
+                            background: 'linear-gradient(135deg, #69F0AE 0%, #00C853 100%)'
+                          }
+                        },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <Stack direction="row" alignItems="center" spacing={3}>
+                        <Box
+                          className="step-number"
+                          sx={{
+                            width: 60,
+                            height: 60,
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #00C853 0%, #69F0AE 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.5rem',
+                            fontWeight: 800,
+                            color: 'white',
+                            boxShadow: '0 8px 25px rgba(0, 200, 83, 0.3)',
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          {index + 1}
+                        </Box>
+                        <Box flex={1}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              color: 'white',
+                              fontWeight: 600,
+                              fontSize: '1.1rem',
+                              mb: 0.5,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1
+                            }}
+                          >
+                            <span style={{ fontSize: '1.3rem' }}>{step.emoji}</span>
+                            {step.text}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: 'rgba(255,255,255,0.65)',
+                              fontSize: '0.95rem'
+                            }}
+                          >
+                            {step.desc}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </Box>
+                  ))}
+                </Stack>
+
+                {/* Enhanced CTA Button */}
+                <Button
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  startIcon={<Restaurant />}
+                  onClick={() => navigate('/register')}
+                  sx={{
+                    py: 3,
+                    borderRadius: 4,
+                    background: 'linear-gradient(135deg, #00C853 0%, #69F0AE 100%)',
+                    fontWeight: 800,
+                    fontSize: '1.2rem',
+                    textTransform: 'none',
+                    boxShadow: '0 15px 40px rgba(0, 200, 83, 0.4)',
+                    border: '2px solid rgba(255, 255, 255, 0.1)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #00B248 0%, #4CAF50 100%)',
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 20px 60px rgba(0, 200, 83, 0.5)'
+                    },
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                >
+                  Start Donating Food
+                </Button>
+              </CardContent>
             </Card>
           </Grid>
 
-          {/* For Receivers */}
+          {/* ENHANCED FOR RECEIVERS CARD */}
           <Grid item xs={12} lg={6}>
             <Card
               sx={{
-                p: 6,
+                p: 0,
                 height: '100%',
-                borderRadius: 4,
-                background: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: 6,
+                background: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(40px)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
                 position: 'relative',
                 overflow: 'hidden',
+                boxShadow: '0 30px 90px rgba(0,0,0,0.2)',
+                '&:hover': {
+                  transform: 'translateY(-8px) scale(1.01)',
+                  boxShadow: '0 40px 120px rgba(0,0,0,0.3)',
+                  '& .receiver-icon': {
+                    transform: 'scale(1.1) rotate(-5deg)',
+                  }
+                },
+                transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&::before': {
                   content: '""',
                   position: 'absolute',
                   top: 0,
                   left: 0,
                   right: 0,
-                  height: 6,
-                  background: 'linear-gradient(90deg, #FF9800 0%, #FFC107 100%)'
+                  height: 8,
+                  background: 'linear-gradient(90deg, #FF9800 0%, #FFB74D 100%)',
+                  borderRadius: '24px 24px 0 0'
+                },
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'radial-gradient(circle at 80% 20%, rgba(255, 152, 0, 0.1) 0%, transparent 60%)',
+                  pointerEvents: 'none'
                 }
               }}
             >
-              <Stack direction="row" alignItems="center" spacing={3} sx={{ mb: 4 }}>
-                <Box
-                  sx={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #FF9800 0%, #FFC107 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 8px 32px rgba(255, 152, 0, 0.4)'
-                  }}
-                >
-                  <People sx={{ fontSize: 40, color: 'white' }} />
-                </Box>
-                <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
-                  For Food Receivers
-                </Typography>
-              </Stack>
-
-              <Stack spacing={4} sx={{ mb: 4 }}>
-                {[
-                  "🔍 Browse fresh food donations in your area",
-                  "❤️ Express interest in items you need",
-                  "📍 Pick up food and enjoy your meal"
-                ].map((step, index) => (
-                  <Stack key={index} direction="row" alignItems="center" spacing={3}>
-                    <Chip
-                      label={index + 1}
-                      sx={{
-                        width: 48,
-                        height: 48,
-                        fontSize: '1.2rem',
-                        fontWeight: 700,
-                        background: 'linear-gradient(135deg, #FF9800 0%, #FFC107 100%)',
-                        color: 'white'
-                      }}
-                    />
+              <CardContent sx={{ p: 6, position: 'relative', zIndex: 1 }}>
+                {/* Enhanced Header */}
+                <Stack direction="row" alignItems="center" spacing={3} sx={{ mb: 6 }}>
+                  <Box
+                    className="receiver-icon"
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 20px 50px rgba(255, 152, 0, 0.4)',
+                      border: '4px solid rgba(255, 255, 255, 0.2)',
+                      transition: 'all 0.4s ease',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: -4,
+                        left: -4,
+                        right: -4,
+                        bottom: -4,
+                        background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
+                        borderRadius: '50%',
+                        opacity: 0.3,
+                        filter: 'blur(12px)',
+                        zIndex: -1
+                      }
+                    }}
+                  >
+                    <People sx={{ fontSize: 50, color: 'white' }} />
+                  </Box>
+                  <Box>
                     <Typography
-                      variant="h6"
+                      variant="h3"
                       sx={{
-                        color: 'rgba(255,255,255,0.9)',
-                        fontWeight: 500,
-                        fontSize: '1.1rem'
+                        color: 'white',
+                        fontWeight: 800,
+                        background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        fontSize: { xs: '1.8rem', md: '2.2rem' }
                       }}
                     >
-                      {step}
+                      For Food Receivers
                     </Typography>
-                  </Stack>
-                ))}
-              </Stack>
+                    <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.7)', mt: 1 }}>
+                      Find fresh food nearby
+                    </Typography>
+                  </Box>
+                </Stack>
 
-              <Button
-                variant="contained"
-                fullWidth
-                startIcon={<People />}
-                onClick={() => navigate('/browse')}
-                sx={{
-                  py: 2,
-                  borderRadius: 3,
-                  background: 'linear-gradient(135deg, #FF9800 0%, #FFC107 100%)',
-                  fontWeight: 700,
-                  fontSize: '1.1rem',
-                  textTransform: 'none',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #F57C00 0%, #FF9800 100%)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 32px rgba(255, 152, 0, 0.4)'
-                  },
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
-              >
-                Find Food Near You
-              </Button>
+                {/* Enhanced Steps */}
+                <Stack spacing={5} sx={{ mb: 6 }}>
+                  {[
+                    { emoji: "🔍", text: "Browse fresh food donations in your area", desc: "Real-time listings with detailed descriptions" },
+                    { emoji: "❤️", text: "Express interest in items you need", desc: "One-click requests with instant notifications" },
+                    { emoji: "📍", text: "Pick up food and enjoy your meal", desc: "Easy coordination and community connections" }
+                  ].map((step, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        p: 3,
+                        borderRadius: 3,
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        backdropFilter: 'blur(20px)',
+                        '&:hover': {
+                          background: 'rgba(255, 255, 255, 0.08)',
+                          transform: 'translateX(8px)',
+                          '& .step-number': {
+                            transform: 'scale(1.1)',
+                            background: 'linear-gradient(135deg, #FFB74D 0%, #FF9800 100%)'
+                          }
+                        },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <Stack direction="row" alignItems="center" spacing={3}>
+                        <Box
+                          className="step-number"
+                          sx={{
+                            width: 60,
+                            height: 60,
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.5rem',
+                            fontWeight: 800,
+                            color: 'white',
+                            boxShadow: '0 8px 25px rgba(255, 152, 0, 0.3)',
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          {index + 1}
+                        </Box>
+                        <Box flex={1}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              color: 'white',
+                              fontWeight: 600,
+                              fontSize: '1.1rem',
+                              mb: 0.5,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1
+                            }}
+                          >
+                            <span style={{ fontSize: '1.3rem' }}>{step.emoji}</span>
+                            {step.text}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: 'rgba(255,255,255,0.65)',
+                              fontSize: '0.95rem'
+                            }}
+                          >
+                            {step.desc}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </Box>
+                  ))}
+                </Stack>
+
+                {/* Enhanced CTA Button */}
+                <Button
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  startIcon={<People />}
+                  onClick={() => navigate('/browse')}
+                  sx={{
+                    py: 3,
+                    borderRadius: 4,
+                    background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
+                    fontWeight: 800,
+                    fontSize: '1.2rem',
+                    textTransform: 'none',
+                    boxShadow: '0 15px 40px rgba(255, 152, 0, 0.4)',
+                    border: '2px solid rgba(255, 255, 255, 0.1)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #F57C00 0%, #FF9800 100%)',
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 20px 60px rgba(255, 152, 0, 0.5)'
+                    },
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                >
+                  Find Food Near You
+                </Button>
+              </CardContent>
             </Card>
           </Grid>
         </Grid>
@@ -1285,7 +1827,7 @@ const HomePage = () => {
                 }}
               >
                 <FormatQuote sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 40, mb: 2 }} />
-                
+
                 <Typography
                   variant="body1"
                   sx={{
@@ -1429,7 +1971,7 @@ const HomePage = () => {
           >
             Get the latest updates about community impact, new features, and success stories.
           </Typography>
-          
+
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ maxWidth: 400, mx: 'auto' }}>
             <TextField
               variant="outlined"
@@ -1505,7 +2047,7 @@ const HomePage = () => {
           }}
         >
           <Celebration sx={{ fontSize: 60, color: '#FFD700', mb: 3 }} />
-          
+
           <Typography
             variant="h2"
             sx={{

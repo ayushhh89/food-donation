@@ -21,7 +21,16 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Stack,
+  Avatar,
+  Fade,
+  Slide,
+  Divider,
+  Badge,
+  Tooltip,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Add,
@@ -35,7 +44,17 @@ import {
   TrendingUp,
   CheckCircle,
   Warning,
-  Restaurant
+  Restaurant,
+  Star,
+  Timeline,
+  Analytics,
+  EmojiEvents,
+  Image as ImageIcon,
+  AccessTime,
+  Groups,
+  Favorite,
+  Share,
+  VisibilityOff
 } from '@mui/icons-material';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -53,8 +72,14 @@ const MyDonations = () => {
   const [selectedDonation, setSelectedDonation] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [animationTrigger, setAnimationTrigger] = useState(false);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
+    setAnimationTrigger(true);
+    
     // Load real Firebase data
     const donationsQuery = query(
       collection(db, 'donations'),
@@ -146,6 +171,16 @@ const MyDonations = () => {
     }
   };
 
+  const getStatusGradient = (status) => {
+    switch (status) {
+      case 'available': return 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)';
+      case 'claimed': return 'linear-gradient(135deg, #FF8F00 0%, #FFC107 100%)';
+      case 'completed': return 'linear-gradient(135deg, #1976D2 0%, #2196F3 100%)';
+      case 'expired': return 'linear-gradient(135deg, #D32F2F 0%, #F44336 100%)';
+      default: return 'linear-gradient(135deg, #616161 0%, #9E9E9E 100%)';
+    }
+  };
+
   const filterDonations = (status) => {
     switch (status) {
       case 'active':
@@ -179,371 +214,933 @@ const MyDonations = () => {
   const tabData = getTabData();
   const filteredDonations = filterDonations(['all', 'active', 'completed', 'expired'][tabValue]);
 
+  const StatCard = ({ icon: Icon, title, value, color, gradient, description }) => (
+    <Card
+      sx={{
+        position: 'relative',
+        overflow: 'hidden',
+        height: '100%',
+        background: `linear-gradient(135deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
+        border: 'none',
+        borderRadius: 4,
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          transform: 'translateY(-8px) scale(1.02)',
+          boxShadow: `0 20px 40px ${color}30`
+        },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)'
+        }
+      }}
+    >
+      <CardContent sx={{ p: 3, position: 'relative', zIndex: 1 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+          <Box
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: 3,
+              background: 'rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <Icon sx={{ fontSize: 28, color: 'white' }} />
+          </Box>
+        </Stack>
+        
+        <Typography
+          variant="h3"
+          sx={{
+            color: 'white',
+            fontWeight: 800,
+            fontSize: '2.2rem',
+            mb: 1,
+            textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+          }}
+        >
+          {value}
+        </Typography>
+        
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: 'rgba(255, 255, 255, 0.9)',
+            fontWeight: 600,
+            fontSize: '1rem',
+            mb: 0.5
+          }}
+        >
+          {title}
+        </Typography>
+
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: '0.8rem'
+          }}
+        >
+          {description}
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-        <CircularProgress size={60} />
+      <Box
+        sx={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
+              radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 50%)
+            `
+          }
+        }}
+      >
+        <Card
+          sx={{
+            background: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: 4,
+            p: 6,
+            textAlign: 'center'
+          }}
+        >
+          <CircularProgress 
+            size={60} 
+            sx={{ 
+              color: 'white',
+              mb: 3
+            }} 
+          />
+          <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+            Loading your donations...
+          </Typography>
+        </Card>
       </Box>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          My Donations
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Manage your food donations and track their impact
-        </Typography>
-      </Box>
-
-      {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ p: 2, textAlign: 'center' }}>
-            <Box sx={{ color: 'primary.main', mb: 1 }}>
-              <Restaurant sx={{ fontSize: 32 }} />
-            </Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-              {tabData.all}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Total Donations
-            </Typography>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ p: 2, textAlign: 'center' }}>
-            <Box sx={{ color: 'success.main', mb: 1 }}>
-              <Schedule sx={{ fontSize: 32 }} />
-            </Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'success.main' }}>
-              {tabData.active}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Active
-            </Typography>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ p: 2, textAlign: 'center' }}>
-            <Box sx={{ color: 'info.main', mb: 1 }}>
-              <CheckCircle sx={{ fontSize: 32 }} />
-            </Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'info.main' }}>
-              {tabData.completed}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Completed
-            </Typography>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ p: 2, textAlign: 'center' }}>
-            <Box sx={{ color: 'warning.main', mb: 1 }}>
-              <TrendingUp sx={{ fontSize: 32 }} />
-            </Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
-              {tabData.completed * 10}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Impact Score
-            </Typography>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* Tabs */}
-      <Paper sx={{ mb: 3 }}>
-        <Tabs 
-          value={tabValue} 
-          onChange={(e, newValue) => setTabValue(newValue)}
-          variant="fullWidth"
-        >
-          <Tab label={`All (${tabData.all})`} />
-          <Tab label={`Active (${tabData.active})`} />
-          <Tab label={`Completed (${tabData.completed})`} />
-          <Tab label={`Expired (${tabData.expired})`} />
-        </Tabs>
-      </Paper>
-
-      {/* Donations Grid */}
-      {filteredDonations.length === 0 ? (
-        <Paper sx={{ p: 6, textAlign: 'center' }}>
-          <Restaurant sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
-          <Typography variant="h6" gutterBottom>
-            {tabValue === 0 ? 'No donations yet' : 'No donations in this category'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" paragraph>
-            {tabValue === 0 
-              ? 'Start sharing your surplus food with the community!'
-              : 'Check other tabs to see your donations'
-            }
-          </Typography>
-          {tabValue === 0 && (
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => navigate('/create-donation')}
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `
+            radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)
+          `,
+          animation: 'float 20s ease-in-out infinite'
+        }
+      }}
+    >
+      <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+        {/* Header */}
+        <Fade in={animationTrigger} timeout={800}>
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography 
+              variant="h2" 
+              sx={{ 
+                fontWeight: 900,
+                background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                mb: 2,
+                fontSize: { xs: '2.5rem', md: '3.5rem' }
+              }}
             >
-              Create First Donation
-            </Button>
-          )}
-        </Paper>
-      ) : (
-        <Grid container spacing={3}>
-          {filteredDonations.map((donation) => {
-            const timeRemaining = getTimeRemaining(donation.expiryDate);
-            const interestedCount = donation.interestedReceivers?.length || 0;
+              🍽️ My Donations
+            </Typography>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: 'rgba(255,255,255,0.9)',
+                fontSize: '1.2rem',
+                maxWidth: 600,
+                mx: 'auto'
+              }}
+            >
+              Manage your food donations and track their impact on the community
+            </Typography>
+          </Box>
+        </Fade>
 
-            return (
-              <Grid item xs={12} sm={6} md={4} key={donation.id}>
-                <Card 
-                  sx={{ 
-                    height: '100%', 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    position: 'relative'
-                  }}
-                >
-                  {/* Status badge */}
-                  <Chip
-                    label={donation.status}
-                    color={getStatusColor(donation.status)}
-                    size="small"
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      left: 8,
-                      zIndex: 1,
-                      textTransform: 'capitalize'
-                    }}
-                  />
+        {/* Stats Cards */}
+        <Slide direction="up" in={animationTrigger} timeout={1000}>
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid item xs={12} sm={6} lg={3}>
+              <StatCard
+                icon={Restaurant}
+                title="Total Donations"
+                value={tabData.all}
+                color="#667eea"
+                gradient={{ from: '#667eea', to: '#764ba2' }}
+                description="Food items shared"
+              />
+            </Grid>
 
-                  {/* Menu button */}
-                  <IconButton
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 8,
-                      bgcolor: 'rgba(255,255,255,0.9)',
-                      zIndex: 1
-                    }}
-                    onClick={(e) => handleMenuOpen(e, donation)}
-                  >
-                    <MoreVert />
-                  </IconButton>
+            <Grid item xs={12} sm={6} lg={3}>
+              <StatCard
+                icon={Schedule}
+                title="Active Donations"
+                value={tabData.active}
+                color="#00C853"
+                gradient={{ from: '#00C853', to: '#4CAF50' }}
+                description="Currently available"
+              />
+            </Grid>
 
-                  {/* Image */}
-                  {donation.images && donation.images.length > 0 ? (
-                    <CardMedia
-                      component="img"
-                      height="180"
-                      image={donation.images[0]}
-                      alt={donation.title}
-                      sx={{ objectFit: 'cover' }}
-                    />
-                  ) : (
-                    <Box
+            <Grid item xs={12} sm={6} lg={3}>
+              <StatCard
+                icon={CheckCircle}
+                title="Completed"
+                value={tabData.completed}
+                color="#1976D2"
+                gradient={{ from: '#1976D2', to: '#2196F3' }}
+                description="Successfully shared"
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6} lg={3}>
+              <StatCard
+                icon={EmojiEvents}
+                title="Impact Score"
+                value={tabData.completed * 10}
+                color="#FF9800"
+                gradient={{ from: '#FF9800', to: '#FFB74D' }}
+                description="Community impact points"
+              />
+            </Grid>
+          </Grid>
+        </Slide>
+
+        {/* Tabs */}
+        <Slide direction="up" in={animationTrigger} timeout={1200}>
+          <Card
+            sx={{
+              mb: 4,
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: 4,
+              overflow: 'hidden'
+            }}
+          >
+            <Tabs 
+              value={tabValue} 
+              onChange={(e, newValue) => setTabValue(newValue)}
+              variant={isMobile ? "scrollable" : "fullWidth"}
+              scrollButtons="auto"
+              sx={{
+                '& .MuiTab-root': {
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  py: 3,
+                  '&.Mui-selected': {
+                    color: 'white',
+                    fontWeight: 700,
+                  },
+                },
+                '& .MuiTabs-indicator': {
+                  background: 'linear-gradient(90deg, #00C853 0%, #4CAF50 100%)',
+                  height: 4,
+                  borderRadius: 2,
+                },
+                '& .MuiTabs-flexContainer': {
+                  background: 'rgba(255, 255, 255, 0.05)',
+                },
+              }}
+            >
+              <Tab 
+                label={
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <span>All</span>
+                    <Badge 
+                      badgeContent={tabData.all} 
                       sx={{
-                        height: 180,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        bgcolor: 'grey.100'
+                        '& .MuiBadge-badge': {
+                          background: 'rgba(255, 255, 255, 0.2)',
+                          color: 'white',
+                          fontWeight: 600
+                        }
                       }}
                     >
-                      <Restaurant sx={{ fontSize: 40, color: 'text.secondary' }} />
-                    </Box>
-                  )}
-
-                  <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    {/* Title */}
-                    <Typography variant="h6" component="h3" gutterBottom>
-                      {donation.title}
-                    </Typography>
-
-                    {/* Category and quantity */}
-                    <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                      <Chip 
-                        label={donation.category} 
-                        size="small" 
-                        variant="outlined"
-                      />
-                      <Chip 
-                        label={`${donation.quantity} ${donation.unit}`} 
-                        size="small" 
-                        color="primary"
-                        variant="outlined"
-                      />
-                    </Box>
-
-                    {/* Location */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <LocationOn sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {donation.pickupLocation?.length > 30 
-                          ? `${donation.pickupLocation.substring(0, 30)}...` 
-                          : donation.pickupLocation
+                      <Box sx={{ width: 8 }} />
+                    </Badge>
+                  </Stack>
+                } 
+              />
+              <Tab 
+                label={
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <span>Active</span>
+                    <Badge 
+                      badgeContent={tabData.active} 
+                      sx={{
+                        '& .MuiBadge-badge': {
+                          background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
+                          color: 'white',
+                          fontWeight: 600
                         }
-                      </Typography>
-                    </Box>
+                      }}
+                    >
+                      <Box sx={{ width: 8 }} />
+                    </Badge>
+                  </Stack>
+                } 
+              />
+              <Tab 
+                label={
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <span>Completed</span>
+                    <Badge 
+                      badgeContent={tabData.completed} 
+                      sx={{
+                        '& .MuiBadge-badge': {
+                          background: 'linear-gradient(135deg, #1976D2 0%, #2196F3 100%)',
+                          color: 'white',
+                          fontWeight: 600
+                        }
+                      }}
+                    >
+                      <Box sx={{ width: 8 }} />
+                    </Badge>
+                  </Stack>
+                } 
+              />
+              <Tab 
+                label={
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <span>Expired</span>
+                    <Badge 
+                      badgeContent={tabData.expired} 
+                      sx={{
+                        '& .MuiBadge-badge': {
+                          background: 'linear-gradient(135deg, #D32F2F 0%, #F44336 100%)',
+                          color: 'white',
+                          fontWeight: 600
+                        }
+                      }}
+                    >
+                      <Box sx={{ width: 8 }} />
+                    </Badge>
+                  </Stack>
+                } 
+              />
+            </Tabs>
+          </Card>
+        </Slide>
 
-                    {/* Time remaining */}
-                    {timeRemaining && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <Schedule sx={{ 
-                          fontSize: 16, 
-                          mr: 0.5, 
-                          color: timeRemaining.urgent ? 'error.main' : 'text.secondary' 
-                        }} />
-                        <Typography 
-                          variant="body2" 
-                          color={timeRemaining.urgent ? 'error.main' : 'text.secondary'}
-                          sx={{ fontWeight: timeRemaining.urgent ? 'medium' : 'normal' }}
+        {/* Donations Grid */}
+        <Slide direction="up" in={animationTrigger} timeout={1400}>
+          <Box>
+            {filteredDonations.length === 0 ? (
+              <Card
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: 4,
+                  p: 8,
+                  textAlign: 'center'
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 120,
+                    height: 120,
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 4,
+                    border: '2px dashed rgba(255, 255, 255, 0.3)'
+                  }}
+                >
+                  <Restaurant sx={{ fontSize: 60, color: 'rgba(255, 255, 255, 0.7)' }} />
+                </Box>
+                
+                <Typography 
+                  variant="h4" 
+                  sx={{ 
+                    color: 'white', 
+                    fontWeight: 700, 
+                    mb: 2 
+                  }}
+                >
+                  {tabValue === 0 ? 'No donations yet' : 'No donations in this category'}
+                </Typography>
+                
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    color: 'rgba(255, 255, 255, 0.8)', 
+                    mb: 4,
+                    maxWidth: 500,
+                    mx: 'auto'
+                  }}
+                >
+                  {tabValue === 0 
+                    ? 'Start sharing your surplus food with the community and make a difference!'
+                    : 'Check other tabs to see your donations or create a new one'
+                  }
+                </Typography>
+                
+                {tabValue === 0 && (
+                  <Button
+                    variant="contained"
+                    startIcon={<Add />}
+                    onClick={() => navigate('/create-donation')}
+                    size="large"
+                    sx={{
+                      px: 6,
+                      py: 2,
+                      borderRadius: 3,
+                      background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
+                      fontWeight: 700,
+                      fontSize: '1.1rem',
+                      textTransform: 'none',
+                      boxShadow: '0 8px 32px rgba(0, 200, 83, 0.4)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 12px 40px rgba(0, 200, 83, 0.6)'
+                      },
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    Create Your First Donation
+                  </Button>
+                )}
+              </Card>
+            ) : (
+              <Grid container spacing={3}>
+                {filteredDonations.map((donation, index) => {
+                  const timeRemaining = getTimeRemaining(donation.expiryDate);
+                  const interestedCount = donation.interestedReceivers?.length || 0;
+
+                  return (
+                    <Grid item xs={12} sm={6} lg={4} key={donation.id}>
+                      <Fade in={animationTrigger} timeout={800 + index * 100}>
+                        <Card 
+                          sx={{ 
+                            height: '100%', 
+                            display: 'flex', 
+                            flexDirection: 'column',
+                            position: 'relative',
+                            background: 'rgba(255, 255, 255, 0.15)',
+                            backdropFilter: 'blur(20px)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            borderRadius: 4,
+                            overflow: 'hidden',
+                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '&:hover': {
+                              transform: 'translateY(-8px) scale(1.02)',
+                              boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+                              '& .donation-image': {
+                                transform: 'scale(1.1)',
+                              }
+                            },
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: 4,
+                              background: getStatusGradient(donation.status)
+                            }
+                          }}
                         >
-                          {timeRemaining.text} remaining
-                        </Typography>
-                      </Box>
-                    )}
+                          {/* Status badge */}
+                          <Chip
+                            label={donation.status}
+                            size="small"
+                            sx={{
+                              position: 'absolute',
+                              top: 16,
+                              left: 16,
+                              zIndex: 2,
+                              textTransform: 'capitalize',
+                              fontWeight: 700,
+                              background: getStatusGradient(donation.status),
+                              color: 'white',
+                              border: '1px solid rgba(255, 255, 255, 0.3)',
+                              backdropFilter: 'blur(10px)',
+                              '& .MuiChip-label': {
+                                px: 2
+                              }
+                            }}
+                          />
 
-                    {/* Interested users */}
-                    {interestedCount > 0 && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Person sx={{ fontSize: 16, mr: 0.5, color: 'success.main' }} />
-                        <Typography variant="body2" color="success.main">
-                          {interestedCount} interested receiver{interestedCount > 1 ? 's' : ''}
-                        </Typography>
-                      </Box>
-                    )}
+                          {/* Menu button */}
+                          <IconButton
+                            sx={{
+                              position: 'absolute',
+                              top: 16,
+                              right: 16,
+                              background: 'rgba(255, 255, 255, 0.2)',
+                              backdropFilter: 'blur(10px)',
+                              border: '1px solid rgba(255, 255, 255, 0.3)',
+                              zIndex: 2,
+                              '&:hover': {
+                                background: 'rgba(255, 255, 255, 0.3)',
+                                transform: 'scale(1.1)',
+                              },
+                              transition: 'all 0.3s ease'
+                            }}
+                            onClick={(e) => handleMenuOpen(e, donation)}
+                          >
+                            <MoreVert sx={{ color: 'white' }} />
+                          </IconButton>
 
-                    {/* Posted date */}
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 'auto' }}>
-                      Posted {donation.createdAt.toLocaleDateString()}
-                    </Typography>
+                          {/* Image */}
+                          {donation.images && donation.images.length > 0 ? (
+                            <Box sx={{ position: 'relative', overflow: 'hidden' }}>
+                              <CardMedia
+                                className="donation-image"
+                                component="img"
+                                height="200"
+                                image={donation.images[0]}
+                                alt={donation.title}
+                                sx={{ 
+                                  objectFit: 'cover',
+                                  transition: 'transform 0.4s ease'
+                                }}
+                              />
+                              <Box
+                                sx={{
+                                  position: 'absolute',
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  height: '50%',
+                                  background: 'linear-gradient(transparent, rgba(0,0,0,0.3))'
+                                }}
+                              />
+                            </Box>
+                          ) : (
+                            <Box
+                              sx={{
+                                height: 200,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+                                border: '2px dashed rgba(255, 255, 255, 0.3)'
+                              }}
+                            >
+                              <Stack alignItems="center" spacing={2}>
+                                <ImageIcon sx={{ fontSize: 48, color: 'rgba(255, 255, 255, 0.5)' }} />
+                                <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem' }}>
+                                  No image
+                                </Typography>
+                              </Stack>
+                            </Box>
+                          )}
 
-                    {/* Actions */}
-                    <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-                      <Button
-                        size="small"
-                        startIcon={<Visibility />}
-                        onClick={() => navigate(`/donation/${donation.id}`)}
-                      >
-                        View
-                      </Button>
-                      {donation.status === 'available' && (
-                        <Button
-                          size="small"
-                          startIcon={<Edit />}
-                          onClick={() => navigate(`/edit-donation/${donation.id}`)}
-                        >
-                          Edit
-                        </Button>
-                      )}
-                    </Box>
-                  </CardContent>
-                </Card>
+                          <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3 }}>
+                            {/* Title */}
+                            <Typography 
+                              variant="h6" 
+                              component="h3" 
+                              sx={{ 
+                                color: 'white',
+                                fontWeight: 700,
+                                mb: 2,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {donation.title}
+                            </Typography>
+
+                            {/* Category and quantity */}
+                            <Stack direction="row" spacing={1} mb={2} flexWrap="wrap" useFlexGap>
+                              <Chip 
+                                label={donation.category} 
+                                size="small" 
+                                sx={{
+                                  background: 'rgba(102, 126, 234, 0.2)',
+                                  color: 'white',
+                                  border: '1px solid rgba(102, 126, 234, 0.5)',
+                                  fontWeight: 600
+                                }}
+                              />
+                              <Chip 
+                                label={`${donation.quantity} ${donation.unit}`} 
+                                size="small" 
+                                sx={{
+                                  background: 'rgba(255, 255, 255, 0.2)',
+                                  color: 'white',
+                                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                                  fontWeight: 600
+                                }}
+                              />
+                            </Stack>
+
+                            {/* Location */}
+                            <Stack direction="row" alignItems="center" spacing={1} mb={1.5}>
+                              <LocationOn sx={{ fontSize: 18, color: 'rgba(255, 255, 255, 0.8)' }} />
+                              <Typography 
+                                variant="body2" 
+                                sx={{
+                                  color: 'rgba(255, 255, 255, 0.8)',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  flex: 1
+                                }}
+                              >
+                                {donation.pickupLocation?.length > 30 
+                                  ? `${donation.pickupLocation.substring(0, 30)}...` 
+                                  : donation.pickupLocation || 'Location not specified'
+                                }
+                              </Typography>
+                            </Stack>
+
+                            {/* Time remaining */}
+                            {timeRemaining && (
+                              <Stack direction="row" alignItems="center" spacing={1} mb={1.5}>
+                                <AccessTime 
+                                  sx={{ 
+                                    fontSize: 18, 
+                                    color: timeRemaining.urgent ? '#FF5722' : 'rgba(255, 255, 255, 0.8)' 
+                                  }} 
+                                />
+                                <Typography 
+                                  variant="body2" 
+                                  sx={{
+                                    color: timeRemaining.urgent ? '#FF5722' : 'rgba(255, 255, 255, 0.8)',
+                                    fontWeight: timeRemaining.urgent ? 700 : 500
+                                  }}
+                                >
+                                  {timeRemaining.text} remaining
+                                </Typography>
+                              </Stack>
+                            )}
+
+                            {/* Interested users */}
+                            {interestedCount > 0 && (
+                              <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                                <Groups sx={{ fontSize: 18, color: '#00C853' }} />
+                                <Typography variant="body2" sx={{ color: '#00C853', fontWeight: 600 }}>
+                                  {interestedCount} interested receiver{interestedCount > 1 ? 's' : ''}
+                                </Typography>
+                              </Stack>
+                            )}
+
+                            <Divider sx={{ background: 'rgba(255, 255, 255, 0.2)', my: 2 }} />
+
+                            {/* Posted date */}
+                            <Typography 
+                              variant="caption" 
+                              sx={{ 
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                mb: 2,
+                                fontWeight: 500
+                              }}
+                            >
+                              Posted {donation.createdAt.toLocaleDateString()}
+                            </Typography>
+
+                            {/* Actions */}
+                            <Stack direction="row" spacing={1} sx={{ mt: 'auto' }}>
+                              <Button
+                                size="small"
+                                startIcon={<Visibility />}
+                                onClick={() => navigate(`/donation/${donation.id}`)}
+                                sx={{
+                                  flex: 1,
+                                  borderRadius: 2,
+                                  background: 'rgba(255, 255, 255, 0.1)',
+                                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                                  color: 'white',
+                                  fontWeight: 600,
+                                  '&:hover': {
+                                    background: 'rgba(255, 255, 255, 0.2)',
+                                    border: '1px solid rgba(255, 255, 255, 0.5)',
+                                    transform: 'translateY(-1px)',
+                                  },
+                                  transition: 'all 0.3s ease'
+                                }}
+                              >
+                                View
+                              </Button>
+                              {donation.status === 'available' && (
+                                <Button
+                                  size="small"
+                                  startIcon={<Edit />}
+                                  onClick={() => navigate(`/edit-donation/${donation.id}`)}
+                                  sx={{
+                                    flex: 1,
+                                    borderRadius: 2,
+                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                                      transform: 'translateY(-1px)',
+                                      boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+                                    },
+                                    transition: 'all 0.3s ease'
+                                  }}
+                                >
+                                  Edit
+                                </Button>
+                              )}
+                            </Stack>
+                          </CardContent>
+                        </Card>
+                      </Fade>
+                    </Grid>
+                  );
+                })}
               </Grid>
-            );
-          })}
-        </Grid>
-      )}
+            )}
+          </Box>
+        </Slide>
 
-      {/* Menu */}
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={() => {
-          navigate(`/donation/${selectedDonation?.id}`);
-          handleMenuClose();
-        }}>
-          <Visibility sx={{ mr: 1 }} />
-          View Details
-        </MenuItem>
-        
-        {selectedDonation?.status === 'available' && (
+        {/* Menu */}
+        <Menu
+          anchorEl={menuAnchor}
+          open={Boolean(menuAnchor)}
+          onClose={handleMenuClose}
+          PaperProps={{
+            sx: {
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: 3,
+              mt: 1,
+              '& .MuiMenuItem-root': {
+                color: 'white',
+                fontWeight: 600,
+                px: 3,
+                py: 1.5,
+                borderRadius: 2,
+                mx: 1,
+                mb: 0.5,
+                '&:hover': {
+                  background: 'rgba(255, 255, 255, 0.1)',
+                },
+                '&:last-child': {
+                  mb: 1,
+                }
+              }
+            }
+          }}
+        >
           <MenuItem onClick={() => {
-            navigate(`/edit-donation/${selectedDonation?.id}`);
+            navigate(`/donation/${selectedDonation?.id}`);
             handleMenuClose();
           }}>
-            <Edit sx={{ mr: 1 }} />
-            Edit
+            <Visibility sx={{ mr: 2 }} />
+            View Details
           </MenuItem>
-        )}
-
-        {selectedDonation?.status === 'claimed' && (
-          <MenuItem onClick={() => markAsCompleted(selectedDonation?.id)}>
-            <CheckCircle sx={{ mr: 1 }} />
-            Mark as Completed
-          </MenuItem>
-        )}
-
-        {(selectedDonation?.status === 'available' || selectedDonation?.status === 'expired') && (
-          <MenuItem 
-            onClick={() => {
-              setDeleteDialog(true);
-            }}
-            sx={{ color: 'error.main' }}
-          >
-            <Delete sx={{ mr: 1 }} />
-            Delete
-          </MenuItem>
-        )}
-      </Menu>
-
-      {/* Delete Dialog */}
-      <Dialog
-        open={deleteDialog}
-        onClose={() => setDeleteDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          Delete Donation
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1">
-            Are you sure you want to delete "{selectedDonation?.title}"? This action cannot be undone.
-          </Typography>
-          {selectedDonation?.interestedReceivers?.length > 0 && (
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              {selectedDonation.interestedReceivers.length} user(s) have shown interest in this donation.
-            </Alert>
+          
+          {selectedDonation?.status === 'available' && (
+            <MenuItem onClick={() => {
+              navigate(`/edit-donation/${selectedDonation?.id}`);
+              handleMenuClose();
+            }}>
+              <Edit sx={{ mr: 2 }} />
+              Edit Donation
+            </MenuItem>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialog(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleDelete}
-            color="error"
-            variant="contained"
-            disabled={deleting}
-            startIcon={deleting ? <CircularProgress size={16} /> : <Delete />}
-          >
-            {deleting ? 'Deleting...' : 'Delete'}
-          </Button>
-        </DialogActions>
-      </Dialog>
 
-      {/* Floating Action Button */}
-      <Fab
-        color="primary"
-        aria-label="add donation"
-        onClick={() => navigate('/create-donation')}
-        sx={{ position: 'fixed', bottom: 16, right: 16 }}
-      >
-        <Add />
-      </Fab>
-    </Container>
+          {selectedDonation?.status === 'claimed' && (
+            <MenuItem onClick={() => markAsCompleted(selectedDonation?.id)}>
+              <CheckCircle sx={{ mr: 2 }} />
+              Mark as Completed
+            </MenuItem>
+          )}
+
+          {(selectedDonation?.status === 'available' || selectedDonation?.status === 'expired') && (
+            <MenuItem 
+              onClick={() => {
+                setDeleteDialog(true);
+              }}
+              sx={{ 
+                color: '#FF5722 !important',
+                '&:hover': {
+                  background: 'rgba(255, 87, 34, 0.1) !important',
+                }
+              }}
+            >
+              <Delete sx={{ mr: 2 }} />
+              Delete Donation
+            </MenuItem>
+          )}
+        </Menu>
+
+        {/* Delete Dialog */}
+        <Dialog
+          open={deleteDialog}
+          onClose={() => setDeleteDialog(false)}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: {
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: 4,
+              color: 'white'
+            }
+          }}
+        >
+          <DialogTitle sx={{ 
+            fontWeight: 700, 
+            fontSize: '1.5rem',
+            color: 'white',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+            pb: 2
+          }}>
+            🗑️ Delete Donation
+          </DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            <Typography variant="body1" sx={{ mb: 2, color: 'rgba(255, 255, 255, 0.9)' }}>
+              Are you sure you want to delete "{selectedDonation?.title}"? This action cannot be undone.
+            </Typography>
+            {selectedDonation?.interestedReceivers?.length > 0 && (
+              <Alert 
+                severity="warning" 
+                sx={{ 
+                  background: 'rgba(255, 193, 7, 0.15)',
+                  border: '1px solid rgba(255, 193, 7, 0.3)',
+                  color: 'white',
+                  borderRadius: 3,
+                  '& .MuiAlert-icon': {
+                    color: '#FFC107'
+                  }
+                }}
+              >
+                ⚠️ {selectedDonation.interestedReceivers.length} user(s) have shown interest in this donation.
+              </Alert>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ p: 3, pt: 2 }}>
+            <Button 
+              onClick={() => setDeleteDialog(false)}
+              sx={{
+                color: 'white',
+                fontWeight: 600,
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                '&:hover': {
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.5)',
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDelete}
+              variant="contained"
+              disabled={deleting}
+              startIcon={deleting ? <CircularProgress size={16} sx={{ color: 'white' }} /> : <Delete />}
+              sx={{
+                px: 4,
+                py: 1,
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, #D32F2F 0%, #F44336 100%)',
+                fontWeight: 600,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #C62828 0%, #E53935 100%)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 15px rgba(211, 47, 47, 0.4)',
+                },
+                '&:disabled': {
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {deleting ? 'Deleting...' : 'Delete Forever'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Floating Action Button */}
+        <Fade in={animationTrigger} timeout={1600}>
+          <Fab
+            color="primary"
+            aria-label="add donation"
+            onClick={() => navigate('/create-donation')}
+            sx={{ 
+              position: 'fixed', 
+              bottom: 32, 
+              right: 32,
+              background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
+              width: 64,
+              height: 64,
+              boxShadow: '0 8px 32px rgba(0, 200, 83, 0.4)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
+                transform: 'scale(1.1)',
+                boxShadow: '0 12px 40px rgba(0, 200, 83, 0.6)',
+              },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            <Add sx={{ fontSize: 32 }} />
+          </Fab>
+        </Fade>
+      </Container>
+
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          33% { transform: translateY(-15px) rotate(1deg); }
+          66% { transform: translateY(8px) rotate(-1deg); }
+        }
+      `}</style>
+    </Box>
   );
 };
 
