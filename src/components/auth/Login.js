@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -15,7 +15,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, currentUser, userProfile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -25,8 +25,16 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const from = location.state?.from?.pathname || '/dashboard';
+
+  // Handle navigation after successful login and auth state update
+  useEffect(() => {
+    if (loginSuccess && currentUser && userProfile && !authLoading) {
+      navigate(from, { replace: true });
+    }
+  }, [loginSuccess, currentUser, userProfile, authLoading, navigate, from]);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -39,12 +47,15 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setLoginSuccess(false);
 
     try {
       await login(formData.email, formData.password);
-      navigate(from, { replace: true });
+      setLoginSuccess(true);
+      // Don't navigate here - let the useEffect handle it
     } catch (error) {
       setError('Failed to login. Please check your credentials.');
+      setLoginSuccess(false);
     } finally {
       setLoading(false);
     }
@@ -93,10 +104,19 @@ const Login = () => {
               fullWidth
               variant="contained"
               size="large"
-              disabled={loading}
+              disabled={loading || (loginSuccess && authLoading)}
               sx={{ mt: 3, mb: 2 }}
             >
-              {loading ? <CircularProgress size={24} /> : 'Sign In'}
+              {loading ? (
+                <CircularProgress size={24} />
+              ) : loginSuccess && authLoading ? (
+                <>
+                  <CircularProgress size={20} sx={{ mr: 1 }} />
+                  Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </Button>
           </Box>
 

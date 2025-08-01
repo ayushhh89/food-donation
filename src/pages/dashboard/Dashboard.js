@@ -19,7 +19,10 @@ import {
   Alert,
   Fab,
   Badge,
-  Skeleton
+  Skeleton,
+  Stack,
+  Divider,
+  LinearProgress
 } from '@mui/material';
 import {
   TrendingUp,
@@ -33,7 +36,19 @@ import {
   EnergySavingsLeaf,
   Star,
   ArrowForward,
-  Warning
+  Warning,
+  Dashboard as DashboardIcon,
+  Analytics,
+  Favorite,
+  Group,
+  EmojiEvents,
+  Timeline,
+  NotificationsActive,
+  ChevronRight,
+  Speed,
+  Eco,
+  People,
+  Assignment
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -163,79 +178,231 @@ const Dashboard = () => {
     }
   };
 
+  const StatCard = ({ icon: Icon, title, value, color, gradient, progress }) => (
+    <Card
+      sx={{
+        position: 'relative',
+        overflow: 'hidden',
+        height: '100%',
+        background: `linear-gradient(135deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
+        border: 'none',
+        borderRadius: 4,
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          transform: 'translateY(-8px) scale(1.02)',
+          boxShadow: `0 20px 40px ${color}20`
+        },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)'
+        }
+      }}
+    >
+      <CardContent sx={{ p: 4, position: 'relative', zIndex: 1 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
+          <Box
+            sx={{
+              width: 64,
+              height: 64,
+              borderRadius: 3,
+              background: 'rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <Icon sx={{ fontSize: 32, color: 'white' }} />
+          </Box>
+          {progress && (
+            <Box sx={{ width: 40, height: 40 }}>
+              <CircularProgress
+                variant="determinate"
+                value={progress}
+                size={40}
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  '& .MuiCircularProgress-circle': {
+                    strokeLinecap: 'round'
+                  }
+                }}
+              />
+            </Box>
+          )}
+        </Stack>
+        
+        <Typography
+          variant="h3"
+          sx={{
+            color: 'white',
+            fontWeight: 800,
+            fontSize: '2.5rem',
+            mb: 1,
+            textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+          }}
+        >
+          {value}
+        </Typography>
+        
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: 'rgba(255, 255, 255, 0.9)',
+            fontWeight: 600,
+            fontSize: '1rem'
+          }}
+        >
+          {title}
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+
+  const ActivityCard = ({ item, index }) => (
+    <Card
+      sx={{
+        mb: 2,
+        borderRadius: 3,
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        cursor: 'pointer',
+        '&:hover': {
+          transform: 'translateX(8px)',
+          background: 'rgba(255, 255, 255, 0.95)',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+        }
+      }}
+      onClick={() => navigate(`/donation/${item.id}`)}
+    >
+      <CardContent sx={{ p: 3 }}>
+        <Stack direction="row" alignItems="center" spacing={3}>
+          <Avatar
+            sx={{
+              width: 56,
+              height: 56,
+              background: `linear-gradient(135deg, ${
+                getStatusColor(item.status) === 'success' ? '#00C853 0%, #4CAF50 100%' :
+                getStatusColor(item.status) === 'warning' ? '#FF8F00 0%, #FFC107 100%' :
+                getStatusColor(item.status) === 'primary' ? '#1976D2 0%, #2196F3 100%' :
+                getStatusColor(item.status) === 'error' ? '#D32F2F 0%, #F44336 100%' : '#616161 0%, #9E9E9E 100%'
+              })`
+            }}
+          >
+            <Restaurant sx={{ fontSize: 28 }} />
+          </Avatar>
+          
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 0.5,
+                color: '#1a1a1a',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {item.title}
+            </Typography>
+            
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Typography variant="body2" color="text.secondary">
+                {format(item.createdAt?.toDate() || new Date(), 'MMM d, yyyy HH:mm')}
+              </Typography>
+              <Chip
+                label={item.status}
+                size="small"
+                color={getStatusColor(item.status)}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                  textTransform: 'capitalize',
+                  height: 24
+                }}
+              />
+            </Stack>
+          </Box>
+          
+          <ChevronRight
+            sx={{
+              color: 'text.secondary',
+              transition: 'transform 0.3s ease',
+              '.MuiCard-root:hover &': {
+                transform: 'translateX(4px)'
+              }
+            }}
+          />
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+
   if (loading) {
     return (
       <Box
         sx={{
           minHeight: '100vh',
-          background: `
-            radial-gradient(circle at 20% 80%, rgba(129, 199, 132, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(76, 175, 80, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(46, 125, 50, 0.08) 0%, transparent 50%),
-            linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)
-          `,
-          py: 4
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
+              radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 50%)
+            `
+          }
         }}
       >
-        <Container maxWidth="xl">
-          {/* Welcome Section Skeleton */}
-          <Box 
-            sx={{ 
-              textAlign: 'center', 
-              mb: 6,
-              py: 6,
-              borderRadius: 6,
-              background: `
-                linear-gradient(135deg, 
-                  rgba(255,255,255,0.9) 0%, 
-                  rgba(248,249,250,0.95) 100%
-                )
-              `,
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255,255,255,0.2)'
-            }}
-          >
-            <Skeleton variant="text" width="40%" height={80} sx={{ mx: 'auto', mb: 2 }} />
-            <Skeleton variant="text" width="60%" height={40} sx={{ mx: 'auto' }} />
-          </Box>
+        <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+          <Grid container spacing={4}>
+            {/* Header Skeleton */}
+            <Grid item xs={12}>
+              <Skeleton
+                variant="rectangular"
+                height={200}
+                sx={{ borderRadius: 4, bgcolor: 'rgba(255,255,255,0.1)' }}
+              />
+            </Grid>
 
-          {/* Stats Grid Skeleton */}
-          <Grid container spacing={4} sx={{ mb: 6 }}>
+            {/* Stats Skeletons */}
             {[...Array(4)].map((_, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <Card
-                  sx={{
-                    p: 4,
-                    borderRadius: 5,
-                    background: `
-                      linear-gradient(135deg, 
-                        rgba(255,255,255,0.95) 0%, 
-                        rgba(248,249,250,0.9) 100%
-                      )
-                    `,
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    textAlign: 'center'
-                  }}
-                >
-                  <Skeleton variant="circular" width={80} height={80} sx={{ mx: 'auto', mb: 3 }} />
-                  <Skeleton variant="text" width="60%" height={50} sx={{ mx: 'auto', mb: 1 }} />
-                  <Skeleton variant="text" width="80%" height={30} sx={{ mx: 'auto' }} />
-                </Card>
+              <Grid item xs={12} sm={6} lg={3} key={index}>
+                <Skeleton
+                  variant="rectangular"
+                  height={160}
+                  sx={{ borderRadius: 4, bgcolor: 'rgba(255,255,255,0.1)' }}
+                />
               </Grid>
             ))}
-          </Grid>
 
-          {/* Content Skeleton */}
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 5, mb: 4 }} />
+            {/* Content Skeletons */}
+            <Grid item xs={12} lg={8}>
+              <Skeleton
+                variant="rectangular"
+                height={400}
+                sx={{ borderRadius: 4, bgcolor: 'rgba(255,255,255,0.1)' }}
+              />
             </Grid>
-            <Grid item xs={12} md={6}>
-              <Skeleton variant="rectangular" height={500} sx={{ borderRadius: 5 }} />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Skeleton variant="rectangular" height={500} sx={{ borderRadius: 5 }} />
+            <Grid item xs={12} lg={4}>
+              <Skeleton
+                variant="rectangular"
+                height={400}
+                sx={{ borderRadius: 4, bgcolor: 'rgba(255,255,255,0.1)' }}
+              />
             </Grid>
           </Grid>
         </Container>
@@ -247,15 +414,8 @@ const Dashboard = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: `
-          radial-gradient(circle at 20% 80%, rgba(129, 199, 132, 0.15) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(76, 175, 80, 0.1) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, rgba(46, 125, 50, 0.08) 0%, transparent 50%),
-          linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)
-        `,
-        py: 4,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         position: 'relative',
-        overflow: 'hidden',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -263,1116 +423,749 @@ const Dashboard = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%234CAF50" fill-opacity="0.02"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-          animation: 'float 25s linear infinite'
+          backgroundImage: `
+            radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 50%)
+          `,
+          animation: 'float 20s ease-in-out infinite'
         }
       }}
     >
-      <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
-        {/* Welcome Section */}
-        <Box 
-          sx={{ 
-            textAlign: 'center', 
-            mb: 6,
-            py: 8,
-            borderRadius: 6,
-            background: `
-              radial-gradient(circle at 30% 40%, rgba(129, 199, 132, 0.4) 0%, transparent 50%),
-              radial-gradient(circle at 70% 60%, rgba(76, 175, 80, 0.3) 0%, transparent 50%),
-              linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%)
-            `,
-            color: 'white',
-            position: 'relative',
+      <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+        {/* Hero Header */}
+        <Card
+          sx={{
+            mb: 4,
+            background: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: 4,
             overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.1)',
-            boxShadow: '0 25px 80px rgba(46, 125, 50, 0.3)',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: -100,
-              right: -100,
-              width: 200,
-              height: 200,
-              background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
-              borderRadius: '50%',
-              animation: 'pulse 6s ease-in-out infinite'
-            },
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              bottom: -80,
-              left: -80,
-              width: 160,
-              height: 160,
-              background: 'radial-gradient(circle, rgba(129, 199, 132, 0.2) 0%, transparent 70%)',
-              borderRadius: '50%',
-              animation: 'pulse 6s ease-in-out infinite 3s'
-            }
+            position: 'relative'
           }}
         >
-          <Typography 
-            variant="h2" 
+          <Box
             sx={{
-              fontWeight: 800,
-              fontSize: { xs: '2.5rem', md: '3.5rem' },
-              mb: 3,
-              background: 'linear-gradient(135deg, #ffffff 0%, #E8F5E8 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              position: 'relative',
-              zIndex: 1
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '40%',
+              height: '100%',
+              background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%)',
+              borderRadius: '50% 0 0 50%'
             }}
-          >
-            {getGreeting()}, {userProfile?.name?.split(' ')[0]}! 🌱
-          </Typography>
-          <Typography 
-            variant="h6" 
-            sx={{
-              fontSize: '1.3rem',
-              fontWeight: 300,
-              opacity: 0.95,
-              maxWidth: '600px',
-              mx: 'auto',
-              lineHeight: 1.6,
-              position: 'relative',
-              zIndex: 1
-            }}
-          >
-            {userProfile?.role === 'donor'
-              ? 'Share the gift of food and make a difference today!'
-              : 'Discover fresh food donations for your community!'}
-          </Typography>
-        </Box>
-
-        {/* Stats Grid */}
-        <Grid container spacing={4} sx={{ mb: 6 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card
-              sx={{
-                p: 5,
-                borderRadius: 6,
-                background: `
-                  linear-gradient(135deg, 
-                    rgba(255,255,255,0.95) 0%, 
-                    rgba(248,249,250,0.9) 100%
-                  )
-                `,
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(46, 125, 50, 0.1)',
-                boxShadow: '0 20px 60px rgba(46, 125, 50, 0.1)',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 5,
-                  background: 'linear-gradient(90deg, #2E7D32 0%, #4CAF50 100%)'
-                },
-                '&:hover': {
-                  boxShadow: '0 30px 80px rgba(46, 125, 50, 0.15)',
-                  transform: 'translateY(-8px) scale(1.02)'
-                },
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}
-            >
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 3,
-                  border: '3px solid rgba(46, 125, 50, 0.1)',
-                  position: 'relative',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: -10,
-                    left: -10,
-                    width: 30,
-                    height: 30,
-                    background: 'radial-gradient(circle, rgba(46, 125, 50, 0.3) 0%, transparent 70%)',
+          />
+          
+          <CardContent sx={{ p: 6, position: 'relative', zIndex: 1 }}>
+            <Grid container alignItems="center" spacing={4}>
+              <Grid item xs={12} md={8}>
+                <Stack spacing={2}>
+                  <Typography
+                    variant="h2"
+                    sx={{
+                      fontWeight: 900,
+                      fontSize: { xs: '2rem', md: '3rem' },
+                      background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text'
+                    }}
+                  >
+                    {getGreeting()}, {userProfile?.name?.split(' ')[0]}! 👋
+                  </Typography>
+                  
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      fontWeight: 500,
+                      maxWidth: '600px'
+                    }}
+                  >
+                    {userProfile?.role === 'donor'
+                      ? 'Transform lives through the power of food sharing 🌟'
+                      : 'Discover fresh opportunities to nourish your community 🍽️'}
+                  </Typography>
+                </Stack>
+              </Grid>
+              
+              <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    width: 120,
+                    height: 120,
                     borderRadius: '50%',
-                    animation: 'pulse 4s ease-in-out infinite'
-                  }
-                }}
-              >
-                <Restaurant sx={{ fontSize: 36, color: '#2E7D32' }} />
-              </Box>
-              <Typography 
-                variant="h2" 
-                sx={{ 
-                  background: 'linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  mb: 2,
-                  fontWeight: 800,
-                  fontSize: '3rem'
-                }}
-              >
-                {stats.totalDonations}
-              </Typography>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  color: '#666',
-                  fontWeight: 600,
-                  fontSize: '1.1rem'
-                }}
-              >
-                {userProfile?.role === 'donor' ? 'Total Donations' : 'Total Claims'}
-              </Typography>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card
-              sx={{
-                p: 5,
-                borderRadius: 6,
-                background: `
-                  linear-gradient(135deg, 
-                    rgba(255,255,255,0.95) 0%, 
-                    rgba(248,249,250,0.9) 100%
-                  )
-                `,
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(76, 175, 80, 0.1)',
-                boxShadow: '0 20px 60px rgba(76, 175, 80, 0.1)',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 5,
-                  background: 'linear-gradient(90deg, #4CAF50 0%, #66BB6A 100%)'
-                },
-                '&:hover': {
-                  boxShadow: '0 30px 80px rgba(76, 175, 80, 0.15)',
-                  transform: 'translateY(-8px) scale(1.02)'
-                },
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}
-            >
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 3,
-                  border: '3px solid rgba(76, 175, 80, 0.1)',
-                  position: 'relative',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: -10,
-                    left: -10,
-                    width: 30,
-                    height: 30,
-                    background: 'radial-gradient(circle, rgba(76, 175, 80, 0.3) 0%, transparent 70%)',
-                    borderRadius: '50%',
-                    animation: 'pulse 4s ease-in-out infinite 1s'
-                  }
-                }}
-              >
-                <Schedule sx={{ fontSize: 36, color: '#4CAF50' }} />
-              </Box>
-              <Typography 
-                variant="h2" 
-                sx={{ 
-                  background: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  mb: 2,
-                  fontWeight: 800,
-                  fontSize: '3rem'
-                }}
-              >
-                {stats.activeDonations}
-              </Typography>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  color: '#666',
-                  fontWeight: 600,
-                  fontSize: '1.1rem'
-                }}
-              >
-                Active
-              </Typography>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card
-              sx={{
-                p: 5,
-                borderRadius: 6,
-                background: `
-                  linear-gradient(135deg, 
-                    rgba(255,255,255,0.95) 0%, 
-                    rgba(248,249,250,0.9) 100%
-                  )
-                `,
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(33, 150, 243, 0.1)',
-                boxShadow: '0 20px 60px rgba(33, 150, 243, 0.1)',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 5,
-                  background: 'linear-gradient(90deg, #2196F3 0%, #42A5F5 100%)'
-                },
-                '&:hover': {
-                  boxShadow: '0 30px 80px rgba(33, 150, 243, 0.15)',
-                  transform: 'translateY(-8px) scale(1.02)'
-                },
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}
-            >
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 3,
-                  border: '3px solid rgba(33, 150, 243, 0.1)',
-                  position: 'relative',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: -10,
-                    left: -10,
-                    width: 30,
-                    height: 30,
-                    background: 'radial-gradient(circle, rgba(33, 150, 243, 0.3) 0%, transparent 70%)',
-                    borderRadius: '50%',
-                    animation: 'pulse 4s ease-in-out infinite 2s'
-                  }
-                }}
-              >
-                <CheckCircle sx={{ fontSize: 36, color: '#2196F3' }} />
-              </Box>
-              <Typography 
-                variant="h2" 
-                sx={{ 
-                  background: 'linear-gradient(135deg, #2196F3 0%, #42A5F5 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  mb: 2,
-                  fontWeight: 800,
-                  fontSize: '3rem'
-                }}
-              >
-                {stats.completedDonations}
-              </Typography>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  color: '#666',
-                  fontWeight: 600,
-                  fontSize: '1.1rem'
-                }}
-              >
-                Completed
-              </Typography>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card
-              sx={{
-                p: 5,
-                borderRadius: 6,
-                background: `
-                  linear-gradient(135deg, 
-                    rgba(255,255,255,0.95) 0%, 
-                    rgba(248,249,250,0.9) 100%
-                  )
-                `,
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 152, 0, 0.1)',
-                boxShadow: '0 20px 60px rgba(255, 152, 0, 0.1)',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 5,
-                  background: 'linear-gradient(90deg, #FF9800 0%, #FFB74D 100%)'
-                },
-                '&:hover': {
-                  boxShadow: '0 30px 80px rgba(255, 152, 0, 0.15)',
-                  transform: 'translateY(-8px) scale(1.02)'
-                },
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}
-            >
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #FFF3E0 0%, #FFCC02 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 3,
-                  border: '3px solid rgba(255, 152, 0, 0.1)',
-                  position: 'relative',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: -10,
-                    left: -10,
-                    width: 30,
-                    height: 30,
-                    background: 'radial-gradient(circle, rgba(255, 152, 0, 0.3) 0%, transparent 70%)',
-                    borderRadius: '50%',
-                    animation: 'pulse 4s ease-in-out infinite 3s'
-                  }
-                }}
-              >
-                <EnergySavingsLeaf sx={{ fontSize: 36, color: '#FF9800' }} />
-              </Box>
-              <Typography 
-                variant="h2" 
-                sx={{ 
-                  background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  mb: 2,
-                  fontWeight: 800,
-                  fontSize: '3rem'
-                }}
-              >
-                {stats.impactScore}
-              </Typography>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  color: '#666',
-                  fontWeight: 600,
-                  fontSize: '1.1rem'
-                }}
-              >
-                Impact Score
-              </Typography>
-            </Card>
-          </Grid>
-        </Grid>
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    backdropFilter: 'blur(10px)',
+                    border: '2px solid rgba(255,255,255,0.3)'
+                  }}
+                >
+                  <DashboardIcon sx={{ fontSize: 60, color: 'white' }} />
+                </Box>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
 
         {/* Expiry Alert */}
         {upcomingExpiry.length > 0 && userProfile?.role === 'donor' && (
-          <Box sx={{ mb: 6 }}>
-            <Alert
-              severity="warning"
-              sx={{
-                borderRadius: 4,
-                background: `
-                  linear-gradient(135deg, 
-                    rgba(255, 243, 224, 0.95) 0%, 
-                    rgba(255, 248, 225, 0.9) 100%
-                  )
-                `,
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 152, 0, 0.2)',
-                boxShadow: '0 8px 32px rgba(255, 152, 0, 0.1)',
-                p: 3,
-                '& .MuiAlert-icon': {
-                  fontSize: 28
-                }
-              }}
-              action={
-                <Button 
-                  sx={{
-                    background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
-                    color: 'white',
-                    fontWeight: 600,
-                    borderRadius: 2.5,
-                    px: 3,
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #F57C00 0%, #FF9800 100%)',
-                      transform: 'translateY(-2px)'
-                    },
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                  }}
-                  onClick={() => navigate('/my-donations')}
-                >
-                  View All
-                </Button>
+          <Alert
+            severity="warning"
+            sx={{
+              mb: 4,
+              borderRadius: 3,
+              background: 'rgba(255, 193, 7, 0.15)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 193, 7, 0.3)',
+              color: 'white',
+              '& .MuiAlert-icon': {
+                color: '#FFC107'
               }
-            >
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 600,
-                  color: '#E65100'
+            }}
+            action={
+              <Button
+                sx={{
+                  color: 'white',
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  '&:hover': {
+                    borderColor: 'white',
+                    background: 'rgba(255,255,255,0.1)'
+                  }
                 }}
+                variant="outlined"
+                size="small"
+                onClick={() => navigate('/my-donations')}
               >
-                {upcomingExpiry.length} donation{upcomingExpiry.length > 1 ? 's' : ''} expiring soon!
-              </Typography>
-            </Alert>
-          </Box>
+                View Details
+              </Button>
+            }
+          >
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              ⚠️ {upcomingExpiry.length} donation{upcomingExpiry.length > 1 ? 's' : ''} expiring within 12 hours!
+            </Typography>
+          </Alert>
         )}
 
-        {/* Main Content */}
-        <Grid container spacing={6}>
-          {/* Quick Actions */}
-          <Grid item xs={12}>
-            <Paper
+        {/* Stats Grid */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard
+              icon={Restaurant}
+              title={userProfile?.role === 'donor' ? 'Total Donations' : 'Total Claims'}
+              value={stats.totalDonations}
+              color="#00C853"
+              gradient={{ from: '#00C853', to: '#4CAF50' }}
+              progress={75}
+            />
+          </Grid>
+          
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard
+              icon={Schedule}
+              title="Active"
+              value={stats.activeDonations}
+              color="#FF8F00"
+              gradient={{ from: '#FF8F00', to: '#FFC107' }}
+              progress={60}
+            />
+          </Grid>
+          
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard
+              icon={CheckCircle}
+              title="Completed"
+              value={stats.completedDonations}
+              color="#1976D2"
+              gradient={{ from: '#1976D2', to: '#2196F3' }}
+              progress={85}
+            />
+          </Grid>
+          
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard
+              icon={EmojiEvents}
+              title="Impact Score"
+              value={stats.impactScore}
+              color="#7B1FA2"
+              gradient={{ from: '#7B1FA2', to: '#9C27B0' }}
+              progress={90}
+            />
+          </Grid>
+        </Grid>
+
+        {/* Quick Actions */}
+        <Card
+          sx={{
+            mb: 4,
+            background: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: 4
+          }}
+        >
+          <CardContent sx={{ p: 4 }}>
+            <Typography
+              variant="h4"
               sx={{
-                p: 6,
-                borderRadius: 6,
-                background: `
-                  linear-gradient(135deg, 
-                    rgba(255,255,255,0.95) 0%, 
-                    rgba(248,249,250,0.9) 100%
-                  )
-                `,
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                boxShadow: '0 25px 80px rgba(0,0,0,0.08)',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 4,
-                  background: 'linear-gradient(90deg, #2E7D32 0%, #4CAF50 50%, #66BB6A 100%)'
-                }
+                fontWeight: 700,
+                mb: 3,
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2
               }}
             >
-              <Typography 
-                variant="h4" 
-                sx={{ 
-                  mb: 4,
-                  fontWeight: 700,
-                  background: 'linear-gradient(135deg, #1a1a1a 0%, #2E7D32 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}
-              >
-                Quick Actions
-              </Typography>
-              <Box 
-                sx={{ 
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 3,
-                  justifyContent: { xs: 'center', md: 'flex-start' }
-                }}
-              >
-                {userProfile?.role === 'donor' ? (
-                  <>
+              <Speed sx={{ fontSize: 32 }} />
+              Quick Actions
+            </Typography>
+            
+            <Grid container spacing={2}>
+              {userProfile?.role === 'donor' ? (
+                <>
+                  <Grid item xs={12} sm={6} md={3}>
                     <Button
+                      fullWidth
                       variant="contained"
                       startIcon={<Add />}
                       onClick={() => navigate('/create-donation')}
                       sx={{
-                        px: 5,
-                        py: 2.5,
-                        borderRadius: 4,
-                        background: 'linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%)',
-                        color: 'white',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
+                        py: 2,
+                        borderRadius: 3,
+                        background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
+                        fontWeight: 600,
+                        fontSize: '1rem',
                         textTransform: 'none',
-                        boxShadow: '0 8px 32px rgba(46, 125, 50, 0.3)',
-                        minWidth: 200,
+                        boxShadow: '0 8px 32px rgba(0, 200, 83, 0.3)',
                         '&:hover': {
-                          background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)',
-                          transform: 'translateY(-4px) scale(1.02)',
-                          boxShadow: '0 12px 48px rgba(46, 125, 50, 0.4)'
+                          background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 12px 40px rgba(0, 200, 83, 0.4)'
                         },
-                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       Create Donation
                     </Button>
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={6} md={3}>
                     <Button
+                      fullWidth
                       variant="outlined"
-                      startIcon={<Restaurant />}
+                      startIcon={<Assignment />}
                       onClick={() => navigate('/my-donations')}
                       sx={{
-                        px: 5,
-                        py: 2.5,
-                        borderRadius: 4,
-                        border: '2px solid rgba(46, 125, 50, 0.3)',
-                        color: '#2E7D32',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
+                        py: 2,
+                        borderRadius: 3,
+                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '1rem',
                         textTransform: 'none',
-                        minWidth: 200,
-                        background: 'rgba(46, 125, 50, 0.05)',
                         '&:hover': {
-                          border: '2px solid rgba(46, 125, 50, 0.6)',
-                          background: 'rgba(46, 125, 50, 0.1)',
-                          transform: 'translateY(-4px) scale(1.02)',
-                          boxShadow: '0 8px 32px rgba(46, 125, 50, 0.2)'
+                          border: '2px solid white',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          transform: 'translateY(-2px)'
                         },
-                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       My Donations
                     </Button>
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={6} md={3}>
                     <Button
+                      fullWidth
                       variant="outlined"
-                      startIcon={<TrendingUp />}
+                      startIcon={<Analytics />}
                       onClick={() => navigate('/analytics')}
                       sx={{
-                        px: 5,
-                        py: 2.5,
-                        borderRadius: 4,
-                        border: '2px solid rgba(46, 125, 50, 0.3)',
-                        color: '#2E7D32',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
+                        py: 2,
+                        borderRadius: 3,
+                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '1rem',
                         textTransform: 'none',
-                        minWidth: 200,
-                        background: 'rgba(46, 125, 50, 0.05)',
                         '&:hover': {
-                          border: '2px solid rgba(46, 125, 50, 0.6)',
-                          background: 'rgba(46, 125, 50, 0.1)',
-                          transform: 'translateY(-4px) scale(1.02)',
-                          boxShadow: '0 8px 32px rgba(46, 125, 50, 0.2)'
+                          border: '2px solid white',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          transform: 'translateY(-2px)'
                         },
-                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
-                      View Analytics
+                      Analytics
                     </Button>
-                  </>
-                ) : (
-                  <>
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={6} md={3}>
                     <Button
+                      fullWidth
+                      variant="outlined"
+                      startIcon={<People />}
+                      onClick={() => navigate('/community')}
+                      sx={{
+                        py: 2,
+                        borderRadius: 3,
+                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '1rem',
+                        textTransform: 'none',
+                        '&:hover': {
+                          border: '2px solid white',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          transform: 'translateY(-2px)'
+                        },
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}
+                    >
+                      Community
+                    </Button>
+                  </Grid>
+                </>
+              ) : (
+                <>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Button
+                      fullWidth
                       variant="contained"
                       startIcon={<Restaurant />}
                       onClick={() => navigate('/browse')}
                       sx={{
-                        px: 5,
-                        py: 2.5,
-                        borderRadius: 4,
-                        background: 'linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%)',
-                        color: 'white',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
+                        py: 2,
+                        borderRadius: 3,
+                        background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
+                        fontWeight: 600,
+                        fontSize: '1rem',
                         textTransform: 'none',
-                        boxShadow: '0 8px 32px rgba(46, 125, 50, 0.3)',
-                        minWidth: 200,
+                        boxShadow: '0 8px 32px rgba(0, 200, 83, 0.3)',
                         '&:hover': {
-                          background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)',
-                          transform: 'translateY(-4px) scale(1.02)',
-                          boxShadow: '0 12px 48px rgba(46, 125, 50, 0.4)'
+                          background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 12px 40px rgba(0, 200, 83, 0.4)'
                         },
-                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       Browse Donations
                     </Button>
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={6} md={3}>
                     <Button
+                      fullWidth
                       variant="outlined"
                       startIcon={<LocalDining />}
                       onClick={() => navigate('/my-claims')}
                       sx={{
-                        px: 5,
-                        py: 2.5,
-                        borderRadius: 4,
-                        border: '2px solid rgba(46, 125, 50, 0.3)',
-                        color: '#2E7D32',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
+                        py: 2,
+                        borderRadius: 3,
+                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '1rem',
                         textTransform: 'none',
-                        minWidth: 200,
-                        background: 'rgba(46, 125, 50, 0.05)',
                         '&:hover': {
-                          border: '2px solid rgba(46, 125, 50, 0.6)',
-                          background: 'rgba(46, 125, 50, 0.1)',
-                          transform: 'translateY(-4px) scale(1.02)',
-                          boxShadow: '0 8px 32px rgba(46, 125, 50, 0.2)'
+                          border: '2px solid white',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          transform: 'translateY(-2px)'
                         },
-                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       My Claims
                     </Button>
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={6} md={3}>
                     <Button
+                      fullWidth
                       variant="outlined"
-                      startIcon={<Star />}
+                      startIcon={<Favorite />}
                       onClick={() => navigate('/favorites')}
                       sx={{
-                        px: 5,
-                        py: 2.5,
-                        borderRadius: 4,
-                        border: '2px solid rgba(46, 125, 50, 0.3)',
-                        color: '#2E7D32',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
+                        py: 2,
+                        borderRadius: 3,
+                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '1rem',
                         textTransform: 'none',
-                        minWidth: 200,
-                        background: 'rgba(46, 125, 50, 0.05)',
                         '&:hover': {
-                          border: '2px solid rgba(46, 125, 50, 0.6)',
-                          background: 'rgba(46, 125, 50, 0.1)',
-                          transform: 'translateY(-4px) scale(1.02)',
-                          boxShadow: '0 8px 32px rgba(46, 125, 50, 0.2)'
+                          border: '2px solid white',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          transform: 'translateY(-2px)'
                         },
-                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       Favorites
                     </Button>
-                  </>
-                )}
-              </Box>
-            </Paper>
-          </Grid>
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      startIcon={<Group />}
+                      onClick={() => navigate('/community')}
+                      sx={{
+                        py: 2,
+                        borderRadius: 3,
+                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '1rem',
+                        textTransform: 'none',
+                        '&:hover': {
+                          border: '2px solid white',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          transform: 'translateY(-2px)'
+                        },
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}
+                    >
+                      Community
+                    </Button>
+                  </Grid>
+                </>
+              )}
+            </Grid>
+          </CardContent>
+        </Card>
 
+        {/* Main Content */}
+        <Grid container spacing={4}>
           {/* Recent Activity */}
-          <Grid item xs={12} md={8}>
-            <Paper
+          <Grid item xs={12} lg={8}>
+            <Card
               sx={{
-                p: 6,
-                borderRadius: 6,
-                background: `
-                  linear-gradient(135deg, 
-                    rgba(255,255,255,0.95) 0%, 
-                    rgba(248,249,250,0.9) 100%
-                  )
-                `,
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                boxShadow: '0 25px 80px rgba(0,0,0,0.08)',
                 height: '100%',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 4,
-                  background: 'linear-gradient(90deg, #2E7D32 0%, #4CAF50 50%, #66BB6A 100%)'
-                }
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: 4
               }}
             >
-              <Box 
-                sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
-                  mb: 4 
-                }}
-              >
-                <Typography 
-                  variant="h4" 
-                  sx={{ 
-                    fontWeight: 700,
-                    background: 'linear-gradient(135deg, #1a1a1a 0%, #2E7D32 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
-                  }}
-                >
-                  Recent Activity
-                </Typography>
-                <Button
-                  endIcon={<ArrowForward />}
-                  onClick={() => navigate(userProfile?.role === 'donor' ? '/my-donations' : '/my-claims')}
-                  sx={{
-                    color: '#2E7D32',
-                    fontWeight: 600,
-                    px: 3,
-                    py: 1.5,
-                    borderRadius: 3,
-                    textTransform: 'none',
-                    '&:hover': {
-                      background: 'rgba(46, 125, 50, 0.08)',
-                      transform: 'translateX(4px)'
-                    },
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                  }}
-                >
-                  View All
-                </Button>
-              </Box>
-              
-              {recentActivity.length === 0 ? (
-                <Box 
-                  sx={{ 
-                    textAlign: 'center', 
-                    py: 8,
-                    borderRadius: 4,
-                    background: 'rgba(46, 125, 50, 0.02)',
-                    border: '2px dashed rgba(46, 125, 50, 0.2)'
-                  }}
-                >
-                  <Restaurant 
-                    sx={{ 
-                      fontSize: 80, 
-                      color: 'rgba(46, 125, 50, 0.3)', 
-                      mb: 3 
-                    }} 
-                  />
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      color: '#666', 
-                      mb: 3,
-                      fontWeight: 500
+              <CardContent sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 700,
+                      color: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2
                     }}
                   >
-                    No recent activity
+                    <Timeline sx={{ fontSize: 32 }} />
+                    Recent Activity
                   </Typography>
+                  
                   <Button
-                    variant="contained"
-                    onClick={() => navigate(userProfile?.role === 'donor' ? '/create-donation' : '/browse')}
+                    endIcon={<ArrowForward />}
+                    onClick={() => navigate(userProfile?.role === 'donor' ? '/my-donations' : '/my-claims')}
                     sx={{
-                      px: 4,
-                      py: 2,
-                      borderRadius: 3,
-                      background: 'linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%)',
+                      color: 'white',
                       fontWeight: 600,
+                      px: 3,
+                      py: 1,
+                      borderRadius: 2,
                       textTransform: 'none',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
                       '&:hover': {
-                        background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 32px rgba(46, 125, 50, 0.3)'
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.5)',
+                        transform: 'translateX(4px)'
                       },
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                   >
-                    {userProfile?.role === 'donor' ? 'Create First Donation' : 'Browse Donations'}
+                    View All
                   </Button>
-                </Box>
-              ) : (
-                <List sx={{ p: 0 }}>
-                  {recentActivity.map((item, index) => (
-                    <ListItem 
-                      key={item.id}
+                </Stack>
+
+                <Box sx={{ flex: 1, overflow: 'auto' }}>
+                  {recentActivity.length === 0 ? (
+                    <Box
                       sx={{
-                        mb: 2,
-                        borderRadius: 4,
-                        background: 'rgba(255, 255, 255, 0.7)',
-                        border: '1px solid rgba(46, 125, 50, 0.1)',
-                        backdropFilter: 'blur(10px)',
-                        '&:hover': {
-                          background: 'rgba(255, 255, 255, 0.9)',
-                          transform: 'translateX(8px)',
-                          boxShadow: '0 8px 32px rgba(46, 125, 50, 0.1)'
-                        },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        p: 3
+                        textAlign: 'center',
+                        py: 8,
+                        borderRadius: 3,
+                        border: '2px dashed rgba(255, 255, 255, 0.3)',
+                        background: 'rgba(255, 255, 255, 0.05)'
                       }}
                     >
-                      <ListItemAvatar>
-                        <Avatar 
-                          sx={{ 
-                            width: 50,
-                            height: 50,
-                            background: `linear-gradient(135deg, ${
-                              getStatusColor(item.status) === 'success' ? '#4CAF50' :
-                              getStatusColor(item.status) === 'warning' ? '#FF9800' :
-                              getStatusColor(item.status) === 'primary' ? '#2196F3' :
-                              getStatusColor(item.status) === 'error' ? '#f44336' : '#9E9E9E'
-                            } 0%, ${
-                              getStatusColor(item.status) === 'success' ? '#66BB6A' :
-                              getStatusColor(item.status) === 'warning' ? '#FFB74D' :
-                              getStatusColor(item.status) === 'primary' ? '#42A5F5' :
-                              getStatusColor(item.status) === 'error' ? '#ef5350' : '#BDBDBD'
-                            } 100%)`,
-                            boxShadow: '0 4px 16px rgba(0,0,0,0.2)'
-                          }}
-                        >
-                          <Restaurant sx={{ color: 'white' }} />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Typography 
-                            variant="h6" 
-                            sx={{ 
-                              fontWeight: 600,
-                              color: '#1a1a1a',
-                              mb: 1
-                            }}
-                          >
-                            {item.title}
-                          </Typography>
-                        }
-                        secondary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-                            <Typography 
-                              variant="body2" 
-                              sx={{ 
-                                color: '#666',
-                                fontWeight: 500
-                              }}
-                            >
-                              {format(item.createdAt?.toDate() || new Date(), 'MMM d, yyyy HH:mm')}
-                            </Typography>
-                            <Chip
-                              label={item.status}
-                              size="small"
-                              color={getStatusColor(item.status)}
-                              sx={{
-                                fontWeight: 600,
-                                fontSize: '0.75rem',
-                                textTransform: 'capitalize'
-                              }}
-                            />
-                          </Box>
-                        }
-                      />
-                      <IconButton 
-                        onClick={() => navigate(`/donation/${item.id}`)}
+                      <Restaurant
                         sx={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 2.5,
-                          background: 'rgba(46, 125, 50, 0.1)',
-                          color: '#2E7D32',
+                          fontSize: 80,
+                          color: 'rgba(255, 255, 255, 0.4)',
+                          mb: 3
+                        }}
+                      />
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          mb: 3,
+                          fontWeight: 500
+                        }}
+                      >
+                        No recent activity yet
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        onClick={() => navigate(userProfile?.role === 'donor' ? '/create-donation' : '/browse')}
+                        sx={{
+                          px: 4,
+                          py: 2,
+                          borderRadius: 3,
+                          background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
+                          fontWeight: 600,
+                          textTransform: 'none',
                           '&:hover': {
-                            background: 'rgba(46, 125, 50, 0.2)',
-                            transform: 'scale(1.1)',
-                            boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                            background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 8px 32px rgba(0, 200, 83, 0.3)'
                           },
                           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                       >
-                        <Visibility />
-                      </IconButton>
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </Paper>
+                        {userProfile?.role === 'donor' ? 'Create First Donation' : 'Browse Donations'}
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+                      {recentActivity.map((item) => (
+                        <ActivityCard key={item.id} item={item} />
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              </CardContent>
+            </Card>
           </Grid>
 
           {/* Notifications */}
-          <Grid item xs={12} md={4}>
-            <Paper
+          <Grid item xs={12} lg={4}>
+            <Card
               sx={{
-                p: 6,
-                borderRadius: 6,
-                background: `
-                  linear-gradient(135deg, 
-                    rgba(255,255,255,0.95) 0%, 
-                    rgba(248,249,250,0.9) 100%
-                  )
-                `,
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                boxShadow: '0 25px 80px rgba(0,0,0,0.08)',
                 height: '100%',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 4,
-                  background: 'linear-gradient(90deg, #FF9800 0%, #FFB74D 50%, #FFCC02 100%)'
-                }
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: 4
               }}
             >
-              <Box 
-                sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
-                  mb: 4 
-                }}
-              >
-                <Typography 
-                  variant="h4" 
-                  sx={{ 
-                    fontWeight: 700,
-                    background: 'linear-gradient(135deg, #1a1a1a 0%, #FF9800 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
-                  }}
-                >
-                  Notifications
-                </Typography>
-                <Badge 
-                  badgeContent={notifications.length} 
-                  sx={{
-                    '& .MuiBadge-badge': {
-                      background: 'linear-gradient(135deg, #f44336 0%, #ff5722 100%)',
-                      boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
-                      fontWeight: 700
-                    }
-                  }}
-                >
-                  <Box
+              <CardContent sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
+                  <Typography
+                    variant="h4"
                     sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 152, 0, 0.05) 100%)',
+                      fontWeight: 700,
+                      color: 'white',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '2px solid rgba(255, 152, 0, 0.2)'
+                      gap: 2
                     }}
                   >
-                    <Notifications sx={{ color: '#FF9800' }} />
-                  </Box>
-                </Badge>
-              </Box>
-              
-              {notifications.length === 0 ? (
-                <Box 
-                  sx={{ 
-                    textAlign: 'center', 
-                    py: 8,
-                    borderRadius: 4,
-                    background: 'rgba(255, 152, 0, 0.02)',
-                    border: '2px dashed rgba(255, 152, 0, 0.2)'
-                  }}
-                >
-                  <Notifications 
-                    sx={{ 
-                      fontSize: 60, 
-                      color: 'rgba(255, 152, 0, 0.3)', 
-                      mb: 3 
-                    }} 
-                  />
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      color: '#666',
-                      fontWeight: 500
-                    }}
-                  >
-                    No new notifications
+                    <NotificationsActive sx={{ fontSize: 32 }} />
+                    Notifications
                   </Typography>
-                </Box>
-              ) : (
-                <List sx={{ p: 0 }}>
-                  {notifications.map((notification, index) => (
-                    <ListItem
-                      key={notification.id}
+                  
+                  <Badge
+                    badgeContent={notifications.length}
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        background: 'linear-gradient(135deg, #f44336 0%, #ff5722 100%)',
+                        color: 'white',
+                        fontWeight: 700
+                      }
+                    }}
+                  >
+                    <Box
                       sx={{
-                        mb: 2,
-                        borderRadius: 4,
-                        background: notification.read 
-                          ? 'rgba(255, 255, 255, 0.5)' 
-                          : 'rgba(255, 152, 0, 0.1)',
-                        border: `1px solid ${notification.read 
-                          ? 'rgba(0,0,0,0.1)' 
-                          : 'rgba(255, 152, 0, 0.3)'}`,
-                        backdropFilter: 'blur(10px)',
-                        '&:hover': {
-                          background: notification.read 
-                            ? 'rgba(255, 255, 255, 0.8)' 
-                            : 'rgba(255, 152, 0, 0.15)',
-                          transform: 'translateX(4px)'
-                        },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        p: 3,
-                        position: 'relative',
-                        '&::before': notification.read ? {} : {
-                          content: '""',
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: 4,
-                          background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
-                          borderRadius: '4px 0 0 4px'
-                        }
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '1px solid rgba(255, 255, 255, 0.2)'
                       }}
                     >
-                      <ListItemText
-                        primary={
-                          <Typography 
-                            variant="subtitle1" 
-                            sx={{ 
-                              fontWeight: notification.read ? 500 : 700,
-                              color: notification.read ? '#666' : '#1a1a1a',
-                              mb: 1
-                            }}
-                          >
-                            {notification.title || 'New Notification'}
-                          </Typography>
-                        }
-                        secondary={
-                          <Typography 
-                            variant="caption" 
-                            sx={{ 
-                              color: '#888',
-                              fontWeight: 500
-                            }}
-                          >
-                            {format(notification.createdAt?.toDate() || new Date(), 'MMM d, HH:mm')}
-                          </Typography>
-                        }
+                      <Notifications sx={{ color: 'white', fontSize: 20 }} />
+                    </Box>
+                  </Badge>
+                </Stack>
+
+                <Box sx={{ flex: 1, overflow: 'auto' }}>
+                  {notifications.length === 0 ? (
+                    <Box
+                      sx={{
+                        textAlign: 'center',
+                        py: 8,
+                        borderRadius: 3,
+                        border: '2px dashed rgba(255, 255, 255, 0.3)',
+                        background: 'rgba(255, 255, 255, 0.05)'
+                      }}
+                    >
+                      <Notifications
+                        sx={{
+                          fontSize: 60,
+                          color: 'rgba(255, 255, 255, 0.4)',
+                          mb: 3
+                        }}
                       />
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </Paper>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontWeight: 500
+                        }}
+                      >
+                        All caught up! 🎉
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          mt: 1
+                        }}
+                      >
+                        No new notifications
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+                      {notifications.map((notification) => (
+                        <Card
+                          key={notification.id}
+                          sx={{
+                            mb: 2,
+                            borderRadius: 3,
+                            background: notification.read
+                              ? 'rgba(255, 255, 255, 0.1)'
+                              : 'rgba(255, 193, 7, 0.2)',
+                            backdropFilter: 'blur(10px)',
+                            border: `1px solid ${
+                              notification.read
+                                ? 'rgba(255, 255, 255, 0.2)'
+                                : 'rgba(255, 193, 7, 0.4)'
+                            }`,
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            '&:hover': {
+                              transform: 'translateX(4px)',
+                              background: notification.read
+                                ? 'rgba(255, 255, 255, 0.15)'
+                                : 'rgba(255, 193, 7, 0.25)'
+                            },
+                            '&::before': notification.read
+                              ? {}
+                              : {
+                                  content: '""',
+                                  position: 'absolute',
+                                  left: 0,
+                                  top: 0,
+                                  bottom: 0,
+                                  width: 4,
+                                  background: 'linear-gradient(135deg, #FFC107 0%, #FF8F00 100%)',
+                                  borderRadius: '4px 0 0 4px'
+                                }
+                          }}
+                        >
+                          <CardContent sx={{ p: 3 }}>
+                            <Stack direction="row" alignItems="flex-start" spacing={2}>
+                              <Avatar
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  background: notification.read
+                                    ? 'rgba(255, 255, 255, 0.2)'
+                                    : 'rgba(255, 193, 7, 0.3)',
+                                  fontSize: 20
+                                }}
+                              >
+                                <Notifications />
+                              </Avatar>
+                              
+                              <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Typography
+                                  variant="subtitle1"
+                                  sx={{
+                                    fontWeight: notification.read ? 500 : 700,
+                                    color: 'white',
+                                    mb: 0.5,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {notification.title || 'New Notification'}
+                                </Typography>
+                                
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    fontWeight: 500
+                                  }}
+                                >
+                                  {format(notification.createdAt?.toDate() || new Date(), 'MMM d, HH:mm')}
+                                </Typography>
+                              </Box>
+                            </Stack>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              </CardContent>
+            </Card>
           </Grid>
         </Grid>
       </Container>
 
+      {/* Floating Action Button */}
+      <Fab
+        color="primary"
+        sx={{
+          position: 'fixed',
+          bottom: 32,
+          right: 32,
+          background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
+          width: 64,
+          height: 64,
+          boxShadow: '0 8px 32px rgba(0, 200, 83, 0.4)',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
+            transform: 'scale(1.1)',
+            boxShadow: '0 12px 40px rgba(0, 200, 83, 0.5)'
+          },
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
+        onClick={() => navigate(userProfile?.role === 'donor' ? '/create-donation' : '/browse')}
+      >
+        <Add sx={{ fontSize: 32 }} />
+      </Fab>
+
       <style jsx>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(2deg); }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 0.6; transform: scale(1.1); }
+          33% { transform: translateY(-10px) rotate(1deg); }
+          66% { transform: translateY(5px) rotate(-1deg); }
         }
       `}</style>
     </Box>
