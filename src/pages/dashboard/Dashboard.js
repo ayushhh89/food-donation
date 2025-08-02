@@ -186,11 +186,13 @@ const Dashboard = () => {
         height: '100%',
         background: `linear-gradient(135deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
         border: 'none',
-        borderRadius: 4,
-        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        borderRadius: 6,
+        transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: 'translateZ(0)', // Hardware acceleration
+        willChange: 'transform',
         '&:hover': {
-          transform: 'translateY(-8px) scale(1.02)',
-          boxShadow: `0 20px 40px ${color}20`
+          transform: 'translateY(-12px) scale(1.03)',
+          boxShadow: `0 32px 64px -12px ${color}40, 0 0 0 1px rgba(255,255,255,0.1)`
         },
         '&::before': {
           content: '""',
@@ -199,63 +201,117 @@ const Dashboard = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(10px)'
+          background: `
+            radial-gradient(circle at 20% 20%, rgba(255,255,255,0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+            linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)
+          `,
+          backdropFilter: 'blur(20px)'
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)`,
+          opacity: 0,
+          transition: 'opacity 0.6s ease',
+        },
+        '&:hover::after': {
+          opacity: 1
         }
       }}
     >
-      <CardContent sx={{ p: 4, position: 'relative', zIndex: 1 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
+      <CardContent sx={{ p: 5, position: 'relative', zIndex: 1 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
           <Box
             sx={{
-              width: 64,
-              height: 64,
-              borderRadius: 3,
-              background: 'rgba(255, 255, 255, 0.2)',
+              width: 72,
+              height: 72,
+              borderRadius: 4,
+              background: 'rgba(255, 255, 255, 0.25)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              transition: 'all 0.4s ease',
+              '&:hover': {
+                transform: 'rotate(10deg) scale(1.1)',
+                background: 'rgba(255, 255, 255, 0.3)'
+              }
             }}
           >
-            <Icon sx={{ fontSize: 32, color: 'white' }} />
+            <Icon sx={{ fontSize: 36, color: 'white', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.2))' }} />
           </Box>
           {progress && (
-            <Box sx={{ width: 40, height: 40 }}>
+            <Box sx={{ position: 'relative', width: 48, height: 48 }}>
+              <CircularProgress
+                variant="determinate"
+                value={100}
+                size={48}
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.2)',
+                  position: 'absolute'
+                }}
+              />
               <CircularProgress
                 variant="determinate"
                 value={progress}
-                size={40}
+                size={48}
                 sx={{
-                  color: 'rgba(255, 255, 255, 0.8)',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  position: 'absolute',
                   '& .MuiCircularProgress-circle': {
-                    strokeLinecap: 'round'
+                    strokeLinecap: 'round',
+                    filter: 'drop-shadow(0 2px 6px rgba(255,255,255,0.3))'
                   }
                 }}
               />
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: 'white'
+                }}
+              >
+                {progress}%
+              </Box>
             </Box>
           )}
         </Stack>
         
         <Typography
-          variant="h3"
+          variant="h2"
           sx={{
             color: 'white',
-            fontWeight: 800,
-            fontSize: '2.5rem',
-            mb: 1,
-            textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+            fontWeight: 900,
+            fontSize: '3rem',
+            mb: 2,
+            textShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            background: 'linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            lineHeight: 1
           }}
         >
           {value}
         </Typography>
         
         <Typography
-          variant="subtitle1"
+          variant="h6"
           sx={{
-            color: 'rgba(255, 255, 255, 0.9)',
+            color: 'rgba(255, 255, 255, 0.95)',
             fontWeight: 600,
-            fontSize: '1rem'
+            fontSize: '1.1rem',
+            textShadow: '0 2px 10px rgba(0,0,0,0.2)'
           }}
         >
           {title}
@@ -267,36 +323,64 @@ const Dashboard = () => {
   const ActivityCard = ({ item, index }) => (
     <Card
       sx={{
-        mb: 2,
-        borderRadius: 3,
-        background: 'rgba(255, 255, 255, 0.8)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        mb: 3,
+        borderRadius: 4,
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(40px)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
         '&:hover': {
-          transform: 'translateX(8px)',
-          background: 'rgba(255, 255, 255, 0.95)',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+          transform: 'translateX(12px) translateY(-4px)',
+          background: 'rgba(255, 255, 255, 1)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.8)',
+          '& .activity-arrow': {
+            transform: 'translateX(8px)',
+            color: '#1976D2'
+          }
+        },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '4px',
+          height: '100%',
+          background: `linear-gradient(135deg, ${
+            getStatusColor(item.status) === 'success' ? '#00C853, #4CAF50' :
+            getStatusColor(item.status) === 'warning' ? '#FF8F00, #FFC107' :
+            getStatusColor(item.status) === 'primary' ? '#1976D2, #2196F3' :
+            getStatusColor(item.status) === 'error' ? '#D32F2F, #F44336' : '#616161, #9E9E9E'
+          })`,
+          borderRadius: '0 2px 2px 0'
         }
       }}
       onClick={() => navigate(`/donation/${item.id}`)}
     >
-      <CardContent sx={{ p: 3 }}>
-        <Stack direction="row" alignItems="center" spacing={3}>
+      <CardContent sx={{ p: 4 }}>
+        <Stack direction="row" alignItems="center" spacing={4}>
           <Avatar
             sx={{
-              width: 56,
-              height: 56,
+              width: 64,
+              height: 64,
               background: `linear-gradient(135deg, ${
                 getStatusColor(item.status) === 'success' ? '#00C853 0%, #4CAF50 100%' :
                 getStatusColor(item.status) === 'warning' ? '#FF8F00 0%, #FFC107 100%' :
                 getStatusColor(item.status) === 'primary' ? '#1976D2 0%, #2196F3 100%' :
                 getStatusColor(item.status) === 'error' ? '#D32F2F 0%, #F44336 100%' : '#616161 0%, #9E9E9E 100%'
-              })`
+              })`,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+              border: '2px solid rgba(255,255,255,0.3)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'scale(1.1) rotate(5deg)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.2)'
+              }
             }}
           >
-            <Restaurant sx={{ fontSize: 28 }} />
+            <Restaurant sx={{ fontSize: 32, color: 'white', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
           </Avatar>
           
           <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -304,18 +388,26 @@ const Dashboard = () => {
               variant="h6"
               sx={{
                 fontWeight: 700,
-                mb: 0.5,
+                mb: 1,
                 color: '#1a1a1a',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                fontSize: '1.2rem'
               }}
             >
               {item.title}
             </Typography>
             
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Typography variant="body2" color="text.secondary">
+            <Stack direction="row" alignItems="center" spacing={3}>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: 'text.secondary',
+                  fontWeight: 500,
+                  fontSize: '0.9rem'
+                }}
+              >
                 {format(item.createdAt?.toDate() || new Date(), 'MMM d, yyyy HH:mm')}
               </Typography>
               <Chip
@@ -323,22 +415,23 @@ const Dashboard = () => {
                 size="small"
                 color={getStatusColor(item.status)}
                 sx={{
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
                   textTransform: 'capitalize',
-                  height: 24
+                  height: 28,
+                  borderRadius: 2,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                 }}
               />
             </Stack>
           </Box>
           
           <ChevronRight
+            className="activity-arrow"
             sx={{
               color: 'text.secondary',
-              transition: 'transform 0.3s ease',
-              '.MuiCard-root:hover &': {
-                transform: 'translateX(4px)'
-              }
+              fontSize: 28,
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           />
         </Stack>
@@ -351,7 +444,11 @@ const Dashboard = () => {
       <Box
         sx={{
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: `
+            linear-gradient(135deg, #667eea 0%, #764ba2 100%),
+            radial-gradient(circle at 25% 25%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(255, 119, 198, 0.2) 0%, transparent 50%)
+          `,
           position: 'relative',
           '&::before': {
             content: '""',
@@ -361,20 +458,25 @@ const Dashboard = () => {
             right: 0,
             bottom: 0,
             backgroundImage: `
-              radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
-              radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 50%)
-            `
+              radial-gradient(circle at 25% 25%, rgba(255,255,255,0.15) 0%, transparent 50%),
+              radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%)
+            `,
+            animation: 'shimmer 3s ease-in-out infinite'
           }
         }}
       >
-        <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+        <Container maxWidth="xl" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
           <Grid container spacing={4}>
             {/* Header Skeleton */}
             <Grid item xs={12}>
               <Skeleton
                 variant="rectangular"
-                height={200}
-                sx={{ borderRadius: 4, bgcolor: 'rgba(255,255,255,0.1)' }}
+                height={220}
+                sx={{ 
+                  borderRadius: 6, 
+                  bgcolor: 'rgba(255,255,255,0.15)',
+                  backdropFilter: 'blur(20px)'
+                }}
               />
             </Grid>
 
@@ -383,8 +485,12 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6} lg={3} key={index}>
                 <Skeleton
                   variant="rectangular"
-                  height={160}
-                  sx={{ borderRadius: 4, bgcolor: 'rgba(255,255,255,0.1)' }}
+                  height={180}
+                  sx={{ 
+                    borderRadius: 6, 
+                    bgcolor: 'rgba(255,255,255,0.15)',
+                    backdropFilter: 'blur(20px)'
+                  }}
                 />
               </Grid>
             ))}
@@ -393,15 +499,23 @@ const Dashboard = () => {
             <Grid item xs={12} lg={8}>
               <Skeleton
                 variant="rectangular"
-                height={400}
-                sx={{ borderRadius: 4, bgcolor: 'rgba(255,255,255,0.1)' }}
+                height={500}
+                sx={{ 
+                  borderRadius: 6, 
+                  bgcolor: 'rgba(255,255,255,0.15)',
+                  backdropFilter: 'blur(20px)'
+                }}
               />
             </Grid>
             <Grid item xs={12} lg={4}>
               <Skeleton
                 variant="rectangular"
-                height={400}
-                sx={{ borderRadius: 4, bgcolor: 'rgba(255,255,255,0.1)' }}
+                height={500}
+                sx={{ 
+                  borderRadius: 6, 
+                  bgcolor: 'rgba(255,255,255,0.15)',
+                  backdropFilter: 'blur(20px)'
+                }}
               />
             </Grid>
           </Grid>
@@ -414,7 +528,11 @@ const Dashboard = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: `
+          linear-gradient(135deg, #667eea 0%, #764ba2 100%),
+          radial-gradient(circle at 25% 25%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+          radial-gradient(circle at 75% 75%, rgba(255, 119, 198, 0.2) 0%, transparent 50%)
+        `,
         position: 'relative',
         '&::before': {
           content: '""',
@@ -424,24 +542,25 @@ const Dashboard = () => {
           right: 0,
           bottom: 0,
           backgroundImage: `
-            radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
-            radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 50%)
+            radial-gradient(circle at 25% 25%, rgba(255,255,255,0.15) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%)
           `,
-          animation: 'float 20s ease-in-out infinite'
+          animation: 'float 25s ease-in-out infinite'
         }
       }}
     >
-      <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+      <Container maxWidth="xl" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
         {/* Hero Header */}
         <Card
           sx={{
-            mb: 4,
-            background: 'rgba(255, 255, 255, 0.15)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: 4,
+            mb: 6,
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(40px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: 6,
             overflow: 'hidden',
-            position: 'relative'
+            position: 'relative',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
           }}
         >
           <Box
@@ -449,26 +568,31 @@ const Dashboard = () => {
               position: 'absolute',
               top: 0,
               right: 0,
-              width: '40%',
+              width: '60%',
               height: '100%',
-              background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%)',
-              borderRadius: '50% 0 0 50%'
+              background: `
+                radial-gradient(ellipse at top right, rgba(255,255,255,0.2) 0%, transparent 70%),
+                linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%)
+              `,
+              borderRadius: '0 6px 6px 0'
             }}
           />
           
-          <CardContent sx={{ p: 6, position: 'relative', zIndex: 1 }}>
-            <Grid container alignItems="center" spacing={4}>
+          <CardContent sx={{ p: 8, position: 'relative', zIndex: 1 }}>
+            <Grid container alignItems="center" spacing={6}>
               <Grid item xs={12} md={8}>
-                <Stack spacing={2}>
+                <Stack spacing={3}>
                   <Typography
-                    variant="h2"
+                    variant="h1"
                     sx={{
                       fontWeight: 900,
-                      fontSize: { xs: '2rem', md: '3rem' },
-                      background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%)',
+                      fontSize: { xs: '2.5rem', md: '4rem' },
+                      background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.9) 100%)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text'
+                      backgroundClip: 'text',
+                      textShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                      lineHeight: 1.1
                     }}
                   >
                     {getGreeting()}, {userProfile?.name?.split(' ')[0]}! 👋
@@ -477,9 +601,12 @@ const Dashboard = () => {
                   <Typography
                     variant="h5"
                     sx={{
-                      color: 'rgba(255, 255, 255, 0.9)',
+                      color: 'rgba(255, 255, 255, 0.95)',
                       fontWeight: 500,
-                      maxWidth: '600px'
+                      maxWidth: '600px',
+                      fontSize: '1.4rem',
+                      lineHeight: 1.4,
+                      textShadow: '0 2px 10px rgba(0,0,0,0.1)'
                     }}
                   >
                     {userProfile?.role === 'donor'
@@ -492,19 +619,28 @@ const Dashboard = () => {
               <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
                 <Box
                   sx={{
-                    width: 120,
-                    height: 120,
+                    width: 140,
+                    height: 140,
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
+                    background: `
+                      linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%),
+                      radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 0%, transparent 50%)
+                    `,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     mx: 'auto',
-                    backdropFilter: 'blur(10px)',
-                    border: '2px solid rgba(255,255,255,0.3)'
+                    backdropFilter: 'blur(20px)',
+                    border: '2px solid rgba(255,255,255,0.4)',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                    transition: 'all 0.4s ease',
+                    '&:hover': {
+                      transform: 'scale(1.05) rotate(5deg)',
+                      boxShadow: '0 25px 50px rgba(0,0,0,0.15)'
+                    }
                   }}
                 >
-                  <DashboardIcon sx={{ fontSize: 60, color: 'white' }} />
+                  <DashboardIcon sx={{ fontSize: 70, color: 'white', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.2))' }} />
                 </Box>
               </Grid>
             </Grid>
@@ -516,42 +652,54 @@ const Dashboard = () => {
           <Alert
             severity="warning"
             sx={{
-              mb: 4,
-              borderRadius: 3,
-              background: 'rgba(255, 193, 7, 0.15)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 193, 7, 0.3)',
+              mb: 6,
+              borderRadius: 4,
+              background: 'rgba(255, 193, 7, 0.2)',
+              backdropFilter: 'blur(40px)',
+              border: '1px solid rgba(255, 193, 7, 0.4)',
               color: 'white',
+              boxShadow: '0 10px 30px rgba(255, 193, 7, 0.2)',
               '& .MuiAlert-icon': {
-                color: '#FFC107'
+                color: '#FFC107',
+                fontSize: '2rem'
+              },
+              '& .MuiAlert-message': {
+                fontSize: '1.1rem'
               }
             }}
             action={
               <Button
                 sx={{
                   color: 'white',
-                  borderColor: 'rgba(255,255,255,0.3)',
+                  borderColor: 'rgba(255,255,255,0.4)',
+                  fontWeight: 600,
+                  px: 3,
+                  py: 1,
+                  borderRadius: 3,
                   '&:hover': {
                     borderColor: 'white',
-                    background: 'rgba(255,255,255,0.1)'
-                  }
+                    background: 'rgba(255,255,255,0.15)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 8px 25px rgba(255,255,255,0.2)'
+                  },
+                  transition: 'all 0.3s ease'
                 }}
                 variant="outlined"
-                size="small"
+                size="medium"
                 onClick={() => navigate('/my-donations')}
               >
                 View Details
               </Button>
             }
           >
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
               ⚠️ {upcomingExpiry.length} donation{upcomingExpiry.length > 1 ? 's' : ''} expiring within 12 hours!
             </Typography>
           </Alert>
         )}
 
         {/* Stats Grid */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid container spacing={4} sx={{ mb: 6 }}>
           <Grid item xs={12} sm={6} lg={3}>
             <StatCard
               icon={Restaurant}
@@ -600,52 +748,55 @@ const Dashboard = () => {
         {/* Quick Actions */}
         <Card
           sx={{
-            mb: 4,
-            background: 'rgba(255, 255, 255, 0.15)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: 4
+            mb: 6,
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(40px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: 6,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
           }}
         >
-          <CardContent sx={{ p: 4 }}>
+          <CardContent sx={{ p: 6 }}>
             <Typography
-              variant="h4"
+              variant="h3"
               sx={{
-                fontWeight: 700,
-                mb: 3,
+                fontWeight: 800,
+                mb: 4,
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 2
+                gap: 3,
+                textShadow: '0 2px 10px rgba(0,0,0,0.2)'
               }}
             >
-              <Speed sx={{ fontSize: 32 }} />
+              <Speed sx={{ fontSize: 40 }} />
               Quick Actions
             </Typography>
             
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
               {userProfile?.role === 'donor' ? (
                 <>
                   <Grid item xs={12} sm={6} md={3}>
                     <Button
                       fullWidth
                       variant="contained"
-                      startIcon={<Add />}
+                      startIcon={<Add sx={{ fontSize: '1.5rem' }} />}
                       onClick={() => navigate('/create-donation')}
                       sx={{
-                        py: 2,
-                        borderRadius: 3,
+                        py: 3,
+                        borderRadius: 4,
                         background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
-                        fontWeight: 600,
-                        fontSize: '1rem',
+                        fontWeight: 700,
+                        fontSize: '1.1rem',
                         textTransform: 'none',
-                        boxShadow: '0 8px 32px rgba(0, 200, 83, 0.3)',
+                        boxShadow: '0 12px 40px rgba(0, 200, 83, 0.4)',
+                        border: '1px solid rgba(255,255,255,0.2)',
                         '&:hover': {
                           background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 12px 40px rgba(0, 200, 83, 0.4)'
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 20px 60px rgba(0, 200, 83, 0.5)'
                         },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       Create Donation
@@ -656,22 +807,24 @@ const Dashboard = () => {
                     <Button
                       fullWidth
                       variant="outlined"
-                      startIcon={<Assignment />}
+                      startIcon={<Assignment sx={{ fontSize: '1.5rem' }} />}
                       onClick={() => navigate('/my-donations')}
                       sx={{
-                        py: 2,
-                        borderRadius: 3,
-                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        py: 3,
+                        borderRadius: 4,
+                        border: '2px solid rgba(255, 255, 255, 0.6)',
                         color: 'white',
-                        fontWeight: 600,
-                        fontSize: '1rem',
+                        fontWeight: 700,
+                        fontSize: '1.1rem',
                         textTransform: 'none',
+                        backdropFilter: 'blur(10px)',
                         '&:hover': {
                           border: '2px solid white',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          transform: 'translateY(-2px)'
+                          background: 'rgba(255, 255, 255, 0.15)',
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 12px 40px rgba(255,255,255,0.2)'
                         },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       My Donations
@@ -682,22 +835,24 @@ const Dashboard = () => {
                     <Button
                       fullWidth
                       variant="outlined"
-                      startIcon={<Analytics />}
+                      startIcon={<Analytics sx={{ fontSize: '1.5rem' }} />}
                       onClick={() => navigate('/analytics')}
                       sx={{
-                        py: 2,
-                        borderRadius: 3,
-                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        py: 3,
+                        borderRadius: 4,
+                        border: '2px solid rgba(255, 255, 255, 0.6)',
                         color: 'white',
-                        fontWeight: 600,
-                        fontSize: '1rem',
+                        fontWeight: 700,
+                        fontSize: '1.1rem',
                         textTransform: 'none',
+                        backdropFilter: 'blur(10px)',
                         '&:hover': {
                           border: '2px solid white',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          transform: 'translateY(-2px)'
+                          background: 'rgba(255, 255, 255, 0.15)',
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 12px 40px rgba(255,255,255,0.2)'
                         },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       Analytics
@@ -708,22 +863,24 @@ const Dashboard = () => {
                     <Button
                       fullWidth
                       variant="outlined"
-                      startIcon={<People />}
+                      startIcon={<People sx={{ fontSize: '1.5rem' }} />}
                       onClick={() => navigate('/community')}
                       sx={{
-                        py: 2,
-                        borderRadius: 3,
-                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        py: 3,
+                        borderRadius: 4,
+                        border: '2px solid rgba(255, 255, 255, 0.6)',
                         color: 'white',
-                        fontWeight: 600,
-                        fontSize: '1rem',
+                        fontWeight: 700,
+                        fontSize: '1.1rem',
                         textTransform: 'none',
+                        backdropFilter: 'blur(10px)',
                         '&:hover': {
                           border: '2px solid white',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          transform: 'translateY(-2px)'
+                          background: 'rgba(255, 255, 255, 0.15)',
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 12px 40px rgba(255,255,255,0.2)'
                         },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       Community
@@ -736,22 +893,23 @@ const Dashboard = () => {
                     <Button
                       fullWidth
                       variant="contained"
-                      startIcon={<Restaurant />}
+                      startIcon={<Restaurant sx={{ fontSize: '1.5rem' }} />}
                       onClick={() => navigate('/browse')}
                       sx={{
-                        py: 2,
-                        borderRadius: 3,
+                        py: 3,
+                        borderRadius: 4,
                         background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
-                        fontWeight: 600,
-                        fontSize: '1rem',
+                        fontWeight: 700,
+                        fontSize: '1.1rem',
                         textTransform: 'none',
-                        boxShadow: '0 8px 32px rgba(0, 200, 83, 0.3)',
+                        boxShadow: '0 12px 40px rgba(0, 200, 83, 0.4)',
+                        border: '1px solid rgba(255,255,255,0.2)',
                         '&:hover': {
                           background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 12px 40px rgba(0, 200, 83, 0.4)'
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 20px 60px rgba(0, 200, 83, 0.5)'
                         },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       Browse Donations
@@ -762,22 +920,24 @@ const Dashboard = () => {
                     <Button
                       fullWidth
                       variant="outlined"
-                      startIcon={<LocalDining />}
+                      startIcon={<LocalDining sx={{ fontSize: '1.5rem' }} />}
                       onClick={() => navigate('/my-claims')}
                       sx={{
-                        py: 2,
-                        borderRadius: 3,
-                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        py: 3,
+                        borderRadius: 4,
+                        border: '2px solid rgba(255, 255, 255, 0.6)',
                         color: 'white',
-                        fontWeight: 600,
-                        fontSize: '1rem',
+                        fontWeight: 700,
+                        fontSize: '1.1rem',
                         textTransform: 'none',
+                        backdropFilter: 'blur(10px)',
                         '&:hover': {
                           border: '2px solid white',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          transform: 'translateY(-2px)'
+                          background: 'rgba(255, 255, 255, 0.15)',
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 12px 40px rgba(255,255,255,0.2)'
                         },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       My Claims
@@ -788,22 +948,24 @@ const Dashboard = () => {
                     <Button
                       fullWidth
                       variant="outlined"
-                      startIcon={<Favorite />}
+                      startIcon={<Favorite sx={{ fontSize: '1.5rem' }} />}
                       onClick={() => navigate('/favorites')}
                       sx={{
-                        py: 2,
-                        borderRadius: 3,
-                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        py: 3,
+                        borderRadius: 4,
+                        border: '2px solid rgba(255, 255, 255, 0.6)',
                         color: 'white',
-                        fontWeight: 600,
-                        fontSize: '1rem',
+                        fontWeight: 700,
+                        fontSize: '1.1rem',
                         textTransform: 'none',
+                        backdropFilter: 'blur(10px)',
                         '&:hover': {
                           border: '2px solid white',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          transform: 'translateY(-2px)'
+                          background: 'rgba(255, 255, 255, 0.15)',
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 12px 40px rgba(255,255,255,0.2)'
                         },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       Favorites
@@ -814,22 +976,24 @@ const Dashboard = () => {
                     <Button
                       fullWidth
                       variant="outlined"
-                      startIcon={<Group />}
+                      startIcon={<Group sx={{ fontSize: '1.5rem' }} />}
                       onClick={() => navigate('/community')}
                       sx={{
-                        py: 2,
-                        borderRadius: 3,
-                        border: '2px solid rgba(255, 255, 255, 0.5)',
+                        py: 3,
+                        borderRadius: 4,
+                        border: '2px solid rgba(255, 255, 255, 0.6)',
                         color: 'white',
-                        fontWeight: 600,
-                        fontSize: '1rem',
+                        fontWeight: 700,
+                        fontSize: '1.1rem',
                         textTransform: 'none',
+                        backdropFilter: 'blur(10px)',
                         '&:hover': {
                           border: '2px solid white',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          transform: 'translateY(-2px)'
+                          background: 'rgba(255, 255, 255, 0.15)',
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 12px 40px rgba(255,255,255,0.2)'
                         },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
                       Community
@@ -848,75 +1012,82 @@ const Dashboard = () => {
             <Card
               sx={{
                 height: '100%',
-                background: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: 4
+                background: 'rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(40px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: 6,
+                boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
               }}
             >
-              <CardContent sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
+              <CardContent sx={{ p: 6, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
                   <Typography
-                    variant="h4"
+                    variant="h3"
                     sx={{
-                      fontWeight: 700,
+                      fontWeight: 800,
                       color: 'white',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 2
+                      gap: 3,
+                      textShadow: '0 2px 10px rgba(0,0,0,0.2)'
                     }}
                   >
-                    <Timeline sx={{ fontSize: 32 }} />
+                    <Timeline sx={{ fontSize: 40 }} />
                     Recent Activity
                   </Typography>
                   
                   <Button
-                    endIcon={<ArrowForward />}
+                    endIcon={<ArrowForward sx={{ fontSize: '1.2rem' }} />}
                     onClick={() => navigate(userProfile?.role === 'donor' ? '/my-donations' : '/my-claims')}
                     sx={{
                       color: 'white',
-                      fontWeight: 600,
-                      px: 3,
-                      py: 1,
-                      borderRadius: 2,
+                      fontWeight: 700,
+                      px: 4,
+                      py: 2,
+                      borderRadius: 3,
                       textTransform: 'none',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      border: '2px solid rgba(255, 255, 255, 0.4)',
+                      backdropFilter: 'blur(10px)',
+                      fontSize: '1rem',
                       '&:hover': {
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        border: '1px solid rgba(255, 255, 255, 0.5)',
-                        transform: 'translateX(4px)'
+                        background: 'rgba(255, 255, 255, 0.15)',
+                        border: '2px solid rgba(255, 255, 255, 0.7)',
+                        transform: 'translateX(8px) translateY(-2px)',
+                        boxShadow: '0 8px 25px rgba(255,255,255,0.2)'
                       },
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                   >
                     View All
                   </Button>
                 </Stack>
 
-                <Box sx={{ flex: 1, overflow: 'auto' }}>
+                <Box sx={{ flex: 1, overflow: 'hidden' }}>
                   {recentActivity.length === 0 ? (
                     <Box
                       sx={{
                         textAlign: 'center',
                         py: 8,
-                        borderRadius: 3,
-                        border: '2px dashed rgba(255, 255, 255, 0.3)',
-                        background: 'rgba(255, 255, 255, 0.05)'
+                        borderRadius: 4,
+                        border: '2px dashed rgba(255, 255, 255, 0.4)',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        backdropFilter: 'blur(20px)'
                       }}
                     >
                       <Restaurant
                         sx={{
-                          fontSize: 80,
-                          color: 'rgba(255, 255, 255, 0.4)',
-                          mb: 3
+                          fontSize: 100,
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          mb: 4,
+                          filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.1))'
                         }}
                       />
                       <Typography
-                        variant="h6"
+                        variant="h5"
                         sx={{
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          mb: 3,
-                          fontWeight: 500
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          mb: 4,
+                          fontWeight: 600
                         }}
                       >
                         No recent activity yet
@@ -925,25 +1096,49 @@ const Dashboard = () => {
                         variant="contained"
                         onClick={() => navigate(userProfile?.role === 'donor' ? '/create-donation' : '/browse')}
                         sx={{
-                          px: 4,
-                          py: 2,
-                          borderRadius: 3,
+                          px: 6,
+                          py: 3,
+                          borderRadius: 4,
                           background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
-                          fontWeight: 600,
+                          fontWeight: 700,
+                          fontSize: '1.1rem',
                           textTransform: 'none',
+                          boxShadow: '0 12px 40px rgba(0, 200, 83, 0.4)',
                           '&:hover': {
                             background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 8px 32px rgba(0, 200, 83, 0.3)'
+                            transform: 'translateY(-4px)',
+                            boxShadow: '0 20px 60px rgba(0, 200, 83, 0.5)'
                           },
-                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                       >
                         {userProfile?.role === 'donor' ? 'Create First Donation' : 'Browse Donations'}
                       </Button>
                     </Box>
                   ) : (
-                    <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+                    <Box 
+                      sx={{ 
+                        maxHeight: 500, 
+                        overflow: 'auto',
+                        pr: 2,
+                        '&::-webkit-scrollbar': {
+                          width: '8px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          borderRadius: '4px',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          background: 'rgba(255, 255, 255, 0.3)',
+                          borderRadius: '4px',
+                          '&:hover': {
+                            background: 'rgba(255, 255, 255, 0.5)',
+                          },
+                        },
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: 'rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1)',
+                      }}
+                    >
                       {recentActivity.map((item) => (
                         <ActivityCard key={item.id} item={item} />
                       ))}
@@ -959,25 +1154,27 @@ const Dashboard = () => {
             <Card
               sx={{
                 height: '100%',
-                background: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: 4
+                background: 'rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(40px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: 6,
+                boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
               }}
             >
-              <CardContent sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
+              <CardContent sx={{ p: 6, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
                   <Typography
-                    variant="h4"
+                    variant="h3"
                     sx={{
-                      fontWeight: 700,
+                      fontWeight: 800,
                       color: 'white',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 2
+                      gap: 3,
+                      textShadow: '0 2px 10px rgba(0,0,0,0.2)'
                     }}
                   >
-                    <NotificationsActive sx={{ fontSize: 32 }} />
+                    <NotificationsActive sx={{ fontSize: 40 }} />
                     Notifications
                   </Typography>
                   
@@ -987,89 +1184,126 @@ const Dashboard = () => {
                       '& .MuiBadge-badge': {
                         background: 'linear-gradient(135deg, #f44336 0%, #ff5722 100%)',
                         color: 'white',
-                        fontWeight: 700
+                        fontWeight: 800,
+                        fontSize: '0.9rem',
+                        minWidth: '24px',
+                        height: '24px',
+                        boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)'
                       }
                     }}
                   >
                     <Box
                       sx={{
-                        width: 40,
-                        height: 40,
+                        width: 48,
+                        height: 48,
                         borderRadius: '50%',
-                        background: 'rgba(255, 255, 255, 0.1)',
+                        background: 'rgba(255, 255, 255, 0.15)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                        border: '2px solid rgba(255, 255, 255, 0.3)',
+                        backdropFilter: 'blur(10px)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'scale(1.1)',
+                          background: 'rgba(255, 255, 255, 0.2)'
+                        }
                       }}
                     >
-                      <Notifications sx={{ color: 'white', fontSize: 20 }} />
+                      <Notifications sx={{ color: 'white', fontSize: 24 }} />
                     </Box>
                   </Badge>
                 </Stack>
 
-                <Box sx={{ flex: 1, overflow: 'auto' }}>
+                <Box sx={{ flex: 1, overflow: 'hidden' }}>
                   {notifications.length === 0 ? (
                     <Box
                       sx={{
                         textAlign: 'center',
                         py: 8,
-                        borderRadius: 3,
-                        border: '2px dashed rgba(255, 255, 255, 0.3)',
-                        background: 'rgba(255, 255, 255, 0.05)'
+                        borderRadius: 4,
+                        border: '2px dashed rgba(255, 255, 255, 0.4)',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        backdropFilter: 'blur(20px)'
                       }}
                     >
                       <Notifications
                         sx={{
-                          fontSize: 60,
-                          color: 'rgba(255, 255, 255, 0.4)',
-                          mb: 3
+                          fontSize: 80,
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          mb: 4,
+                          filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.1))'
                         }}
                       />
                       <Typography
-                        variant="h6"
+                        variant="h5"
                         sx={{
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          fontWeight: 500
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          fontWeight: 600,
+                          mb: 2
                         }}
                       >
                         All caught up! 🎉
                       </Typography>
                       <Typography
-                        variant="body2"
+                        variant="body1"
                         sx={{
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          mt: 1
+                          color: 'rgba(255, 255, 255, 0.6)',
+                          fontSize: '1.1rem'
                         }}
                       >
                         No new notifications
                       </Typography>
                     </Box>
                   ) : (
-                    <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+                    <Box 
+                      sx={{ 
+                        maxHeight: 500, 
+                        overflow: 'auto',
+                        pr: 2,
+                        '&::-webkit-scrollbar': {
+                          width: '8px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          borderRadius: '4px',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          background: 'rgba(255, 255, 255, 0.3)',
+                          borderRadius: '4px',
+                          '&:hover': {
+                            background: 'rgba(255, 255, 255, 0.5)',
+                          },
+                        },
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: 'rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1)',
+                      }}
+                    >
                       {notifications.map((notification) => (
                         <Card
                           key={notification.id}
                           sx={{
-                            mb: 2,
-                            borderRadius: 3,
+                            mb: 3,
+                            borderRadius: 4,
                             background: notification.read
-                              ? 'rgba(255, 255, 255, 0.1)'
-                              : 'rgba(255, 193, 7, 0.2)',
-                            backdropFilter: 'blur(10px)',
-                            border: `1px solid ${
+                              ? 'rgba(255, 255, 255, 0.15)'
+                              : 'rgba(255, 193, 7, 0.25)',
+                            backdropFilter: 'blur(20px)',
+                            border: `2px solid ${
                               notification.read
-                                ? 'rgba(255, 255, 255, 0.2)'
-                                : 'rgba(255, 193, 7, 0.4)'
+                                ? 'rgba(255, 255, 255, 0.3)'
+                                : 'rgba(255, 193, 7, 0.5)'
                             }`,
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                             cursor: 'pointer',
                             position: 'relative',
+                            overflow: 'hidden',
                             '&:hover': {
-                              transform: 'translateX(4px)',
+                              transform: 'translateX(8px) translateY(-2px)',
                               background: notification.read
-                                ? 'rgba(255, 255, 255, 0.15)'
-                                : 'rgba(255, 193, 7, 0.25)'
+                                ? 'rgba(255, 255, 255, 0.2)'
+                                : 'rgba(255, 193, 7, 0.3)',
+                              boxShadow: '0 12px 40px rgba(0,0,0,0.15)'
                             },
                             '&::before': notification.read
                               ? {}
@@ -1079,47 +1313,57 @@ const Dashboard = () => {
                                   left: 0,
                                   top: 0,
                                   bottom: 0,
-                                  width: 4,
+                                  width: 6,
                                   background: 'linear-gradient(135deg, #FFC107 0%, #FF8F00 100%)',
-                                  borderRadius: '4px 0 0 4px'
+                                  borderRadius: '0 4px 4px 0'
                                 }
                           }}
                         >
-                          <CardContent sx={{ p: 3 }}>
-                            <Stack direction="row" alignItems="flex-start" spacing={2}>
+                          <CardContent sx={{ p: 4 }}>
+                            <Stack direction="row" alignItems="flex-start" spacing={3}>
                               <Avatar
                                 sx={{
-                                  width: 40,
-                                  height: 40,
+                                  width: 48,
+                                  height: 48,
                                   background: notification.read
-                                    ? 'rgba(255, 255, 255, 0.2)'
-                                    : 'rgba(255, 193, 7, 0.3)',
-                                  fontSize: 20
+                                    ? 'rgba(255, 255, 255, 0.25)'
+                                    : 'rgba(255, 193, 7, 0.4)',
+                                  border: '2px solid rgba(255, 255, 255, 0.2)',
+                                  backdropFilter: 'blur(10px)',
+                                  transition: 'all 0.3s ease',
+                                  '&:hover': {
+                                    transform: 'scale(1.1)',
+                                    background: notification.read
+                                      ? 'rgba(255, 255, 255, 0.3)'
+                                      : 'rgba(255, 193, 7, 0.5)'
+                                  }
                                 }}
                               >
-                                <Notifications />
+                                <Notifications sx={{ fontSize: 24, color: 'white' }} />
                               </Avatar>
                               
                               <Box sx={{ flex: 1, minWidth: 0 }}>
                                 <Typography
-                                  variant="subtitle1"
+                                  variant="h6"
                                   sx={{
-                                    fontWeight: notification.read ? 500 : 700,
+                                    fontWeight: notification.read ? 600 : 800,
                                     color: 'white',
-                                    mb: 0.5,
+                                    mb: 1,
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap'
+                                    whiteSpace: 'nowrap',
+                                    fontSize: '1.1rem'
                                   }}
                                 >
                                   {notification.title || 'New Notification'}
                                 </Typography>
                                 
                                 <Typography
-                                  variant="caption"
+                                  variant="body2"
                                   sx={{
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    fontWeight: 500
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    fontWeight: 600,
+                                    fontSize: '0.9rem'
                                   }}
                                 >
                                   {format(notification.createdAt?.toDate() || new Date(), 'MMM d, HH:mm')}
@@ -1140,32 +1384,44 @@ const Dashboard = () => {
 
       {/* Floating Action Button */}
       <Fab
-        color="primary"
         sx={{
           position: 'fixed',
-          bottom: 32,
-          right: 32,
+          bottom: 40,
+          right: 40,
           background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
-          width: 64,
-          height: 64,
-          boxShadow: '0 8px 32px rgba(0, 200, 83, 0.4)',
+          width: 72,
+          height: 72,
+          boxShadow: '0 16px 48px rgba(0, 200, 83, 0.5)',
+          border: '2px solid rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(10px)',
           '&:hover': {
             background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
-            transform: 'scale(1.1)',
-            boxShadow: '0 12px 40px rgba(0, 200, 83, 0.5)'
+            transform: 'scale(1.15) rotate(10deg)',
+            boxShadow: '0 24px 64px rgba(0, 200, 83, 0.6)'
           },
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
         onClick={() => navigate(userProfile?.role === 'donor' ? '/create-donation' : '/browse')}
       >
-        <Add sx={{ fontSize: 32 }} />
+        <Add sx={{ fontSize: 36, color: 'white', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.2))' }} />
       </Fab>
 
       <style jsx>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
-          33% { transform: translateY(-10px) rotate(1deg); }
-          66% { transform: translateY(5px) rotate(-1deg); }
+          33% { transform: translateY(-15px) rotate(2deg); }
+          66% { transform: translateY(8px) rotate(-1deg); }
+        }
+
+        @keyframes shimmer {
+          0% { opacity: 0.8; }
+          50% { opacity: 1; }
+          100% { opacity: 0.8; }
+        }
+
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
         }
       `}</style>
     </Box>

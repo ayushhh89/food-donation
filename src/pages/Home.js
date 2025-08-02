@@ -511,9 +511,9 @@ const HomePage = () => {
                     }}
                   >
                     <Stack direction="row" alignItems="center" spacing={1}>
-                      <Badge badgeContent="New" color="success">
+                      {/* <Badge badgeContent="" color="success"> */}
                         <LocalDining sx={{ color: '#FFD700', fontSize: 20 }} />
-                      </Badge>
+                      {/* </Badge> */}
                       <Typography variant="caption" sx={{ color: 'white', fontWeight: 600 }}>
                         +12 today
                       </Typography>
