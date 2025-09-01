@@ -44,6 +44,8 @@ const MapContainer = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
+  const [mapReady, setMapReady] = useState(false); // <-- ADD THIS LINE
+
 
   // src/components/map/MapContainer.js - FIXED VERSION
 
@@ -222,7 +224,7 @@ const MapContainer = () => {
               key={d.id}
               sx={{
                 mb: 2,
-                cursor: 'pointer',
+                cursor: mapReady ? 'pointer' : 'wait',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 transform: 'translateY(0)',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
@@ -253,8 +255,13 @@ const MapContainer = () => {
                   },
                 },
               }}
-              onClick={() => flyTo(d)}
-            >
+              onClick={() => {
+                if (mapReady) {
+                  flyTo(d);
+                } else {
+                  toast.info('Please wait for the map to finish loading.');
+                }
+              }}            >
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Typography
@@ -440,7 +447,7 @@ const MapContainer = () => {
             center={donations[0]?.coordinates || [20.5937, 78.9629]}
             zoom={5}
             style={{ height: '100%', width: '100%' }}
-            whenCreated={m => mapRef.current = m}
+            whenCreated={m => { mapRef.current = m; setMapReady(true); }}
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
