@@ -45,30 +45,40 @@ const MapContainer = () => {
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
 
+  // src/components/map/MapContainer.js - FIXED VERSION
+
   useEffect(() => {
     const q = query(collection(db, 'donations'), where('status', '==', 'available'));
     const unsubscribe = onSnapshot(q, async snap => {
-      const geocoded = await Promise.all(snap.docs.map(async docSnap => {
+      const geocodedPromises = snap.docs.map(async docSnap => {
         const data = docSnap.data();
         const address = data.pickupAddress;
         let coords = null;
-        if (address) {
+
+        // --- THIS IS THE FIX ---
+        // Only geocode if the address is a valid, non-empty string
+        if (address && address.trim() !== '') {
           try {
             const resp = await axios.get(
-              `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(address)}&key=${OPENCAGE_KEY}`
+              `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(address.trim())}&key=${OPENCAGE_KEY}`
             );
             if (resp.data.results.length > 0) {
               const g = resp.data.results[0].geometry;
-              coords = { lat: g.lat, lng: g.lng };
+              coords = [g.lat, g.lng];
             } else {
-              console.warn(`No result for ${address}`);
+              console.warn(`Geocoding: No results found for address "${address}"`);
             }
           } catch (err) {
-            console.error('Geocoding error:', err);
+            // Log the problematic address to make debugging easier
+            console.error(`Geocoding error for address "${address}":`, err.response ? err.response.data : err.message);
           }
+        } else {
+          console.warn(`Skipping geocoding for invalid address on donation ID: ${docSnap.id}`);
         }
         return { id: docSnap.id, ...data, coordinates: coords };
-      }));
+      });
+
+      const geocoded = await Promise.all(geocodedPromises);
 
       setDonations(geocoded.filter(d => d.coordinates));
       setLoading(false);
@@ -440,7 +450,7 @@ const MapContainer = () => {
               <Marker
                 key={d.id}
                 position={d.coordinates}
-                ref={ref => { if(ref) markerRefs.current[d.id] = ref; }}
+                ref={ref => { if (ref) markerRefs.current[d.id] = ref; }}
               >
                 <Popup>
                   <Box sx={{ minWidth: 200 }}>

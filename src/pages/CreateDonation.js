@@ -1,4 +1,4 @@
-// src/pages/CreateDonation.js - BEAUTIFULLY ENHANCED VERSION
+// src/pages/CreateDonation.js - COMPLETE MODERN UI VERSION
 import React, { useState, useEffect } from 'react';
 import {
   Container,
@@ -25,13 +25,14 @@ import {
   Switch,
   FormControlLabel,
   Autocomplete,
-  Fade,
-  Slide,
   Stack,
   Avatar,
   Divider,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  InputAdornment,
+  Tooltip,
+  FormHelperText
 } from '@mui/material';
 import {
   CloudUpload,
@@ -55,7 +56,18 @@ import {
   ContactPhone,
   Preview,
   Star,
-  Nature
+  Nature,
+  Person,
+  Description,
+  Category,
+  Numbers,
+  Scale,
+  Group,
+  CalendarMonth,
+  Timer,
+  Home,
+  Assignment,
+  PhoneAndroid
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -100,14 +112,14 @@ const steps = [
 ];
 
 const foodCategories = [
-  { value: 'Cooked Meals', icon: '🍽️' },
-  { value: 'Raw Ingredients', icon: '🥬' },
-  { value: 'Packaged Foods', icon: '📦' },
-  { value: 'Baked Goods', icon: '🥖' },
-  { value: 'Dairy Products', icon: '🥛' },
-  { value: 'Fruits & Vegetables', icon: '🍎' },
-  { value: 'Beverages', icon: '🥤' },
-  { value: 'Other', icon: '🍴' }
+  { value: 'Cooked Meals', icon: '🍽️', color: '#FF6B6B' },
+  { value: 'Raw Ingredients', icon: '🥬', color: '#4ECDC4' },
+  { value: 'Packaged Foods', icon: '📦', color: '#45B7D1' },
+  { value: 'Baked Goods', icon: '🥖', color: '#F9CA24' },
+  { value: 'Dairy Products', icon: '🥛', color: '#6C5CE7' },
+  { value: 'Fruits & Vegetables', icon: '🍎', color: '#A29BFE' },
+  { value: 'Beverages', icon: '🥤', color: '#FD79A8' },
+  { value: 'Other', icon: '🍴', color: '#FDCB6E' }
 ];
 
 const quantityUnits = [
@@ -131,7 +143,6 @@ const CreateDonation = () => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [animationTrigger, setAnimationTrigger] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -158,7 +169,6 @@ const CreateDonation = () => {
   });
 
   useEffect(() => {
-    setAnimationTrigger(true);
     if (isEditing && id) {
       loadDonation();
     }
@@ -183,8 +193,7 @@ const CreateDonation = () => {
     }
   };
 
-  const handleInputChange = (field) => (event) => {
-    const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+  const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -354,212 +363,217 @@ const CreateDonation = () => {
     }
   };
 
-  const StyledTextField = ({ children, ...props }) => (
-    <TextField
-      {...props}
-      sx={{
-        '& .MuiOutlinedInput-root': {
-          borderRadius: 3,
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          '&:hover': {
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-          },
-          '&.Mui-focused': {
-            border: '2px solid rgba(102, 126, 234, 0.8)',
-            background: 'rgba(255, 255, 255, 0.15)',
-          },
-          '& fieldset': {
-            border: 'none',
-          },
-        },
-        '& .MuiInputLabel-root': {
-          color: 'rgba(255, 255, 255, 0.8)',
-          fontWeight: 600,
-          '&.Mui-focused': {
-            color: '#667eea',
-          },
-        },
-        '& .MuiOutlinedInput-input': {
-          color: 'white',
-          fontWeight: 500,
-        },
-        '& .MuiFormHelperText-root': {
-          color: 'rgba(255, 255, 255, 0.7)',
-          fontWeight: 500,
-        },
-        ...props.sx,
-      }}
-    />
-  );
-
   const renderStepContent = () => {
     switch (activeStep) {
       case 0:
         return (
-          <Fade in={animationTrigger} timeout={600}>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <Card
+          <Card
+            sx={{
+              boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+              borderRadius: 3,
+              border: '1px solid rgba(0,0,0,0.08)'
+            }}
+          >
+            <Box
+              sx={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                p: 4,
+                borderRadius: '12px 12px 0 0'
+              }}
+            >
+              <Stack direction="row" alignItems="center" spacing={3}>
+                <Avatar
                   sx={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: 4,
-                    p: 3,
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    width: 60,
+                    height: 60,
+                    backdropFilter: 'blur(10px)'
                   }}
                 >
-                  <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-                    <Avatar
-                      sx={{
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        width: 56,
-                        height: 56,
-                      }}
+                  <Fastfood sx={{ fontSize: 32 }} />
+                </Avatar>
+                <Box>
+                  <Typography variant="h4" fontWeight="bold" gutterBottom>
+                    Basic Information
+                  </Typography>
+                  <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                    Tell us about your food donation
+                  </Typography>
+                </Box>
+              </Stack>
+            </Box>
+
+            <CardContent sx={{ p: 4 }}>
+              <Grid container spacing={4}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Donation Title"
+                    value={formData.title}
+                    onChange={(e) => handleInputChange('title', e.target.value)}
+                    error={!!errors.title}
+                    helperText={errors.title || 'Give your donation a clear, descriptive title'}
+                    placeholder="Fresh vegetables from my garden"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Description color="primary" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        backgroundColor: 'rgba(103, 126, 234, 0.04)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(103, 126, 234, 0.08)',
+                        },
+                        '&.Mui-focused': {
+                          backgroundColor: 'rgba(103, 126, 234, 0.08)',
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    label="Description"
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    error={!!errors.description}
+                    helperText={errors.description || 'Describe the food, its condition, and any special notes'}
+                    placeholder="Fresh organic vegetables harvested this morning. Includes tomatoes, lettuce, and carrots. Perfect for families looking for healthy, fresh produce."
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        backgroundColor: 'rgba(103, 126, 234, 0.04)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(103, 126, 234, 0.08)',
+                        },
+                        '&.Mui-focused': {
+                          backgroundColor: 'rgba(103, 126, 234, 0.08)',
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <FormControl
+                    fullWidth
+                    error={!!errors.category}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        backgroundColor: 'rgba(103, 126, 234, 0.04)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(103, 126, 234, 0.08)',
+                        },
+                        '&.Mui-focused': {
+                          backgroundColor: 'rgba(103, 126, 234, 0.08)',
+                        }
+                      }
+                    }}
+                  >
+                    <InputLabel>Food Category</InputLabel>
+                    <Select
+                      value={formData.category}
+                      onChange={(e) => handleInputChange('category', e.target.value)}
+                      label="Food Category"
+                      startAdornment={
+                        <InputAdornment position="start">
+                          <Category color="primary" />
+                        </InputAdornment>
+                      }
                     >
-                      <Fastfood sx={{ fontSize: 28 }} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h5" sx={{ color: 'white', fontWeight: 700 }}>
-                        Basic Information
-                      </Typography>
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Tell us about your food donation
-                      </Typography>
-                    </Box>
-                  </Stack>
+                      {foodCategories.map(category => (
+                        <MenuItem key={category.value} value={category.value}>
+                          <Stack direction="row" alignItems="center" spacing={2}>
+                            <Avatar
+                              sx={{
+                                bgcolor: category.color,
+                                width: 32,
+                                height: 32,
+                                fontSize: '16px'
+                              }}
+                            >
+                              {category.icon}
+                            </Avatar>
+                            <Typography fontWeight="medium">{category.value}</Typography>
+                          </Stack>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {errors.category && (
+                      <FormHelperText>{errors.category}</FormHelperText>
+                    )}
+                  </FormControl>
+                </Grid>
 
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <StyledTextField
-                        fullWidth
-                        label="Donation Title"
-                        value={formData.title}
-                        onChange={handleInputChange('title')}
-                        error={!!errors.title}
-                        helperText={errors.title || 'Give your donation a clear, descriptive title'}
-                        placeholder="Fresh vegetables from garden"
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <StyledTextField
-                        fullWidth
-                        multiline
-                        rows={4}
-                        label="Description"
-                        value={formData.description}
-                        onChange={handleInputChange('description')}
-                        error={!!errors.description}
-                        helperText={errors.description || 'Describe the food, its condition, and any special notes'}
-                        placeholder="Fresh organic vegetables harvested this morning. Includes tomatoes, lettuce, and carrots."
-                      />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <FormControl
-                        fullWidth
-                        error={!!errors.category}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 3,
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            backdropFilter: 'blur(10px)',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
-                            '&:hover': {
-                              border: '1px solid rgba(255, 255, 255, 0.3)',
-                            },
-                            '&.Mui-focused': {
-                              border: '2px solid rgba(102, 126, 234, 0.8)',
-                              background: 'rgba(255, 255, 255, 0.15)',
-                            },
-                            '& fieldset': {
-                              border: 'none',
-                            },
-                            '& .MuiSelect-select': {
-                              color: 'white',
-                              fontWeight: 500,
-                            },
-                          },
-                          '& .MuiInputLabel-root': {
-                            color: 'rgba(255, 255, 255, 0.8)',
-                            fontWeight: 600,
-                            '&.Mui-focused': {
-                              color: '#667eea',
-                            },
-                          },
-                        }}
-                      >
-                        <InputLabel>Category</InputLabel>
-                        <Select
-                          value={formData.category}
-                          onChange={handleInputChange('category')}
-                          label="Category"
-                        >
-                          {foodCategories.map(category => (
-                            <MenuItem key={category.value} value={category.value}>
-                              <Stack direction="row" alignItems="center" spacing={1}>
-                                <span>{category.icon}</span>
-                                <span>{category.value}</span>
-                              </Stack>
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-
-                    <Grid item xs={12} sm={3}>
-                      <StyledTextField
+                <Grid item xs={12} md={6}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <TextField
                         fullWidth
                         type="number"
                         label="Quantity"
                         value={formData.quantity}
-                        onChange={handleInputChange('quantity')}
+                        onChange={(e) => handleInputChange('quantity', e.target.value)}
                         error={!!errors.quantity}
                         helperText={errors.quantity}
                         inputProps={{ min: 1 }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Numbers color="primary" />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'rgba(103, 126, 234, 0.04)',
+                            '&:hover': {
+                              backgroundColor: 'rgba(103, 126, 234, 0.08)',
+                            },
+                            '&.Mui-focused': {
+                              backgroundColor: 'rgba(103, 126, 234, 0.08)',
+                            }
+                          }
+                        }}
                       />
                     </Grid>
-
-                    <Grid item xs={12} sm={3}>
+                    <Grid item xs={6}>
                       <FormControl
                         fullWidth
                         sx={{
                           '& .MuiOutlinedInput-root': {
-                            borderRadius: 3,
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            backdropFilter: 'blur(10px)',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            borderRadius: 2,
+                            backgroundColor: 'rgba(103, 126, 234, 0.04)',
                             '&:hover': {
-                              border: '1px solid rgba(255, 255, 255, 0.3)',
+                              backgroundColor: 'rgba(103, 126, 234, 0.08)',
                             },
                             '&.Mui-focused': {
-                              border: '2px solid rgba(102, 126, 234, 0.8)',
-                              background: 'rgba(255, 255, 255, 0.15)',
-                            },
-                            '& fieldset': {
-                              border: 'none',
-                            },
-                            '& .MuiSelect-select': {
-                              color: 'white',
-                              fontWeight: 500,
-                            },
-                          },
-                          '& .MuiInputLabel-root': {
-                            color: 'rgba(255, 255, 255, 0.8)',
-                            fontWeight: 600,
-                            '&.Mui-focused': {
-                              color: '#667eea',
-                            },
-                          },
+                              backgroundColor: 'rgba(103, 126, 234, 0.08)',
+                            }
+                          }
                         }}
                       >
                         <InputLabel>Unit</InputLabel>
                         <Select
                           value={formData.unit}
-                          onChange={handleInputChange('unit')}
+                          onChange={(e) => handleInputChange('unit', e.target.value)}
                           label="Unit"
+                          startAdornment={
+                            <InputAdornment position="start">
+                              <Scale color="primary" />
+                            </InputAdornment>
+                          }
                         >
                           {quantityUnits.map(unit => (
                             <MenuItem key={unit} value={unit}>
@@ -569,578 +583,821 @@ const CreateDonation = () => {
                         </Select>
                       </FormControl>
                     </Grid>
-
-                    <Grid item xs={12}>
-                      <StyledTextField
-                        fullWidth
-                        label="Serving Size (Optional)"
-                        value={formData.servingSize}
-                        onChange={handleInputChange('servingSize')}
-                        placeholder="Serves 4-6 people"
-                        helperText="How many people this food can serve"
-                      />
-                    </Grid>
                   </Grid>
-                </Card>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Serving Size (Optional)"
+                    value={formData.servingSize}
+                    onChange={(e) => handleInputChange('servingSize', e.target.value)}
+                    placeholder="Serves 4-6 people"
+                    helperText="Estimate how many people this food can serve"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Group color="primary" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        backgroundColor: 'rgba(103, 126, 234, 0.04)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(103, 126, 234, 0.08)',
+                        },
+                        '&.Mui-focused': {
+                          backgroundColor: 'rgba(103, 126, 234, 0.08)',
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
               </Grid>
-            </Grid>
-          </Fade>
+            </CardContent>
+          </Card>
         );
 
       case 1:
         return (
-          <Fade in={animationTrigger} timeout={600}>
-            <Grid container spacing={4}>
-              {/* Expiry Information */}
-              <Grid item xs={12}>
-                <Card
-                  sx={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: 4,
-                    p: 3,
-                  }}
-                >
-                  <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-                    <Avatar
-                      sx={{
-                        background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
-                        width: 56,
-                        height: 56,
+          <Box>
+            {/* Expiry Information */}
+            <Card
+              sx={{
+                boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                borderRadius: 3,
+                border: '1px solid rgba(0,0,0,0.08)',
+                mb: 4
+              }}
+            >
+              <Box
+                sx={{
+                  background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
+                  color: 'white',
+                  p: 4,
+                  borderRadius: '12px 12px 0 0'
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={3}>
+                  <Avatar
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      width: 60,
+                      height: 60,
+                      backdropFilter: 'blur(10px)'
+                    }}
+                  >
+                    <AccessTime sx={{ fontSize: 32 }} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" fontWeight="bold" gutterBottom>
+                      Expiry & Timing
+                    </Typography>
+                    <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                      When does this food expire?
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+
+              <CardContent sx={{ p: 4 }}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Expiry Date"
+                      value={formData.expiryDate}
+                      onChange={(e) => handleInputChange('expiryDate', e.target.value)}
+                      error={!!errors.expiryDate}
+                      helperText={errors.expiryDate || 'When does this food expire?'}
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <CalendarMonth color="warning" />
+                          </InputAdornment>
+                        ),
                       }}
-                    >
-                      <AccessTime sx={{ fontSize: 28 }} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h5" sx={{ color: 'white', fontWeight: 700 }}>
-                        Expiry & Timing
-                      </Typography>
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        When does this food expire?
-                      </Typography>
-                    </Box>
-                  </Stack>
-
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6}>
-                      <StyledTextField
-                        fullWidth
-                        type="date"
-                        label="Expiry Date"
-                        value={formData.expiryDate}
-                        onChange={handleInputChange('expiryDate')}
-                        error={!!errors.expiryDate}
-                        helperText={errors.expiryDate}
-                        InputLabelProps={{ shrink: true }}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <StyledTextField
-                        fullWidth
-                        type="time"
-                        label="Expiry Time"
-                        value={formData.expiryTime}
-                        onChange={handleInputChange('expiryTime')}
-                        error={!!errors.expiryTime}
-                        helperText={errors.expiryTime}
-                        InputLabelProps={{ shrink: true }}
-                      />
-                    </Grid>
-                  </Grid>
-                </Card>
-              </Grid>
-
-              {/* Dietary Information */}
-              <Grid item xs={12}>
-                <Card
-                  sx={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: 4,
-                    p: 3,
-                  }}
-                >
-                  <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-                    <Avatar
                       sx={{
-                        background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
-                        width: 56,
-                        height: 56,
-                      }}
-                    >
-                      <Nature sx={{ fontSize: 28 }} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h5" sx={{ color: 'white', fontWeight: 700 }}>
-                        Dietary Information
-                      </Typography>
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Allergens and dietary preferences
-                      </Typography>
-                    </Box>
-                  </Stack>
-
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <Autocomplete
-                        multiple
-                        options={allergens}
-                        value={formData.allergens}
-                        onChange={(event, newValue) => {
-                          setFormData(prev => ({ ...prev, allergens: newValue }));
-                        }}
-                        renderTags={(value, getTagProps) =>
-                          value.map((option, index) => (
-                            <Chip
-                              variant="outlined"
-                              label={option}
-                              {...getTagProps({ index })}
-                              key={option}
-                              sx={{
-                                background: 'rgba(255, 255, 255, 0.1)',
-                                color: 'white',
-                                borderColor: 'rgba(255, 255, 255, 0.3)',
-                                '& .MuiChip-deleteIcon': {
-                                  color: 'rgba(255, 255, 255, 0.7)',
-                                }
-                              }}
-                            />
-                          ))
-                        }
-                        renderInput={(params) => (
-                          <StyledTextField
-                            {...params}
-                            label="Allergens"
-                            placeholder="Select allergens present in this food"
-                          />
-                        )}
-                        sx={{
-                          '& .MuiAutocomplete-popupIndicator': {
-                            color: 'rgba(255, 255, 255, 0.7)',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: 'rgba(255, 152, 0, 0.04)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(255, 152, 0, 0.08)',
                           },
-                        }}
-                      />
-                    </Grid>
+                          '&.Mui-focused': {
+                            backgroundColor: 'rgba(255, 152, 0, 0.08)',
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
 
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                        {[
-                          { key: 'isVegetarian', label: 'Vegetarian', icon: '🌱' },
-                          { key: 'isVegan', label: 'Vegan', icon: '🌿' },
-                          { key: 'isHalal', label: 'Halal', icon: '☪️' },
-                          { key: 'isKosher', label: 'Kosher', icon: '✡️' },
-                          { key: 'isGlutenFree', label: 'Gluten Free', icon: '🌾' },
-                        ].map((diet) => (
-                          <Card
-                            key={diet.key}
-                            sx={{
-                              background: formData[diet.key]
-                                ? 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)'
-                                : 'rgba(255, 255, 255, 0.05)',
-                              border: `1px solid ${formData[diet.key] ? '#00C853' : 'rgba(255, 255, 255, 0.2)'}`,
-                              borderRadius: 3,
-                              p: 2,
-                              cursor: 'pointer',
-                              transition: 'all 0.3s ease',
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="time"
+                      label="Expiry Time"
+                      value={formData.expiryTime}
+                      onChange={(e) => handleInputChange('expiryTime', e.target.value)}
+                      error={!!errors.expiryTime}
+                      helperText={errors.expiryTime || 'What time does it expire?'}
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Timer color="warning" />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: 'rgba(255, 152, 0, 0.04)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(255, 152, 0, 0.08)',
+                          },
+                          '&.Mui-focused': {
+                            backgroundColor: 'rgba(255, 152, 0, 0.08)',
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+
+            {/* Dietary Information */}
+            <Card
+              sx={{
+                boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                borderRadius: 3,
+                border: '1px solid rgba(0,0,0,0.08)',
+                mb: 4
+              }}
+            >
+              <Box
+                sx={{
+                  background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
+                  color: 'white',
+                  p: 4,
+                  borderRadius: '12px 12px 0 0'
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={3}>
+                  <Avatar
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      width: 60,
+                      height: 60,
+                      backdropFilter: 'blur(10px)'
+                    }}
+                  >
+                    <Nature sx={{ fontSize: 32 }} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" fontWeight="bold" gutterBottom>
+                      Dietary Information
+                    </Typography>
+                    <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                      Allergens and dietary preferences
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+
+              <CardContent sx={{ p: 4 }}>
+                <Grid container spacing={4}>
+                  <Grid item xs={12}>
+                    <Autocomplete
+                      multiple
+                      options={allergens}
+                      value={formData.allergens}
+                      onChange={(event, newValue) => {
+                        handleInputChange('allergens', newValue);
+                      }}
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => (
+                          <Chip
+                            variant="outlined"
+                            label={option}
+                            {...getTagProps({ index })}
+                            key={option}
+                            color="warning"
+                            sx={{ fontWeight: 'medium' }}
+                          />
+                        ))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Allergens"
+                          placeholder="Select allergens present in this food"
+                          helperText="Select all allergens that may be present in this food"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              backgroundColor: 'rgba(0, 200, 83, 0.04)',
                               '&:hover': {
-                                transform: 'translateY(-2px)',
-                                background: formData[diet.key]
-                                  ? 'linear-gradient(135deg, #00B248 0%, #43A047 100%)'
-                                  : 'rgba(255, 255, 255, 0.1)',
+                                backgroundColor: 'rgba(0, 200, 83, 0.08)',
+                              },
+                              '&.Mui-focused': {
+                                backgroundColor: 'rgba(0, 200, 83, 0.08)',
+                              }
+                            }
+                          }}
+                        />
+                      )}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Typography variant="h6" gutterBottom fontWeight="bold" color="text.primary">
+                      Dietary Preferences
+                    </Typography>
+                    <Grid container spacing={2}>
+                      {[
+                        { key: 'isVegetarian', label: 'Vegetarian', icon: '🌱', color: '#4CAF50' },
+                        { key: 'isVegan', label: 'Vegan', icon: '🌿', color: '#66BB6A' },
+                        { key: 'isHalal', label: 'Halal', icon: '☪️', color: '#00BCD4' },
+                        { key: 'isKosher', label: 'Kosher', icon: '✡️', color: '#3F51B5' },
+                        { key: 'isGlutenFree', label: 'Gluten Free', icon: '🌾', color: '#FF9800' },
+                      ].map((diet) => (
+                        <Grid item xs={12} sm={6} md={4} key={diet.key}>
+                          <Paper
+                            elevation={formData[diet.key] ? 8 : 1}
+                            sx={{
+                              p: 3,
+                              borderRadius: 3,
+                              border: formData[diet.key] ? `3px solid ${diet.color}` : '1px solid rgba(0,0,0,0.1)',
+                              bgcolor: formData[diet.key] ? `${diet.color}15` : 'background.paper',
+                              transition: 'all 0.3s ease',
+                              cursor: 'pointer',
+                              '&:hover': {
+                                transform: 'translateY(-4px)',
+                                boxShadow: `0 8px 32px ${diet.color}40`
                               }
                             }}
-                            onClick={() => setFormData(prev => ({ ...prev, [diet.key]: !prev[diet.key] }))}
+                            onClick={() => handleInputChange(diet.key, !formData[diet.key])}
                           >
                             <Stack direction="row" alignItems="center" spacing={2}>
-                              <Typography sx={{ fontSize: '1.5rem' }}>{diet.icon}</Typography>
-                              <Box>
-                                <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                              <Avatar
+                                sx={{
+                                  bgcolor: diet.color,
+                                  width: 40,
+                                  height: 40,
+                                  fontSize: '20px'
+                                }}
+                              >
+                                {diet.icon}
+                              </Avatar>
+                              <Box sx={{ flex: 1 }}>
+                                <Typography fontWeight="bold" color="text.primary">
                                   {diet.label}
                                 </Typography>
                                 <Switch
                                   checked={formData[diet.key]}
-                                  onChange={handleInputChange(diet.key)}
-                                  size="small"
+                                  onChange={(e) => handleInputChange(diet.key, e.target.checked)}
                                   sx={{
-                                    '& .MuiSwitch-track': {
-                                      background: 'rgba(255, 255, 255, 0.3)',
+                                    '& .MuiSwitch-switchBase.Mui-checked': {
+                                      color: diet.color,
                                     },
-                                    '& .MuiSwitch-thumb': {
-                                      background: 'white',
+                                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                      backgroundColor: diet.color,
                                     },
                                   }}
                                 />
                               </Box>
                             </Stack>
-                          </Card>
-                        ))}
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Card>
-              </Grid>
-
-              {/* Images */}
-              <Grid item xs={12}>
-                <Card
-                  sx={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: 4,
-                    p: 3,
-                  }}
-                >
-                  <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-                    <Avatar
-                      sx={{
-                        background: 'linear-gradient(135deg, #E91E63 0%, #F48FB1 100%)',
-                        width: 56,
-                        height: 56,
-                      }}
-                    >
-                      <Camera sx={{ fontSize: 28 }} />
-                    </Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="h5" sx={{ color: 'white', fontWeight: 700 }}>
-                        Food Images
-                      </Typography>
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Add photos to make your donation more appealing
-                      </Typography>
-                    </Box>
-                    <input
-                      accept="image/*"
-                      style={{ display: 'none' }}
-                      id="image-upload"
-                      multiple
-                      type="file"
-                      onChange={handleImageUpload}
-                    />
-                    <label htmlFor="image-upload">
-                      <Button
-                        variant="contained"
-                        component="span"
-                        startIcon={uploading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <CloudUpload />}
-                        disabled={uploading || formData.images.length >= 5}
-                        sx={{
-                          borderRadius: 3,
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          fontWeight: 600,
-                          px: 3,
-                          py: 1.5,
-                          '&:hover': {
-                            background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
-                          },
-                          '&:disabled': {
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            color: 'rgba(255, 255, 255, 0.5)',
-                          },
-                          transition: 'all 0.3s ease',
-                        }}
-                      >
-                        {uploading ? 'Uploading...' : 'Upload Images'}
-                      </Button>
-                    </label>
-                  </Stack>
-
-                  {formData.images.length > 0 ? (
-                    <Grid container spacing={2}>
-                      {formData.images.map((image, index) => (
-                        <Grid item xs={6} sm={4} md={3} key={index}>
-                          <Card
-                            sx={{
-                              position: 'relative',
-                              borderRadius: 3,
-                              overflow: 'hidden',
-                              background: 'rgba(255, 255, 255, 0.1)',
-                              border: '1px solid rgba(255, 255, 255, 0.2)',
-                              '&:hover .delete-btn': {
-                                opacity: 1,
-                              }
-                            }}
-                          >
-                            <CardMedia
-                              component="img"
-                              height="120"
-                              image={image}
-                              alt={`Donation image ${index + 1}`}
-                              sx={{ objectFit: 'cover' }}
-                            />
-                            <IconButton
-                              className="delete-btn"
-                              size="small"
-                              onClick={() => removeImage(index)}
-                              sx={{
-                                position: 'absolute',
-                                top: 8,
-                                right: 8,
-                                background: 'rgba(244, 67, 54, 0.8)',
-                                color: 'white',
-                                opacity: 0,
-                                transition: 'opacity 0.3s ease',
-                                '&:hover': {
-                                  background: 'rgba(244, 67, 54, 1)',
-                                }
-                              }}
-                            >
-                              <Delete sx={{ fontSize: 18 }} />
-                            </IconButton>
-                          </Card>
+                          </Paper>
                         </Grid>
                       ))}
                     </Grid>
-                  ) : (
-                    <Box
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+
+            {/* Images */}
+            <Card
+              sx={{
+                boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                borderRadius: 3,
+                border: '1px solid rgba(0,0,0,0.08)'
+              }}
+            >
+              <Box
+                sx={{
+                  background: 'linear-gradient(135deg, #E91E63 0%, #F48FB1 100%)',
+                  color: 'white',
+                  p: 4,
+                  borderRadius: '12px 12px 0 0'
+                }}
+              >
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Stack direction="row" alignItems="center" spacing={3}>
+                    <Avatar
                       sx={{
-                        textAlign: 'center',
-                        py: 6,
-                        border: '2px dashed rgba(255, 255, 255, 0.3)',
-                        borderRadius: 3,
-                        background: 'rgba(255, 255, 255, 0.05)',
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        width: 60,
+                        height: 60,
+                        backdropFilter: 'blur(10px)'
                       }}
                     >
-                      <ImageIcon sx={{ fontSize: 64, color: 'rgba(255, 255, 255, 0.5)', mb: 2 }} />
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)', mb: 1 }}>
-                        No images uploaded yet
+                      <Camera sx={{ fontSize: 32 }} />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h4" fontWeight="bold" gutterBottom>
+                        Food Images
                       </Typography>
-                      <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-                        Images help receivers see what you're sharing
+                      <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                        Add photos to make your donation more appealing ({formData.images.length}/5)
                       </Typography>
                     </Box>
-                  )}
-                </Card>
-              </Grid>
-            </Grid>
-          </Fade>
+                  </Stack>
+                  <input
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    id="image-upload"
+                    multiple
+                    type="file"
+                    onChange={handleImageUpload}
+                  />
+                  <label htmlFor="image-upload">
+                    <Button
+                      variant="contained"
+                      component="span"
+                      startIcon={uploading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <CloudUpload />}
+                      disabled={uploading || formData.images.length >= 5}
+                      sx={{
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        color: 'white',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        fontWeight: 'bold',
+                        px: 3,
+                        py: 1.5,
+                        borderRadius: 2,
+                        '&:hover': {
+                          bgcolor: 'rgba(255,255,255,0.3)',
+                        },
+                        '&:disabled': {
+                          bgcolor: 'rgba(255,255,255,0.1)',
+                          color: 'rgba(255,255,255,0.5)',
+                        }
+                      }}
+                    >
+                      {uploading ? 'Uploading...' : 'Upload Images'}
+                    </Button>
+                  </label>
+                </Stack>
+              </Box>
+
+              <CardContent sx={{ p: 4 }}>
+                {formData.images.length > 0 ? (
+                  <Grid container spacing={3}>
+                    {formData.images.map((image, index) => (
+                      <Grid item xs={12} sm={6} md={4} key={index}>
+                        <Card
+                          sx={{
+                            position: 'relative',
+                            borderRadius: 3,
+                            overflow: 'hidden',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                            '&:hover .delete-btn': {
+                              opacity: 1,
+                            },
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 12px 32px rgba(0,0,0,0.18)',
+                            },
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          <CardMedia
+                            component="img"
+                            height="200"
+                            image={image}
+                            alt={`Donation image ${index + 1}`}
+                            sx={{ objectFit: 'cover' }}
+                          />
+                          <IconButton
+                            className="delete-btn"
+                            size="small"
+                            onClick={() => removeImage(index)}
+                            sx={{
+                              position: 'absolute',
+                              top: 8,
+                              right: 8,
+                              bgcolor: 'rgba(244, 67, 54, 0.9)',
+                              color: 'white',
+                              opacity: 0,
+                              transition: 'all 0.3s ease',
+                              backdropFilter: 'blur(10px)',
+                              '&:hover': {
+                                bgcolor: 'rgba(244, 67, 54, 1)',
+                                transform: 'scale(1.1)'
+                              }
+                            }}
+                          >
+                            <Delete sx={{ fontSize: 18 }} />
+                          </IconButton>
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              bgcolor: 'rgba(0,0,0,0.7)',
+                              color: 'white',
+                              p: 1,
+                              textAlign: 'center'
+                            }}
+                          >
+                            <Typography variant="caption" fontWeight="medium">
+                              Image {index + 1}
+                            </Typography>
+                          </Box>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                ) : (
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      py: 8,
+                      border: '3px dashed rgba(233, 30, 99, 0.3)',
+                      borderRadius: 3,
+                      bgcolor: 'rgba(233, 30, 99, 0.05)',
+                    }}
+                  >
+                    <Avatar
+                      sx={{
+                        bgcolor: 'rgba(233, 30, 99, 0.1)',
+                        width: 80,
+                        height: 80,
+                        mx: 'auto',
+                        mb: 3
+                      }}
+                    >
+                      <ImageIcon sx={{ fontSize: 40, color: '#E91E63' }} />
+                    </Avatar>
+                    <Typography variant="h6" color="text.primary" gutterBottom fontWeight="bold">
+                      No images uploaded yet
+                    </Typography>
+                    <Typography color="text.secondary" sx={{ maxWidth: 400, mx: 'auto' }}>
+                      Photos help receivers see what you're sharing and make your donation more trustworthy and appealing
+                    </Typography>
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          </Box>
         );
 
       case 2:
         return (
-          <Fade in={animationTrigger} timeout={600}>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <Card
-                  sx={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: 4,
-                    p: 3,
-                  }}
-                >
-                  <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-                    <Avatar
-                      sx={{
-                        background: 'linear-gradient(135deg, #1976D2 0%, #2196F3 100%)',
-                        width: 56,
-                        height: 56,
+          <Box>
+            <Card
+              sx={{
+                boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                borderRadius: 3,
+                border: '1px solid rgba(0,0,0,0.08)',
+                mb: 4
+              }}
+            >
+              <Box
+                sx={{
+                  background: 'linear-gradient(135deg, #1976D2 0%, #2196F3 100%)',
+                  color: 'white',
+                  p: 4,
+                  borderRadius: '12px 12px 0 0'
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={3}>
+                  <Avatar
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      width: 60,
+                      height: 60,
+                      backdropFilter: 'blur(10px)'
+                    }}
+                  >
+                    <LocationOn sx={{ fontSize: 32 }} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" fontWeight="bold" gutterBottom>
+                      Pickup Location
+                    </Typography>
+                    <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                      Where can receivers collect the food?
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+
+              <CardContent sx={{ p: 4 }}>
+                <Grid container spacing={4}>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Pickup Address"
+                      value={formData.pickupAddress}
+                      onChange={(e) => handleInputChange('pickupAddress', e.target.value)}
+                      error={!!errors.pickupAddress}
+                      helperText={errors.pickupAddress || 'Full address where food can be picked up'}
+                      placeholder="123 Main St, City, State 12345"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Home color="info" />
+                          </InputAdornment>
+                        ),
                       }}
-                    >
-                      <LocationOn sx={{ fontSize: 28 }} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h5" sx={{ color: 'white', fontWeight: 700 }}>
-                        Pickup Location
-                      </Typography>
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Where can receivers collect the food?
-                      </Typography>
-                    </Box>
-                  </Stack>
-
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <StyledTextField
-                        fullWidth
-                        label="Pickup Address"
-                        value={formData.pickupAddress}
-                        onChange={handleInputChange('pickupAddress')}
-                        error={!!errors.pickupAddress}
-                        helperText={errors.pickupAddress || 'Full address where food can be picked up'}
-                        placeholder="123 Main St, City, State 12345"
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <StyledTextField
-                        fullWidth
-                        multiline
-                        rows={3}
-                        label="Pickup Instructions"
-                        value={formData.pickupInstructions}
-                        onChange={handleInputChange('pickupInstructions')}
-                        placeholder="Ring doorbell, food is in cooler by front door. Available between 9 AM - 6 PM."
-                        helperText="Specific instructions for pickup (entry, timing, contact, etc.)"
-                      />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <StyledTextField
-                        fullWidth
-                        label="Available From"
-                        type="time"
-                        value={formData.availableFrom}
-                        onChange={handleInputChange('availableFrom')}
-                        InputLabelProps={{ shrink: true }}
-                        helperText="Earliest pickup time"
-                      />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <StyledTextField
-                        fullWidth
-                        label="Available Until"
-                        type="time"
-                        value={formData.availableUntil}
-                        onChange={handleInputChange('availableUntil')}
-                        InputLabelProps={{ shrink: true }}
-                        helperText="Latest pickup time"
-                      />
-                    </Grid>
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          },
+                          '&.Mui-focused': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          }
+                        }
+                      }}
+                    />
                   </Grid>
-                </Card>
-              </Grid>
 
-              <Grid item xs={12}>
-                <Card
-                  sx={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: 4,
-                    p: 3,
-                  }}
-                >
-                  <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-                    <Avatar
-                      sx={{
-                        background: 'linear-gradient(135deg, #FF5722 0%, #FF7043 100%)',
-                        width: 56,
-                        height: 56,
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={4}
+                      label="Pickup Instructions"
+                      value={formData.pickupInstructions}
+                      onChange={(e) => handleInputChange('pickupInstructions', e.target.value)}
+                      placeholder="Ring doorbell, food is in cooler by front door. Available between 9 AM - 6 PM. Please bring your own bags."
+                      helperText="Specific instructions for pickup (entry, timing, contact, etc.)"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Assignment color="info" />
+                          </InputAdornment>
+                        ),
                       }}
-                    >
-                      <ContactPhone sx={{ fontSize: 28 }} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h5" sx={{ color: 'white', fontWeight: 700 }}>
-                        Contact Information
-                      </Typography>
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        How can receivers reach you?
-                      </Typography>
-                    </Box>
-                  </Stack>
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          },
+                          '&.Mui-focused': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
 
-                  <StyledTextField
-                    fullWidth
-                    label="Contact Phone"
-                    value={formData.contactPhone}
-                    onChange={handleInputChange('contactPhone')}
-                    error={!!errors.contactPhone}
-                    helperText={errors.contactPhone || 'Phone number for pickup coordination'}
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </Card>
-              </Grid>
-            </Grid>
-          </Fade>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Available From"
+                      type="time"
+                      value={formData.availableFrom}
+                      onChange={(e) => handleInputChange('availableFrom', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      helperText="Earliest pickup time"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Schedule color="info" />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          },
+                          '&.Mui-focused': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Available Until"
+                      type="time"
+                      value={formData.availableUntil}
+                      onChange={(e) => handleInputChange('availableUntil', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      helperText="Latest pickup time"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Schedule color="info" />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          },
+                          '&.Mui-focused': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+
+            <Card
+              sx={{
+                boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                borderRadius: 3,
+                border: '1px solid rgba(0,0,0,0.08)'
+              }}
+            >
+              <Box
+                sx={{
+                  background: 'linear-gradient(135deg, #FF5722 0%, #FF7043 100%)',
+                  color: 'white',
+                  p: 4,
+                  borderRadius: '12px 12px 0 0'
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={3}>
+                  <Avatar
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      width: 60,
+                      height: 60,
+                      backdropFilter: 'blur(10px)'
+                    }}
+                  >
+                    <ContactPhone sx={{ fontSize: 32 }} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" fontWeight="bold" gutterBottom>
+                      Contact Information
+                    </Typography>
+                    <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                      How can receivers reach you?
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+
+              <CardContent sx={{ p: 4 }}>
+                <TextField
+                  fullWidth
+                  label="Contact Phone"
+                  value={formData.contactPhone}
+                  onChange={(e) => handleInputChange('contactPhone', e.target.value)}
+                  error={!!errors.contactPhone}
+                  helperText={errors.contactPhone || 'Phone number for pickup coordination'}
+                  placeholder="+1 (555) 123-4567"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneAndroid sx={{ color: '#FF5722' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      backgroundColor: 'rgba(255, 87, 34, 0.04)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 87, 34, 0.08)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255, 87, 34, 0.08)',
+                      }
+                    }
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </Box>
         );
 
       case 3:
         return (
-          <Fade in={animationTrigger} timeout={600}>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <Alert
-                  severity="info"
-                  sx={{
-                    mb: 3,
-                    background: 'rgba(33, 150, 243, 0.1)',
-                    border: '1px solid rgba(33, 150, 243, 0.3)',
-                    color: 'white',
-                    borderRadius: 3,
-                    '& .MuiAlert-icon': {
-                      color: '#2196F3',
-                    }
-                  }}
-                >
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                    Ready to Publish? 🚀
-                  </Typography>
-                  Please review all details before publishing your donation. Once published, receivers will be able to see and claim your food donation.
-                </Alert>
-              </Grid>
+          <Box>
+            <Alert
+              severity="info"
+              sx={{
+                mb: 4,
+                borderRadius: 3,
+                boxShadow: '0 4px 20px rgba(33, 150, 243, 0.2)',
+                border: '1px solid rgba(33, 150, 243, 0.3)'
+              }}
+            >
+              <Typography variant="h5" fontWeight="bold" gutterBottom>
+                Ready to Publish?
+              </Typography>
+              <Typography variant="body1">
+                Please review all details before publishing your donation. Once published, receivers will be able to see and claim your food donation.
+              </Typography>
+            </Alert>
 
+            <Grid container spacing={4}>
               <Grid item xs={12} md={8}>
                 <Card
                   sx={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
                     borderRadius: 4,
+                    border: '1px solid rgba(0,0,0,0.08)',
                     overflow: 'hidden',
-                    position: 'relative',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: 4,
-                      background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)'
-                    }
+                    position: 'relative'
                   }}
                 >
-                  <CardContent sx={{ p: 4, pt: 5 }}>
-                    <Stack direction="row" alignItems="flex-start" spacing={3} mb={3}>
+                  <Box
+                    sx={{
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      height: 6
+                    }}
+                  />
+                  <CardContent sx={{ p: 5 }}>
+                    <Stack direction="row" spacing={4} mb={4}>
                       <Avatar
                         sx={{
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          width: 64,
-                          height: 64,
+                          bgcolor: 'primary.main',
+                          width: 80,
+                          height: 80,
+                          boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
                         }}
                       >
-                        <Restaurant sx={{ fontSize: 32 }} />
+                        <Restaurant sx={{ fontSize: 40 }} />
                       </Avatar>
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="h4" sx={{ color: 'white', fontWeight: 800, mb: 1 }}>
+                        <Typography variant="h3" fontWeight="bold" gutterBottom color="text.primary">
                           {formData.title}
                         </Typography>
-                        <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.8)', mb: 3, lineHeight: 1.6 }}>
+                        <Typography variant="h6" color="text.secondary" gutterBottom sx={{ lineHeight: 1.6 }}>
                           {formData.description}
                         </Typography>
 
-                        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap mb={3}>
+                        <Stack direction="row" spacing={2} flexWrap="wrap" mb={4}>
                           <Chip
                             label={formData.category}
                             sx={{
-                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              bgcolor: 'primary.main',
                               color: 'white',
-                              fontWeight: 600
+                              fontWeight: 'bold',
+                              fontSize: '0.9rem',
+                              px: 2,
+                              py: 1
                             }}
                           />
                           <Chip
                             label={`${formData.quantity} ${formData.unit}`}
                             variant="outlined"
                             sx={{
-                              borderColor: 'rgba(255, 255, 255, 0.5)',
-                              color: 'white',
-                              fontWeight: 600
+                              borderWidth: 2,
+                              fontWeight: 'bold',
+                              fontSize: '0.9rem'
                             }}
                           />
+                          {formData.servingSize && (
+                            <Chip
+                              label={formData.servingSize}
+                              variant="outlined"
+                              sx={{
+                                borderWidth: 2,
+                                fontWeight: 'bold',
+                                fontSize: '0.9rem'
+                              }}
+                            />
+                          )}
                           {formData.isVegetarian && (
                             <Chip
                               label="🌱 Vegetarian"
                               sx={{
-                                background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
+                                bgcolor: '#4CAF50',
                                 color: 'white',
-                                fontWeight: 600
+                                fontWeight: 'bold'
                               }}
                             />
                           )}
@@ -1148,43 +1405,143 @@ const CreateDonation = () => {
                             <Chip
                               label="🌿 Vegan"
                               sx={{
-                                background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
+                                bgcolor: '#66BB6A',
                                 color: 'white',
-                                fontWeight: 600
+                                fontWeight: 'bold'
+                              }}
+                            />
+                          )}
+                          {formData.isHalal && (
+                            <Chip
+                              label="☪️ Halal"
+                              sx={{
+                                bgcolor: '#00BCD4',
+                                color: 'white',
+                                fontWeight: 'bold'
+                              }}
+                            />
+                          )}
+                          {formData.isKosher && (
+                            <Chip
+                              label="✡️ Kosher"
+                              sx={{
+                                bgcolor: '#3F51B5',
+                                color: 'white',
+                                fontWeight: 'bold'
+                              }}
+                            />
+                          )}
+                          {formData.isGlutenFree && (
+                            <Chip
+                              label="🌾 Gluten Free"
+                              sx={{
+                                bgcolor: '#FF9800',
+                                color: 'white',
+                                fontWeight: 'bold'
                               }}
                             />
                           )}
                         </Stack>
 
-                        <Divider sx={{ background: 'rgba(255, 255, 255, 0.2)', mb: 3 }} />
+                        {formData.allergens.length > 0 && (
+                          <Box sx={{ mb: 4 }}>
+                            <Typography variant="h6" fontWeight="bold" color="text.primary" gutterBottom>
+                              Allergens:
+                            </Typography>
+                            <Stack direction="row" spacing={1} flexWrap="wrap">
+                              {formData.allergens.map((allergen) => (
+                                <Chip
+                                  key={allergen}
+                                  label={allergen}
+                                  color="warning"
+                                  variant="outlined"
+                                  sx={{ fontWeight: 'medium' }}
+                                />
+                              ))}
+                            </Stack>
+                          </Box>
+                        )}
 
-                        <Grid container spacing={2}>
+                        <Divider sx={{ mb: 4 }} />
+
+                        <Grid container spacing={4}>
                           <Grid item xs={12} sm={6}>
-                            <Stack direction="row" alignItems="center" spacing={2}>
-                              <Schedule sx={{ color: '#FF9800', fontSize: 20 }} />
-                              <Box>
-                                <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                                  Expires
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
-                                  {new Date(`${formData.expiryDate}T${formData.expiryTime}`).toLocaleString()}
-                                </Typography>
-                              </Box>
-                            </Stack>
+                            <Paper
+                              sx={{
+                                p: 3,
+                                borderRadius: 3,
+                                bgcolor: 'rgba(255, 152, 0, 0.05)',
+                                border: '2px solid rgba(255, 152, 0, 0.2)'
+                              }}
+                            >
+                              <Stack direction="row" alignItems="center" spacing={2}>
+                                <Avatar sx={{ bgcolor: 'warning.main' }}>
+                                  <Schedule />
+                                </Avatar>
+                                <Box>
+                                  <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                                    EXPIRES
+                                  </Typography>
+                                  <Typography variant="h6" fontWeight="bold" color="text.primary">
+                                    {new Date(`${formData.expiryDate}T${formData.expiryTime}`).toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              </Stack>
+                            </Paper>
                           </Grid>
                           <Grid item xs={12} sm={6}>
-                            <Stack direction="row" alignItems="center" spacing={2}>
-                              <LocationOn sx={{ color: '#2196F3', fontSize: 20 }} />
-                              <Box>
-                                <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                                  Pickup Location
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
-                                  {formData.pickupAddress}
-                                </Typography>
-                              </Box>
-                            </Stack>
+                            <Paper
+                              sx={{
+                                p: 3,
+                                borderRadius: 3,
+                                bgcolor: 'rgba(25, 118, 210, 0.05)',
+                                border: '2px solid rgba(25, 118, 210, 0.2)'
+                              }}
+                            >
+                              <Stack direction="row" alignItems="center" spacing={2}>
+                                <Avatar sx={{ bgcolor: 'info.main' }}>
+                                  <LocationOn />
+                                </Avatar>
+                                <Box>
+                                  <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                                    PICKUP LOCATION
+                                  </Typography>
+                                  <Typography variant="h6" fontWeight="bold" color="text.primary">
+                                    {formData.pickupAddress}
+                                  </Typography>
+                                </Box>
+                              </Stack>
+                            </Paper>
                           </Grid>
+                          {(formData.availableFrom || formData.availableUntil) && (
+                            <Grid item xs={12}>
+                              <Paper
+                                sx={{
+                                  p: 3,
+                                  borderRadius: 3,
+                                  bgcolor: 'rgba(76, 175, 80, 0.05)',
+                                  border: '2px solid rgba(76, 175, 80, 0.2)'
+                                }}
+                              >
+                                <Stack direction="row" alignItems="center" spacing={2}>
+                                  <Avatar sx={{ bgcolor: 'success.main' }}>
+                                    <AccessTime />
+                                  </Avatar>
+                                  <Box>
+                                    <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                                      PICKUP HOURS
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight="bold" color="text.primary">
+                                      {formData.availableFrom && formData.availableUntil
+                                        ? `${formData.availableFrom} - ${formData.availableUntil}`
+                                        : formData.availableFrom || formData.availableUntil || 'Flexible'
+                                      }
+                                    </Typography>
+                                  </Box>
+                                </Stack>
+                              </Paper>
+                            </Grid>
+                          )}
                         </Grid>
                       </Box>
                     </Stack>
@@ -1196,49 +1553,62 @@ const CreateDonation = () => {
                 <Grid item xs={12} md={4}>
                   <Card
                     sx={{
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      backdropFilter: 'blur(20px)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: 4,
-                      p: 3,
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                      borderRadius: 3,
+                      border: '1px solid rgba(0,0,0,0.08)'
                     }}
                   >
-                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 700, mb: 3 }}>
-                      📸 Food Images
-                    </Typography>
-                    <Grid container spacing={2}>
-                      {formData.images.map((image, index) => (
-                        <Grid item xs={6} key={index}>
-                          <Box
-                            sx={{
-                              borderRadius: 3,
-                              overflow: 'hidden',
-                              border: '2px solid rgba(255, 255, 255, 0.2)',
-                              '&:hover': {
-                                border: '2px solid rgba(102, 126, 234, 0.8)',
-                                transform: 'scale(1.05)',
-                              },
-                              transition: 'all 0.3s ease',
-                            }}
-                          >
-                            <img
-                              src={image}
-                              alt={`Preview ${index + 1}`}
-                              style={{
-                                width: '100%',
-                                height: 80,
-                                objectFit: 'cover'
+                    <Box
+                      sx={{
+                        background: 'linear-gradient(135deg, #E91E63 0%, #F48FB1 100%)',
+                        color: 'white',
+                        p: 3,
+                        borderRadius: '12px 12px 0 0'
+                      }}
+                    >
+                      <Typography variant="h5" fontWeight="bold" gutterBottom>
+                        Food Images
+                      </Typography>
+                      <Typography sx={{ opacity: 0.9 }}>
+                        {formData.images.length} image{formData.images.length !== 1 ? 's' : ''} uploaded
+                      </Typography>
+                    </Box>
+                    <CardContent sx={{ p: 3 }}>
+                      <Grid container spacing={2}>
+                        {formData.images.map((image, index) => (
+                          <Grid item xs={6} key={index}>
+                            <Box
+                              sx={{
+                                borderRadius: 2,
+                                overflow: 'hidden',
+                                border: '3px solid rgba(233, 30, 99, 0.2)',
+                                boxShadow: '0 4px 16px rgba(233, 30, 99, 0.2)',
+                                '&:hover': {
+                                  transform: 'scale(1.05)',
+                                  boxShadow: '0 8px 24px rgba(233, 30, 99, 0.3)',
+                                },
+                                transition: 'all 0.3s ease',
                               }}
-                            />
-                          </Box>
-                        </Grid>
-                      ))}
-                    </Grid>
+                            >
+                              <img
+                                src={image}
+                                alt={`Preview ${index + 1}`}
+                                style={{
+                                  width: '100%',
+                                  height: 100,
+                                  objectFit: 'cover'
+                                }}
+                              />
+                            </Box>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </CardContent>
                   </Card>
                 </Grid>
               )}
             </Grid>
-          </Fade>
+          </Box>
         );
 
       default:
@@ -1248,319 +1618,266 @@ const CreateDonation = () => {
 
   if (userProfile?.role !== 'donor') {
     return (
-      <Box
-        sx={{
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Container maxWidth="md">
-          <Alert
-            severity="warning"
-            sx={{
-              background: 'rgba(255, 193, 7, 0.1)',
-              border: '1px solid rgba(255, 193, 7, 0.3)',
-              color: 'white',
-              borderRadius: 4,
-              '& .MuiAlert-icon': {
-                color: '#FFC107',
-              }
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Access Restricted
-            </Typography>
+      <Container maxWidth="md" sx={{ py: 8 }}>
+        <Paper sx={{ p: 6, borderRadius: 4, textAlign: 'center' }}>
+          <Avatar sx={{ bgcolor: 'warning.main', width: 80, height: 80, mx: 'auto', mb: 3 }}>
+            <Restaurant sx={{ fontSize: 40 }} />
+          </Avatar>
+          <Typography variant="h4" fontWeight="bold" gutterBottom>
+            Access Restricted
+          </Typography>
+          <Typography variant="h6" color="text.secondary">
             Only donors can create food donations. Please contact support if you need to change your role.
-          </Alert>
-        </Container>
-      </Box>
+          </Typography>
+        </Paper>
+      </Container>
     );
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `
-            radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
-            radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 50%),
-            radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%)
-          `,
-          animation: 'float 20s ease-in-out infinite'
-        }
-      }}
-    >
-      <Container maxWidth="lg" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+    <Box sx={{ bgcolor: '#f8fafc', minHeight: '100vh' }}>
+      <Container maxWidth="lg" sx={{ py: 6 }}>
         {/* Header */}
-        <Fade in={animationTrigger} timeout={800}>
-          <Box sx={{ mb: 4 }}>
-            <Button
-              startIcon={<ArrowBack />}
-              onClick={() => navigate('/my-donations')}
-              sx={{
-                mb: 3,
-                color: 'white',
-                fontWeight: 600,
-                px: 3,
-                py: 1,
-                borderRadius: 3,
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                '&:hover': {
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  transform: 'translateX(-4px)',
-                },
-                transition: 'all 0.3s ease',
-              }}
-            >
-              Back to My Donations
-            </Button>
-
-            <Box sx={{ textAlign: 'center', mb: 6 }}>
-              <Typography
-                variant="h2"
-                sx={{
-                  fontWeight: 900,
-                  background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  mb: 2,
-                  fontSize: { xs: '2.5rem', md: '3.5rem' }
-                }}
-              >
-                {isEditing ? '✏️ Edit Donation' : '🍽️ Create Food Donation'}
-              </Typography>
-              <Typography
-                variant="h6"
-                sx={{
-                  color: 'rgba(255,255,255,0.9)',
-                  fontSize: '1.2rem',
-                  maxWidth: 600,
-                  mx: 'auto'
-                }}
-              >
-                Share your surplus food with those who need it most
-              </Typography>
-            </Box>
-          </Box>
-        </Fade>
-
-        {/* Stepper */}
-        <Slide direction="up" in={animationTrigger} timeout={1000}>
-          <Card
+        <Box sx={{ mb: 6 }}>
+          <Button
+            startIcon={<ArrowBack />}
+            onClick={() => navigate('/my-donations')}
             sx={{
               mb: 4,
-              background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: 4,
-              p: 4,
+              fontWeight: 'bold',
+              px: 3,
+              py: 1.5,
+              borderRadius: 3,
+              bgcolor: 'white',
+              color: 'text.primary',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+              '&:hover': {
+                bgcolor: 'grey.50',
+                transform: 'translateX(-4px)',
+                boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
+              },
+              transition: 'all 0.3s ease',
             }}
           >
-            <Stepper
-              activeStep={activeStep}
-              orientation={isMobile ? 'vertical' : 'horizontal'}
+            Back to My Donations
+          </Button>
+
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography
+              variant="h2"
               sx={{
-                '& .MuiStepLabel-root': {
-                  color: 'white',
+                fontWeight: 900,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                mb: 2,
+                fontSize: { xs: '2.5rem', md: '4rem' }
+              }}
+            >
+              {isEditing ? 'Edit Donation' : 'Create Food Donation'}
+            </Typography>
+            <Typography
+              variant="h5"
+              color="text.secondary"
+              sx={{
+                fontSize: '1.3rem',
+                maxWidth: 600,
+                mx: 'auto',
+                fontWeight: 500
+              }}
+            >
+              Share your surplus food with those who need it most
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Stepper */}
+        <Paper
+          sx={{
+            mb: 6,
+            p: 4,
+            borderRadius: 4,
+            boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
+            border: '1px solid rgba(0,0,0,0.05)'
+          }}
+        >
+          <Stepper
+            activeStep={activeStep}
+            orientation={isMobile ? 'vertical' : 'horizontal'}
+            sx={{
+              '& .MuiStepLabel-root': {
+                alignItems: 'flex-start'
+              },
+              '& .MuiStepLabel-label': {
+                fontSize: '1.1rem',
+                fontWeight: 'bold',
+                '&.Mui-active': {
+                  color: 'primary.main',
+                  fontWeight: 'bold'
                 },
-                '& .MuiStepLabel-label': {
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontWeight: 600,
-                  '&.Mui-active': {
-                    color: 'white',
-                    fontWeight: 700,
-                  },
-                  '&.Mui-completed': {
-                    color: 'rgba(255, 255, 255, 0.9)',
-                  },
+                '&.Mui-completed': {
+                  color: 'success.main',
+                  fontWeight: 'bold'
                 },
-                '& .MuiStepIcon-root': {
-                  color: 'rgba(255, 255, 255, 0.3)',
-                  '&.Mui-active': {
-                    color: '#667eea',
-                  },
-                  '&.Mui-completed': {
-                    color: '#00C853',
-                  },
+              },
+              '& .MuiStepIcon-root': {
+                width: 40,
+                height: 40,
+                '&.Mui-active': {
+                  color: 'primary.main',
                 },
-                '& .MuiStepConnector-line': {
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                '&.Mui-completed': {
+                  color: 'success.main',
+                },
+              },
+              '& .MuiStepConnector-line': {
+                borderWidth: 3,
+              },
+            }}
+          >
+            {steps.map((step, index) => (
+              <Step key={step.label}>
+                <StepLabel>
+                  <Typography variant="h6" fontWeight="bold">
+                    {step.label}
+                  </Typography>
+                  <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                    {step.description}
+                  </Typography>
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Paper>
+
+        {/* Form Content */}
+        <Box sx={{ mb: 6 }}>
+          {renderStepContent()}
+        </Box>
+
+        {/* Navigation Buttons */}
+        <Paper
+          sx={{
+            p: 4,
+            borderRadius: 4,
+            boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
+            border: '1px solid rgba(0,0,0,0.05)'
+          }}
+        >
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 3
+          }}>
+            <Button
+              disabled={activeStep === 0}
+              onClick={handleBack}
+              startIcon={<ArrowBack />}
+              size="large"
+              sx={{
+                fontWeight: 'bold',
+                px: 4,
+                py: 1.5,
+                borderRadius: 3,
+                color: 'text.secondary',
+                '&:hover': {
+                  bgcolor: 'grey.100',
+                },
+                '&:disabled': {
+                  color: 'text.disabled',
                 },
               }}
             >
-              {steps.map((step, index) => (
-                <Step key={step.label}>
-                  <StepLabel>
-                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-                      {step.label}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                      {step.description}
-                    </Typography>
-                  </StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-          </Card>
-        </Slide>
+              Previous
+            </Button>
 
-        {/* Form Content */}
-        <Slide direction="up" in={animationTrigger} timeout={1200}>
-          <Box sx={{ mb: 4 }}>
-            {renderStepContent()}
-          </Box>
-        </Slide>
-
-        {/* Navigation Buttons */}
-        <Slide direction="up" in={animationTrigger} timeout={1400}>
-          <Card
-            sx={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: 4,
-              p: 4,
-            }}
-          >
-            <Box sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: 3
-            }}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <Button
-                disabled={activeStep === 0}
-                onClick={handleBack}
-                startIcon={<ArrowBack />}
+                variant="outlined"
+                onClick={saveDraft}
+                disabled={loading}
+                startIcon={<Save />}
+                size="large"
                 sx={{
-                  color: 'white',
-                  fontWeight: 600,
+                  fontWeight: 'bold',
                   px: 4,
                   py: 1.5,
                   borderRadius: 3,
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  borderWidth: 2,
                   '&:hover': {
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.5)',
-                  },
-                  '&:disabled': {
-                    color: 'rgba(255, 255, 255, 0.3)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderWidth: 2,
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
                   },
                   transition: 'all 0.3s ease',
                 }}
               >
-                Previous
+                Save Draft
               </Button>
 
-              <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+              {activeStep === steps.length - 1 ? (
                 <Button
-                  variant="outlined"
-                  onClick={saveDraft}
+                  variant="contained"
+                  onClick={publishDonation}
                   disabled={loading}
-                  startIcon={<Save />}
+                  startIcon={loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : <Publish />}
+                  size="large"
                   sx={{
-                    color: 'white',
-                    fontWeight: 600,
-                    px: 4,
-                    py: 1.5,
+                    px: 6,
+                    py: 2,
                     borderRadius: 3,
-                    border: '2px solid rgba(255, 193, 7, 0.8)',
+                    background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
+                    fontWeight: 'bold',
+                    fontSize: '1.2rem',
+                    textTransform: 'none',
+                    boxShadow: '0 8px 32px rgba(0, 200, 83, 0.4)',
                     '&:hover': {
-                      background: 'rgba(255, 193, 7, 0.1)',
-                      border: '2px solid #FFC107',
-                      transform: 'translateY(-2px)',
+                      background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 12px 40px rgba(0, 200, 83, 0.6)',
+                    },
+                    '&:disabled': {
+                      background: 'linear-gradient(135deg, #ccc 0%, #999 100%)',
+                      color: 'white',
                     },
                     transition: 'all 0.3s ease',
                   }}
                 >
-                  Save Draft
+                  {loading ? 'Publishing...' : 'Publish Donation'}
                 </Button>
-
-                {activeStep === steps.length - 1 ? (
-                  <Button
-                    variant="contained"
-                    onClick={publishDonation}
-                    disabled={loading}
-                    startIcon={loading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <Publish />}
-                    sx={{
-                      px: 6,
-                      py: 1.5,
-                      borderRadius: 3,
-                      background: 'linear-gradient(135deg, #00C853 0%, #4CAF50 100%)',
-                      fontWeight: 700,
-                      fontSize: '1.1rem',
-                      textTransform: 'none',
-                      boxShadow: '0 8px 32px rgba(0, 200, 83, 0.4)',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #00B248 0%, #43A047 100%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 12px 40px rgba(0, 200, 83, 0.6)',
-                      },
-                      '&:disabled': {
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        color: 'rgba(255, 255, 255, 0.5)',
-                      },
-                      transition: 'all 0.3s ease',
-                    }}
-                  >
-                    {loading ? 'Publishing...' : '🚀 Publish Donation'}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="contained"
-                    onClick={handleNext}
-                    endIcon={<ArrowForward />}
-                    sx={{
-                      px: 6,
-                      py: 1.5,
-                      borderRadius: 3,
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      fontWeight: 700,
-                      fontSize: '1.1rem',
-                      textTransform: 'none',
-                      boxShadow: '0 8px 32px rgba(102, 126, 234, 0.4)',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 12px 40px rgba(102, 126, 234, 0.6)',
-                      },
-                      transition: 'all 0.3s ease',
-                    }}
-                  >
-                    Continue
-                  </Button>
-                )}
-              </Box>
-            </Box>
-          </Card>
-        </Slide>
+              ) : (
+                <Button
+                  variant="contained"
+                  onClick={handleNext}
+                  endIcon={<ArrowForward />}
+                  size="large"
+                  sx={{
+                    px: 6,
+                    py: 2,
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    fontWeight: 'bold',
+                    fontSize: '1.2rem',
+                    textTransform: 'none',
+                    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.4)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 12px 40px rgba(102, 126, 234, 0.6)',
+                    },
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  Continue
+                </Button>
+              )}
+            </Stack>
+          </Box>
+        </Paper>
       </Container>
-
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          33% { transform: translateY(-15px) rotate(1deg); }
-          66% { transform: translateY(8px) rotate(-1deg); }
-        }
-      `}</style>
     </Box>
   );
 };

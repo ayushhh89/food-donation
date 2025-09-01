@@ -1,4 +1,5 @@
-﻿import React, { createContext, useContext, useState, useEffect } from 'react';
+﻿// src/contexts/AuthContext.js - COMPLETE FIXED VERSION
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
@@ -33,6 +34,7 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   // Register new user
   async function register(email, password, userData) {
@@ -78,7 +80,25 @@ export function AuthProvider({ children }) {
       return user;
     } catch (error) {
       console.error('Registration error:', error);
-      toast.error(error.message);
+      
+      // Better error messages
+      let errorMessage = 'Failed to create account. Please try again.';
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'This email address is already in use.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Please enter a valid email address.';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'Password should be at least 6 characters.';
+          break;
+        case 'auth/network-request-failed':
+          errorMessage = 'Network error. Please check your internet connection.';
+          break;
+      }
+      
+      toast.error(errorMessage);
       throw error;
     }
   }
@@ -86,12 +106,39 @@ export function AuthProvider({ children }) {
   // Login user
   async function login(email, password) {
     try {
+      console.log('Attempting login for:', email);
       const { user } = await signInWithEmailAndPassword(auth, email, password);
-      toast.success('Welcome back!');
+      console.log('Firebase auth successful for:', user.uid);
+      
+      // Don't show success toast here - let the auth state change handle it
       return user;
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.message);
+      
+      // Better error messages
+      let errorMessage = 'Failed to login. Please try again.';
+      switch (error.code) {
+        case 'auth/user-not-found':
+          errorMessage = 'No account found with this email address.';
+          break;
+        case 'auth/wrong-password':
+          errorMessage = 'Incorrect password. Please try again.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Please enter a valid email address.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Too many failed attempts. Please try again later.';
+          break;
+        case 'auth/network-request-failed':
+          errorMessage = 'Network error. Please check your internet connection.';
+          break;
+        case 'auth/user-disabled':
+          errorMessage = 'This account has been disabled.';
+          break;
+      }
+      
+      toast.error(errorMessage);
       throw error;
     }
   }
@@ -170,19 +217,65 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Fetch user profile from Firestore
+  // Fetch user profile from Firestore with better error handling
   async function fetchUserProfile(uid) {
+    if (!uid) {
+      console.error('No UID provided to fetchUserProfile');
+      return null;
+    }
+
+    setProfileLoading(true);
+    
     try {
-      const userDoc = await getDoc(doc(db, 'users', uid));
+      console.log('Fetching user profile for:', uid);
+      const userRef = doc(db, 'users', uid);
+      const userDoc = await getDoc(userRef);
+      
       if (userDoc.exists()) {
         const profile = { id: userDoc.id, ...userDoc.data() };
+        console.log('Profile fetched successfully:', profile);
         setUserProfile(profile);
         return profile;
+      } else {
+        console.warn('User profile document does not exist for UID:', uid);
+        
+        // Create a basic profile if it doesn't exist (this can happen with existing users)
+        const basicProfile = {
+          uid: uid,
+          email: auth.currentUser?.email || '',
+          name: auth.currentUser?.displayName || 'User',
+          role: 'receiver', // Default role
+          phone: '',
+          location: null,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          profileComplete: false,
+          isActive: true,
+          organizationType: '',
+          beneficiaryCount: 0,
+          totalReceived: 0,
+          verificationStatus: 'pending'
+        };
+
+        // Create the profile document
+        await setDoc(userRef, basicProfile);
+        console.log('Created basic profile for existing user');
+        
+        setUserProfile(basicProfile);
+        toast.info('Profile created successfully. Please complete your profile.');
+        return basicProfile;
       }
-      return null;
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      
+      // Don't show error toast for permission errors during development
+      if (error.code !== 'permission-denied') {
+        toast.error('Error loading profile. Please try refreshing the page.');
+      }
+      
       return null;
+    } finally {
+      setProfileLoading(false);
     }
   }
 
@@ -214,26 +307,58 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Auth state listener
+  // Auth state listener with better error handling
   useEffect(() => {
+    console.log('Setting up auth state listener');
+    
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setCurrentUser(user);
-        await fetchUserProfile(user.uid);
-      } else {
+      console.log('Auth state changed:', user?.uid || 'No user');
+      
+      setLoading(true);
+      
+      try {
+        if (user) {
+          setCurrentUser(user);
+          console.log('User authenticated, fetching profile...');
+          
+          // Fetch user profile
+          const profile = await fetchUserProfile(user.uid);
+          
+          if (profile) {
+            console.log('Login flow completed successfully');
+            // Only show success message on actual login (not page refresh)
+            if (!currentUser) {
+              toast.success('Welcome back!');
+            }
+          } else {
+            console.warn('Failed to fetch user profile');
+          }
+        } else {
+          console.log('No user, clearing state');
+          setCurrentUser(null);
+          setUserProfile(null);
+        }
+      } catch (error) {
+        console.error('Auth state change error:', error);
         setCurrentUser(null);
         setUserProfile(null);
+      } finally {
+        setLoading(false);
+        console.log('Auth state processing complete');
       }
-      setLoading(false);
     });
 
-    return unsubscribe;
-  }, []);
+    return () => {
+      console.log('Cleaning up auth state listener');
+      unsubscribe();
+    };
+  }, []); // Remove currentUser dependency to avoid infinite loops
 
   const value = {
     currentUser,
     userProfile,
     loading,
+    profileLoading,
     register,
     login,
     logout,
