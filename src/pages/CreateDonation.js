@@ -86,7 +86,9 @@ import {
   deleteObject
 } from 'firebase/storage';
 import { db, storage } from '../services/firebase';
+import { notifyAllReceivers } from '../services/emailService';
 import { toast } from 'react-toastify';
+
 
 const steps = [
   {
@@ -326,42 +328,75 @@ const CreateDonation = () => {
     }
   };
 
-  const publishDonation = async () => {
-    if (!validateStep(activeStep)) return;
+// Add this import at the top of CreateDonation.js (around line 40, with other imports)
 
-    setLoading(true);
-    try {
-      const donationData = {
-        ...formData,
-        donorId: currentUser.uid,
-        donorName: userProfile?.name || currentUser?.displayName || 'Unknown User',
-        donorEmail: userProfile?.email || currentUser?.email || '',
-        donorContact: formData.contactPhone,
-        expiryDate: new Date(`${formData.expiryDate}T${formData.expiryTime}`),
-        status: 'available',
-        isDraft: false,
-        interestedReceivers: [],
-        viewCount: 0,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      };
+// Replace your existing publishDonation function with this updated version
+const publishDonation = async () => {
+  if (!validateStep(activeStep)) return;
 
-      if (isEditing) {
-        await updateDoc(doc(db, 'donations', id), donationData);
-        toast.success('Donation updated successfully!');
-      } else {
-        await addDoc(collection(db, 'donations'), donationData);
-        toast.success('Donation published successfully!');
-      }
+  setLoading(true);
+  try {
+    const donationData = {
+      ...formData,
+      donorId: currentUser.uid,
+      donorName: userProfile?.name || currentUser?.displayName || 'Unknown User',
+      donorEmail: userProfile?.email || currentUser?.email || '',
+      donorContact: formData.contactPhone,
+      expiryDate: new Date(`${formData.expiryDate}T${formData.expiryTime}`),
+      status: 'available',
+      isDraft: false,
+      interestedReceivers: [],
+      viewCount: 0,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
 
-      navigate('/my-donations');
-    } catch (error) {
-      console.error('Error publishing donation:', error);
-      toast.error('Error publishing donation');
-    } finally {
-      setLoading(false);
+    let donationId;
+    
+    if (isEditing) {
+      await updateDoc(doc(db, 'donations', id), donationData);
+      donationId = id;
+      toast.success('Donation updated successfully!');
+    } else {
+      const docRef = await addDoc(collection(db, 'donations'), donationData);
+      donationId = docRef.id;
+      toast.success('Donation published successfully!');
     }
-  };
+
+    // Send email notifications to all receivers
+    try {
+      toast.info('📧 Sending notifications to receivers...', { autoClose: 2000 });
+      
+      const emailData = {
+        ...donationData,
+        id: donationId,
+        expiryDate: new Date(`${formData.expiryDate}T${formData.expiryTime}`)
+      };
+      
+      const emailResult = await notifyAllReceivers(emailData);
+      
+      if (emailResult.sent > 0) {
+        toast.success(`🎉 Donation published and ${emailResult.sent} receivers notified!`);
+      } else if (emailResult.total === 0) {
+        toast.info('Donation published! No receivers to notify at the moment.');
+      } else {
+        toast.warning(`Donation published! ${emailResult.failed}/${emailResult.total} email notifications failed.`);
+      }
+      
+    } catch (emailError) {
+      console.error('Email notification error:', emailError);
+      toast.warning('Donation published successfully, but email notifications failed to send.');
+    }
+
+    navigate('/my-donations');
+    
+  } catch (error) {
+    console.error('Error publishing donation:', error);
+    toast.error('Error publishing donation');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const renderStepContent = () => {
     switch (activeStep) {

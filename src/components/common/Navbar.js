@@ -92,7 +92,7 @@ const Navbar = () => {
     ...(userProfile?.role === 'receiver' ? [
       { text: 'Browse Food', icon: <Search />, path: '/browse' },
       { text: 'My Claims', icon: <LocalDining />, path: '/my-claims' },
-      { text: 'Favorites', icon: <Favorite />, path: '/favorites' }
+      // { text: 'Favorites', icon: <Favorite />, path: '/favorites' }
     ] : []),
     { text: 'Community', icon: <People />, path: '/community' }
   ] : [
