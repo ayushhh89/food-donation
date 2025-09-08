@@ -1,4 +1,4 @@
-
+// src/App.js - Complete version with chat integration
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
@@ -20,7 +20,7 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
-import Dashboard from './pages/dashboard/Dashboard'; // Updated path
+import Dashboard from './pages/dashboard/Dashboard';
 import Profile from './pages/Profile';
 import CreateDonation from './pages/CreateDonation';
 import MyDonations from './pages/MyDonations';
@@ -28,6 +28,9 @@ import MyClaims from './pages/MyClaims';
 import DonationDetails from './pages/DonationDetails';
 import DonationFeed from './components/receiver/DonationFeed';
 import MapContainer from './components/maps/MapContainer';
+
+// Chat Components
+import ChatInterface from './components/chat/ChatInterface';
 
 function App() {
   return (
@@ -58,6 +61,19 @@ function App() {
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              } />
+
+              {/* Chat Routes - Available to all authenticated users */}
+              <Route path="/chat" element={
+                <ProtectedRoute>
+                  <ChatInterface standalone={true} />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/chat/:conversationId" element={
+                <ProtectedRoute>
+                  <ChatInterface standalone={true} />
                 </ProtectedRoute>
               } />
 

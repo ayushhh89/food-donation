@@ -73,6 +73,9 @@ import {
 import { db } from '../services/firebase';
 import { toast } from 'react-toastify';
 import { format, formatDistanceToNow } from 'date-fns';
+import { Chat, ChatBubble } from '@mui/icons-material';
+import { useChatActions } from '../hooks/useChat';
+
 
 const DonationDetails = () => {
   const { id } = useParams();
@@ -87,6 +90,8 @@ const DonationDetails = () => {
   const [shareDialog, setShareDialog] = useState(false);
   const [message, setMessage] = useState('');
   const [animationTrigger, setAnimationTrigger] = useState(false);
+  const { startConversation } = useChatActions();
+  const [startingChat, setStartingChat] = useState(false);
 
   useEffect(() => {
     setAnimationTrigger(true);
@@ -130,6 +135,46 @@ const DonationDetails = () => {
 
     return unsubscribe;
   }, [id, navigate]);
+
+  const handleStartChat = async () => {
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    if (userProfile?.role !== 'receiver') {
+      toast.error('Only food receivers can start chats with donors');
+      return;
+    }
+
+    if (!isInterested) {
+      toast.error('Please show interest in this donation first to start chatting');
+      return;
+    }
+
+    setStartingChat(true);
+    try {
+      const conversationId = await startConversation(
+        donation.id,
+        donation.donorId,
+        currentUser.uid,
+        donation.title
+      );
+
+      // Open chat in a new window or navigate to chat
+      window.open(`/chat/${conversationId}`, '_blank', 'width=800,height=600');
+
+      // Alternative: Navigate to full chat interface
+      // navigate(`/chat/${conversationId}`);
+
+      toast.success('Chat started! You can now message the donor.');
+    } catch (error) {
+      console.error('Error starting chat:', error);
+      toast.error('Failed to start chat. Please try again.');
+    } finally {
+      setStartingChat(false);
+    }
+  };
 
 
 
@@ -888,12 +933,14 @@ const DonationDetails = () => {
                       {claiming ? 'Processing...' : (isInterested ? 'Already Interested ✓' : 'Show Interest')}
                     </Button>
 
-                    {isInterested && donation.donorContact && (
+                    {/* Chat Button - Only show if interested */}
+                    {isInterested && (
                       <Button
                         variant="outlined"
                         fullWidth
-                        startIcon={<Phone />}
-                        onClick={handleContactDonor}
+                        startIcon={startingChat ? <CircularProgress size={20} /> : <Chat />}
+                        onClick={handleStartChat}
+                        disabled={startingChat}
                         sx={{
                           py: 1.5,
                           borderRadius: 3,
@@ -904,17 +951,160 @@ const DonationDetails = () => {
                           '&:hover': {
                             borderColor: '#5a6fd8',
                             background: 'rgba(102, 126, 234, 0.04)',
-                            borderWidth: 2
+                            borderWidth: 2,
+                            transform: 'translateY(-1px)'
+                          },
+                          '&:disabled': {
+                            borderColor: 'rgba(0, 0, 0, 0.12)',
+                            color: 'rgba(0, 0, 0, 0.26)'
+                          },
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        {startingChat ? 'Starting Chat...' : 'Chat with Donor'}
+                      </Button>
+                    )}
+
+                    {/* Contact info - Only show if interested and has contact */}
+                    {isInterested && donation.donorContact && (
+                      <Button
+                        variant="text"
+                        fullWidth
+                        startIcon={<Phone />}
+                        onClick={handleContactDonor}
+                        sx={{
+                          mt: 1,
+                          py: 1.5,
+                          borderRadius: 3,
+                          color: '#667eea',
+                          fontWeight: 600,
+                          '&:hover': {
+                            background: 'rgba(102, 126, 234, 0.04)'
                           }
                         }}
                       >
-                        Contact Donor
+                        View Contact Info
                       </Button>
                     )}
                   </Card>
                 )}
 
                 {/* Enhanced Donor Information */}
+
+                {isOwner && donation.interestedReceivers && donation.interestedReceivers.length > 0 && (
+                  <Card sx={{
+                    p: 4,
+                    mb: 3,
+                    borderRadius: 4,
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                      <Box
+                        sx={{
+                          width: 50,
+                          height: 50,
+                          borderRadius: '50%',
+                          background: 'linear-gradient(135deg, #2196F3 0%, #03DAC6 100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <ChatBubble sx={{ color: 'white', fontSize: 24 }} />
+                      </Box>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 700,
+                          background: 'linear-gradient(135deg, #2196F3 0%, #03DAC6 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text'
+                        }}
+                      >
+                        Interested Receivers
+                      </Typography>
+                    </Box>
+
+                    <Typography variant="body2" sx={{ color: 'rgba(0,0,0,0.7)', mb: 3 }}>
+                      {donation.interestedReceivers.length} receiver(s) are interested in this donation.
+                      You can chat with them to coordinate pickup.
+                    </Typography>
+
+                    <List dense>
+                      {interestedUsers.map((user) => (
+                        <ListItem
+                          key={user.id}
+                          sx={{
+                            px: 0,
+                            py: 1,
+                            border: '1px solid rgba(0,0,0,0.1)',
+                            borderRadius: 2,
+                            mb: 1,
+                            background: 'rgba(33, 150, 243, 0.04)'
+                          }}
+                        >
+                          <ListItemAvatar>
+                            <Avatar
+                              sx={{
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                fontWeight: 700
+                              }}
+                            >
+                              {user.name?.charAt(0)}
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={
+                              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                {user.name}
+                              </Typography>
+                            }
+                            secondary={
+                              <Typography variant="body2" sx={{ color: 'rgba(0,0,0,0.6)' }}>
+                                {user.organizationType || 'Individual Receiver'}
+                              </Typography>
+                            }
+                          />
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<Chat />}
+                            onClick={async () => {
+                              setStartingChat(true);
+                              try {
+                                const conversationId = await startConversation(
+                                  donation.id,
+                                  donation.donorId,
+                                  user.id,
+                                  donation.title
+                                );
+                                window.open(`/chat/${conversationId}`, '_blank', 'width=800,height=600');
+                              } catch (error) {
+                                toast.error('Failed to start chat');
+                              } finally {
+                                setStartingChat(false);
+                              }
+                            }}
+                            sx={{
+                              borderColor: '#2196F3',
+                              color: '#2196F3',
+                              '&:hover': {
+                                borderColor: '#1976D2',
+                                background: 'rgba(33, 150, 243, 0.04)'
+                              }
+                            }}
+                          >
+                            Chat
+                          </Button>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Card>
+                )}
                 <Card sx={{
                   p: 4,
                   mb: 3,

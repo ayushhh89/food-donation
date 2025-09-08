@@ -42,6 +42,10 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { Message } from '@mui/icons-material';
+import { Dialog } from '@mui/material';
+import ChatInterface from '../chat/ChatInterface';
+import { useChat } from '../../hooks/useChat';
 
 const Navbar = () => {
   const { currentUser, userProfile, logout } = useAuth();
@@ -52,10 +56,17 @@ const Navbar = () => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const { totalUnreadCount } = useChat();
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
+  const handleChatToggle = () => {
+    setChatOpen(!chatOpen);
+  };
+
 
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -169,7 +180,7 @@ const Navbar = () => {
                 </Typography>
               </Box>
             </Box>
-            
+
             <IconButton
               onClick={handleMobileMenuToggle}
               sx={{
@@ -241,14 +252,14 @@ const Navbar = () => {
         <Box sx={{ flex: 1, p: 2 }}>
           <List sx={{ p: 0 }}>
             {menuItems.map((item, index) => (
-              <ListItem 
+              <ListItem
                 key={item.text}
                 onClick={() => handleNavigation(item.path)}
                 sx={{
                   mb: 1,
                   borderRadius: 3,
                   cursor: 'pointer',
-                  background: isActive(item.path) 
+                  background: isActive(item.path)
                     ? 'rgba(255, 255, 255, 0.2)'
                     : 'transparent',
                   backdropFilter: isActive(item.path) ? 'blur(10px)' : 'none',
@@ -264,8 +275,8 @@ const Navbar = () => {
                   px: 3
                 }}
               >
-                <ListItemIcon 
-                  sx={{ 
+                <ListItemIcon
+                  sx={{
                     color: 'white',
                     minWidth: 48,
                     '& svg': {
@@ -275,7 +286,7 @@ const Navbar = () => {
                 >
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText 
+                <ListItemText
                   primary={item.text}
                   primaryTypographyProps={{
                     sx: {
@@ -348,10 +359,10 @@ const Navbar = () => {
 
   return (
     <>
-      <AppBar 
-        position="sticky" 
-        elevation={0} 
-        sx={{ 
+      <AppBar
+        position="sticky"
+        elevation={0}
+        sx={{
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(0,0,0,0.05)',
@@ -368,7 +379,7 @@ const Navbar = () => {
               color="inherit"
               aria-label="menu"
               onClick={handleMobileMenuToggle}
-              sx={{ 
+              sx={{
                 mr: 2,
                 width: 48,
                 height: 48,
@@ -388,10 +399,10 @@ const Navbar = () => {
           )}
 
           {/* Logo */}
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
               cursor: 'pointer',
               py: 1,
               px: 2,
@@ -401,7 +412,7 @@ const Navbar = () => {
                 transform: 'scale(1.02)'
               },
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-            }} 
+            }}
             onClick={() => navigate('/')}
           >
             <Box
@@ -433,9 +444,9 @@ const Navbar = () => {
               <Restaurant sx={{ color: 'white', fontSize: 28, zIndex: 1 }} />
             </Box>
             <Box>
-              <Typography 
-                variant="h6" 
-                sx={{ 
+              <Typography
+                variant="h6"
+                sx={{
                   fontWeight: 800,
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   WebkitBackgroundClip: 'text',
@@ -479,7 +490,7 @@ const Navbar = () => {
                     fontWeight: isActive(item.path) ? 700 : 500,
                     fontSize: '0.95rem',
                     textTransform: 'none',
-                    background: isActive(item.path) 
+                    background: isActive(item.path)
                       ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                       : 'transparent',
                     boxShadow: isActive(item.path) ? '0 4px 16px rgba(102, 126, 234, 0.3)' : 'none',
@@ -489,7 +500,7 @@ const Navbar = () => {
                         : 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%)',
                       color: isActive(item.path) ? 'white' : '#667eea',
                       transform: 'translateY(-2px)',
-                      boxShadow: isActive(item.path) 
+                      boxShadow: isActive(item.path)
                         ? '0 8px 32px rgba(102, 126, 234, 0.4)'
                         : '0 4px 16px rgba(102, 126, 234, 0.2)'
                     },
@@ -514,7 +525,7 @@ const Navbar = () => {
                 <Button
                   color="inherit"
                   onClick={() => navigate('/login')}
-                  sx={{ 
+                  sx={{
                     px: 4,
                     py: 1.5,
                     borderRadius: 3,
@@ -563,9 +574,9 @@ const Navbar = () => {
             {currentUser && (
               <Stack direction="row" spacing={2}>
                 {/* Notifications */}
-                <IconButton 
-                  color="inherit" 
-                  sx={{ 
+                <IconButton
+                  color="inherit"
+                  sx={{
                     width: 52,
                     height: 52,
                     borderRadius: 3,
@@ -579,8 +590,8 @@ const Navbar = () => {
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 >
-                  <Badge 
-                    badgeContent={3} 
+                  <Badge
+                    badgeContent={3}
                     sx={{
                       '& .MuiBadge-badge': {
                         background: 'linear-gradient(135deg, #f44336 0%, #ff5722 100%)',
@@ -612,10 +623,10 @@ const Navbar = () => {
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 >
-                  <Avatar 
-                    sx={{ 
-                      width: 42, 
-                      height: 42, 
+                  <Avatar
+                    sx={{
+                      width: 42,
+                      height: 42,
                       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                       fontWeight: 700,
                       fontSize: '1.1rem',
@@ -625,6 +636,32 @@ const Navbar = () => {
                     {userProfile?.name?.charAt(0) || currentUser?.email?.charAt(0)}
                   </Avatar>
                 </IconButton>
+
+                <IconButton
+                  onClick={handleChatToggle}
+                  sx={{
+                    color: 'white',
+                    mr: 1,
+                    '&:hover': {
+                      background: 'rgba(255, 255, 255, 0.1)'
+                    }
+                  }}
+                >
+                  <Badge
+                    badgeContent={totalUnreadCount}
+                    color="error"
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        backgroundColor: '#ff4444',
+                        color: 'white',
+                        fontWeight: 700
+                      }
+                    }}
+                  >
+                    <Message />
+                  </Badge>
+                </IconButton>
+
               </Stack>
             )}
           </Box>
@@ -671,8 +708,8 @@ const Navbar = () => {
         {/* Profile Header */}
         <Box sx={{ p: 3, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
           <Stack direction="row" alignItems="center" spacing={3}>
-            <Avatar 
-              sx={{ 
+            <Avatar
+              sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 width: 56,
                 height: 56,
@@ -684,9 +721,9 @@ const Navbar = () => {
               {userProfile?.name?.charAt(0) || currentUser?.email?.charAt(0)}
             </Avatar>
             <Box>
-              <Typography 
-                variant="h6" 
-                sx={{ 
+              <Typography
+                variant="h6"
+                sx={{
                   fontWeight: 700,
                   color: '#1a1a1a',
                   fontSize: '1.1rem',
@@ -695,9 +732,9 @@ const Navbar = () => {
               >
                 {userProfile?.name || 'User'}
               </Typography>
-              <Typography 
-                variant="body2" 
-                sx={{ 
+              <Typography
+                variant="body2"
+                sx={{
                   color: '#666',
                   fontSize: '0.9rem',
                   fontWeight: 500,
@@ -706,9 +743,9 @@ const Navbar = () => {
               >
                 {userProfile?.role || 'Member'}
               </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{ 
+              <Typography
+                variant="caption"
+                sx={{
                   color: '#888',
                   fontSize: '0.75rem'
                 }}
@@ -721,7 +758,7 @@ const Navbar = () => {
 
         {/* Menu Items */}
         <Box sx={{ py: 2 }}>
-          <MenuItem 
+          <MenuItem
             onClick={() => navigate('/dashboard')}
             sx={{
               mx: 2,
@@ -739,8 +776,8 @@ const Navbar = () => {
             <Dashboard sx={{ mr: 3, color: '#667eea', fontSize: 22 }} />
             <Typography sx={{ fontWeight: 600, fontSize: '0.95rem' }}>Dashboard</Typography>
           </MenuItem>
-          
-          <MenuItem 
+
+          <MenuItem
             onClick={() => navigate('/profile')}
             sx={{
               mx: 2,
@@ -758,10 +795,10 @@ const Navbar = () => {
             <Person sx={{ mr: 3, color: '#667eea', fontSize: 22 }} />
             <Typography sx={{ fontWeight: 600, fontSize: '0.95rem' }}>Profile & Settings</Typography>
           </MenuItem>
-          
+
           <Divider sx={{ mx: 2, my: 2 }} />
-          
-          <MenuItem 
+
+          <MenuItem
             onClick={handleLogout}
             sx={{
               mx: 2,
@@ -780,8 +817,33 @@ const Navbar = () => {
               Logout
             </Typography>
           </MenuItem>
+
+          <MenuItem onClick={handleChatToggle}>
+            <ListItemIcon>
+              <Badge badgeContent={totalUnreadCount} color="error">
+                <Message />
+              </Badge>
+            </ListItemIcon>
+            <ListItemText primary="Messages" />
+          </MenuItem>
         </Box>
       </Menu>
+
+      <Dialog
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            height: '80vh',
+            borderRadius: 3,
+            overflow: 'hidden'
+          }
+        }}
+      >
+        <ChatInterface onClose={() => setChatOpen(false)} />
+      </Dialog>
 
       {/* Mobile Menu */}
       {renderMobileMenu}
