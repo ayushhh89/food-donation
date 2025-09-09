@@ -331,8 +331,14 @@ const CreateDonation = () => {
 // Add this import at the top of CreateDonation.js (around line 40, with other imports)
 
 // Replace your existing publishDonation function with this updated version
+// Updated publishDonation function for CreateDonation.js
+// Replace your existing publishDonation function with this:
+
 const publishDonation = async () => {
   if (!validateStep(activeStep)) return;
+
+  // Prevent multiple submissions
+  if (loading) return;
 
   setLoading(true);
   try {
@@ -363,7 +369,7 @@ const publishDonation = async () => {
       toast.success('Donation published successfully!');
     }
 
-    // Send email notifications to all receivers
+    // Send email notifications to all receivers - with single call protection
     try {
       toast.info('📧 Sending notifications to receivers...', { autoClose: 2000 });
       
@@ -373,14 +379,21 @@ const publishDonation = async () => {
         expiryDate: new Date(`${formData.expiryDate}T${formData.expiryTime}`)
       };
       
+      // Add a small delay to ensure document is saved before sending emails
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const emailResult = await notifyAllReceivers(emailData);
       
-      if (emailResult.sent > 0) {
-        toast.success(`🎉 Donation published and ${emailResult.sent} receivers notified!`);
-      } else if (emailResult.total === 0) {
-        toast.info('Donation published! No receivers to notify at the moment.');
+      if (emailResult.success) {
+        if (emailResult.sent > 0) {
+          toast.success(`🎉 Donation published and ${emailResult.sent} receivers notified!`);
+        } else if (emailResult.total === 0) {
+          toast.info('Donation published! No receivers to notify at the moment.');
+        } else {
+          toast.warning(`Donation published! ${emailResult.failed}/${emailResult.total} email notifications failed.`);
+        }
       } else {
-        toast.warning(`Donation published! ${emailResult.failed}/${emailResult.total} email notifications failed.`);
+        toast.warning('Donation published successfully, but email notifications were skipped (duplicate process detected).');
       }
       
     } catch (emailError) {
@@ -388,6 +401,7 @@ const publishDonation = async () => {
       toast.warning('Donation published successfully, but email notifications failed to send.');
     }
 
+    // Navigate after everything is complete
     navigate('/my-donations');
     
   } catch (error) {
