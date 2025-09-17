@@ -105,10 +105,10 @@ const Navbar = () => {
       { text: 'My Claims', icon: <LocalDining />, path: '/my-claims' },
       // { text: 'Favorites', icon: <Favorite />, path: '/favorites' }
     ] : []),
-    { text: 'Community', icon: <People />, path: '/community' }
+    // { text: 'Community', icon: <People />, path: '/community' }
   ] : [
-    { text: 'Browse Food', icon: <Search />, path: '/browse' },
-    { text: 'Community', icon: <People />, path: '/community' }
+    // { text: 'Browse Food', icon: <Search />, path: '/browse' },
+    // { text: 'Community', icon: <People />, path: '/community' }
   ];
 
   const renderMobileMenu = (

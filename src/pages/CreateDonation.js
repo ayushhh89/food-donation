@@ -88,6 +88,7 @@ import {
 import { db, storage } from '../services/firebase';
 import { notifyAllReceivers } from '../services/emailService';
 import { toast } from 'react-toastify';
+import SocialShareButton from '../components/sharing/SocialShareButton';
 
 
 const steps = [
@@ -328,89 +329,130 @@ const CreateDonation = () => {
     }
   };
 
-// Add this import at the top of CreateDonation.js (around line 40, with other imports)
+  // Add this import at the top of CreateDonation.js (around line 40, with other imports)
 
-// Replace your existing publishDonation function with this updated version
-// Updated publishDonation function for CreateDonation.js
-// Replace your existing publishDonation function with this:
+  // Replace your existing publishDonation function with this updated version
+  // Updated publishDonation function for CreateDonation.js
+  // Replace your existing publishDonation function with this:
 
-const publishDonation = async () => {
-  if (!validateStep(activeStep)) return;
+  const publishDonation = async () => {
+    if (!validateStep(activeStep)) return;
 
-  // Prevent multiple submissions
-  if (loading) return;
+    // Prevent multiple submissions
+    if (loading) return;
 
-  setLoading(true);
-  try {
-    const donationData = {
-      ...formData,
-      donorId: currentUser.uid,
-      donorName: userProfile?.name || currentUser?.displayName || 'Unknown User',
-      donorEmail: userProfile?.email || currentUser?.email || '',
-      donorContact: formData.contactPhone,
-      expiryDate: new Date(`${formData.expiryDate}T${formData.expiryTime}`),
-      status: 'available',
-      isDraft: false,
-      interestedReceivers: [],
-      viewCount: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    };
-
-    let donationId;
-    
-    if (isEditing) {
-      await updateDoc(doc(db, 'donations', id), donationData);
-      donationId = id;
-      toast.success('Donation updated successfully!');
-    } else {
-      const docRef = await addDoc(collection(db, 'donations'), donationData);
-      donationId = docRef.id;
-      toast.success('Donation published successfully!');
-    }
-
-    // Send email notifications to all receivers - with single call protection
+    setLoading(true);
     try {
-      toast.info('📧 Sending notifications to receivers...', { autoClose: 2000 });
-      
-      const emailData = {
-        ...donationData,
-        id: donationId,
-        expiryDate: new Date(`${formData.expiryDate}T${formData.expiryTime}`)
+      const donationData = {
+        ...formData,
+        donorId: currentUser.uid,
+        donorName: userProfile?.name || currentUser?.displayName || 'Unknown User',
+        donorEmail: userProfile?.email || currentUser?.email || '',
+        donorContact: formData.contactPhone,
+        expiryDate: new Date(`${formData.expiryDate}T${formData.expiryTime}`),
+        status: 'available',
+        isDraft: false,
+        interestedReceivers: [],
+        viewCount: 0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       };
-      
-      // Add a small delay to ensure document is saved before sending emails
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const emailResult = await notifyAllReceivers(emailData);
-      
-      if (emailResult.success) {
-        if (emailResult.sent > 0) {
-          toast.success(`🎉 Donation published and ${emailResult.sent} receivers notified!`);
-        } else if (emailResult.total === 0) {
-          toast.info('Donation published! No receivers to notify at the moment.');
-        } else {
-          toast.warning(`Donation published! ${emailResult.failed}/${emailResult.total} email notifications failed.`);
-        }
-      } else {
-        toast.warning('Donation published successfully, but email notifications were skipped (duplicate process detected).');
-      }
-      
-    } catch (emailError) {
-      console.error('Email notification error:', emailError);
-      toast.warning('Donation published successfully, but email notifications failed to send.');
-    }
 
-    // Navigate after everything is complete
-    navigate('/my-donations');
-    
-  } catch (error) {
-    console.error('Error publishing donation:', error);
-    toast.error('Error publishing donation');
-  } finally {
-    setLoading(false);
-  }
-};
+      let donationId;
+
+      // After donation is published successfully, replace this part:
+      if (isEditing) {
+        await updateDoc(doc(db, 'donations', id), donationData);
+        donationId = id;
+        toast.success('Donation updated successfully!');
+      } else {
+        const docRef = await addDoc(collection(db, 'donations'), donationData);
+        donationId = docRef.id;
+
+        // ENHANCED SUCCESS MESSAGE WITH SOCIAL SHARING
+        const donationData = {
+          id: donationId,
+          title: formData.title,
+          category: formData.category,
+          quantity: formData.quantity,
+          unit: formData.unit,
+          images: formData.images
+        };
+
+        // Custom success toast with share option
+        toast.success(
+          <Box>
+            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+              🎉 Donation published successfully!
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Share with your community to reach more people
+            </Typography>
+            <SocialShareButton
+              type="donation"
+              data={donationData}
+              variant="button"
+              showLabel
+              size="small"
+              platforms={['facebook', 'twitter', 'whatsapp', 'clipboard']}
+              sx={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+                }
+              }}
+            />
+          </Box>,
+          {
+            autoClose: false, // Don't auto close so user can share
+            closeButton: true
+          }
+        );
+      }
+
+      // Send email notifications to all receivers - with single call protection
+      try {
+        toast.info('📧 Sending notifications to receivers...', { autoClose: 2000 });
+
+        const emailData = {
+          ...donationData,
+          id: donationId,
+          expiryDate: new Date(`${formData.expiryDate}T${formData.expiryTime}`)
+        };
+
+        // Add a small delay to ensure document is saved before sending emails
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const emailResult = await notifyAllReceivers(emailData);
+
+        if (emailResult.success) {
+          if (emailResult.sent > 0) {
+            toast.success(`🎉 Donation published and ${emailResult.sent} receivers notified!`);
+          } else if (emailResult.total === 0) {
+            toast.info('Donation published! No receivers to notify at the moment.');
+          } else {
+            toast.warning(`Donation published! ${emailResult.failed}/${emailResult.total} email notifications failed.`);
+          }
+        } else {
+          toast.warning('Donation published successfully, but email notifications were skipped (duplicate process detected).');
+        }
+
+      } catch (emailError) {
+        console.error('Email notification error:', emailError);
+        toast.warning('Donation published successfully, but email notifications failed to send.');
+      }
+
+      // Navigate after everything is complete
+      navigate('/my-donations');
+
+    } catch (error) {
+      console.error('Error publishing donation:', error);
+      toast.error('Error publishing donation');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderStepContent = () => {
     switch (activeStep) {
