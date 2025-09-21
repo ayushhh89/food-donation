@@ -538,6 +538,7 @@ const Dashboard = () => {
         }
       }}
       onClick={() => setShowGamificationDialog(true)}
+      data-testid="achievements-card"
     >
       <Stack direction="row" alignItems="center" spacing={2} mb={2}>
         <Avatar sx={{ background: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
@@ -670,6 +671,7 @@ const Dashboard = () => {
         }
       }}
       onClick={() => setShowTimelineDialog(true)}
+      data-testid="journey-card"
     >
       <Stack direction="row" alignItems="center" spacing={2}>
         <Avatar sx={{ background: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
@@ -756,11 +758,11 @@ const Dashboard = () => {
         <Button
           fullWidth
           variant="outlined"
-          // Replace the entire onClick handler:
           onClick={() => {
-            setActiveTab(2); // Set to leaderboard tab
+            setActiveTab(2);
             setShowGamificationDialog(true);
-          }} sx={{
+          }}
+          sx={{
             borderRadius: 2,
             textTransform: 'none',
             fontWeight: 600
@@ -1124,7 +1126,6 @@ const Dashboard = () => {
             />
           </Grid>
         </Grid>
-
 
         {/* New Feature Cards Section */}
         <Grid container spacing={4} sx={{ mb: 6 }}>
@@ -1861,6 +1862,7 @@ const Dashboard = () => {
 
       {/* Floating Action Button */}
       <Fab
+        aria-label="add"
         sx={{
           position: 'fixed',
           bottom: 40,
