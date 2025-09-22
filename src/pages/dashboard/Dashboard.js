@@ -1522,6 +1522,7 @@ const Dashboard = () => {
 
       {/* Enhanced Floating Action Button */}
       <Fab
+        aria-label="add"
         sx={{
           position: 'fixed',
           bottom: 40,
