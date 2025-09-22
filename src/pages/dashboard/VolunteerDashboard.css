@@ -1,0 +1,31 @@
+.volunteer-dashboard {
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4ecf7 100%);
+  min-height: 100vh;
+}
+
+.vd-title {
+  font-weight: 700;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.vd-subtitle {
+  text-align: center;
+  margin-top: 0.5rem;
+  color: #444;
+}
+
+.vd-card {
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+  background: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vd-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
+}

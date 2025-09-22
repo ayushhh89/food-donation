@@ -70,6 +70,14 @@ export function AuthProvider({ children }) {
           beneficiaryCount: userData.beneficiaryCount || 0,
           totalReceived: 0,
           verificationStatus: 'pending'
+        }),
+        ...(userData.role === 'volunteer' && {
+          expertiseArea: userData.expertiseArea || '',
+          assignedDonors: [],
+          assignedReceivers: [],
+          volunteersDone: 0,
+          approvalStatus: 'pending',
+          isActive: 0
         })
       };
 
@@ -289,6 +297,10 @@ export function AuthProvider({ children }) {
     return userProfile?.role === 'donor';
   }
 
+  function isVolunteer() {
+    return userProfile?.role === 'volunteer';
+  }
+
   // Check if user is receiver
   function isReceiver() {
     return userProfile?.role === 'receiver';
@@ -368,6 +380,7 @@ export function AuthProvider({ children }) {
     hasRole,
     isDonor,
     isReceiver,
+    isVolunteer,
     updateUserLocation
   };
 

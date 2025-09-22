@@ -81,7 +81,11 @@ const Register = () => {
         role: formData.role,
         phone: formData.phone
       });
-      navigate('/dashboard');
+      if (formData.role === 'volunteer') {
+        navigate('/volunteer-dashboard');
+      } else {
+          navigate('/dashboard');
+      } 
     } catch (error) {
       console.error("Signup failed:", error.code, error.message);
       if (error.code === 'auth/email-already-in-use') {
@@ -348,6 +352,7 @@ const Register = () => {
                     >
                       <MenuItem value="donor">🤝 Food Donor</MenuItem>
                       <MenuItem value="receiver">🍽️ Food Receiver</MenuItem>
+                      <MenuItem value="volunteer">🚚 Volunteer</MenuItem>
                     </Select>
                   </FormControl>
 

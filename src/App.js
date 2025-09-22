@@ -28,6 +28,7 @@ import MyClaims from './pages/MyClaims';
 import DonationDetails from './pages/DonationDetails';
 import DonationFeed from './components/receiver/DonationFeed';
 import MapContainer from './components/maps/MapContainer';
+import VolunteerDashboard from './pages/dashboard/VolunteerDashboard';
 
 // Chat Components
 import ChatInterface from './components/chat/ChatInterface';
@@ -61,6 +62,12 @@ function App() {
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/volunteer-dashboard" element={
+                <ProtectedRoute requireRole="volunteer">
+                  <VolunteerDashboard />
                 </ProtectedRoute>
               } />
 
