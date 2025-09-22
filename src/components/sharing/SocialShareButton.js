@@ -21,7 +21,7 @@ import {
   Alert,
   Avatar,
   Chip,
-    Grid
+  Grid
 } from '@mui/material';
 import {
   ShareOutlined,
@@ -35,7 +35,7 @@ import {
   QrCodeOutlined,
   CloseOutlined
 } from '@mui/icons-material';
-import { useSocialSharing } from '../../services/socialSharingService';
+import { useEnhancedSocialSharing } from '../../services/socialSharingService';
 
 // Add these helper functions after imports:
 const getPlatformIcon = (platform) => {
@@ -73,10 +73,10 @@ const getPlatformName = (platform) => {
   return names[platform] || platform;
 };
 
-const SocialShareButton = ({ 
-  type, 
-  data, 
-  variant = 'icon', 
+const SocialShareButton = ({
+  type,
+  data,
+  variant = 'icon',
   size = 'medium',
   showLabel = false,
   platforms = ['all'] // or specify: ['facebook', 'twitter', 'whatsapp', 'clipboard']
@@ -85,9 +85,8 @@ const SocialShareButton = ({
   const [previewDialog, setPreviewDialog] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  
-  const { share, generateImage, downloadImage, isSharing, platformAvailability } = useSocialSharing();
-  
+
+  const { shareWithCard, generatePreviewCard, isSharing, isGeneratingCard, service } = useEnhancedSocialSharing();
   const handleClick = (event) => {
     if (platforms.length === 1 && platforms[0] !== 'all') {
       // Direct share for single platform
@@ -139,8 +138,8 @@ const SocialShareButton = ({
 
   const handleShare = async (platform) => {
     try {
-      const result = await share(type, data, { platform });
-      
+      const result = await shareWithCard(type, data, platform);
+
       if (result.success) {
         let message = 'Shared successfully!';
         switch (result.method) {
@@ -167,47 +166,43 @@ const SocialShareButton = ({
             message = 'Opened Telegram';
             break;
         }
-        
+
         setSnackbar({ open: true, message, severity: 'success' });
       } else {
-        setSnackbar({ 
-          open: true, 
-          message: result.error || 'Share failed', 
-          severity: 'error' 
+        setSnackbar({
+          open: true,
+          message: result.error || 'Share failed',
+          severity: 'error'
         });
       }
     } catch (error) {
-      setSnackbar({ 
-        open: true, 
-        message: 'Share failed', 
-        severity: 'error' 
+      setSnackbar({
+        open: true,
+        message: 'Share failed',
+        severity: 'error'
       });
     }
-    
+
     handleClose();
   };
 
   const handleGenerateImage = async () => {
     try {
-      const imageData = await generateImage('share-preview', {
-        width: 1200,
-        height: 630,
-        backgroundColor: '#ffffff'
-      });
-      
+      const imageData = await generatePreviewCard(type, data);
+
       if (imageData) {
-        downloadImage(imageData, `foodshare-${type}-${Date.now()}.png`);
-        setSnackbar({ 
-          open: true, 
-          message: 'Image downloaded successfully!', 
-          severity: 'success' 
+        service.downloadImage(imageData, `foodshare-${type}-${Date.now()}.png`);
+        setSnackbar({
+          open: true,
+          message: 'Image downloaded successfully!',
+          severity: 'success'
         });
       }
     } catch (error) {
-      setSnackbar({ 
-        open: true, 
-        message: 'Failed to generate image', 
-        severity: 'error' 
+      setSnackbar({
+        open: true,
+        message: 'Failed to generate image',
+        severity: 'error'
       });
     }
   };
@@ -248,9 +243,9 @@ const SocialShareButton = ({
   //   return names[platform] || platform;
   // };
 
-  const availablePlatforms = platforms[0] === 'all' 
+  const availablePlatforms = platforms[0] === 'all'
     ? ['facebook', 'twitter', 'linkedin', 'whatsapp', 'telegram', 'clipboard']
-    : platforms.filter(platform => platformAvailability[platform]);
+    : platforms;
 
   const ShareButton = ({ children, ...props }) => {
     if (variant === 'button') {
@@ -266,7 +261,7 @@ const SocialShareButton = ({
         </Button>
       );
     }
-    
+
     return (
       <Tooltip title={showLabel ? undefined : 'Share'}>
         <IconButton
@@ -507,8 +502,8 @@ const SocialShareButton = ({
         onClose={() => setSnackbar({ ...snackbar, open: false })}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={() => setSnackbar({ ...snackbar, open: false })} 
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
           sx={{ borderRadius: 2 }}
         >
@@ -520,12 +515,12 @@ const SocialShareButton = ({
 };
 
 // Standalone Share Dialog Component
-export const SocialShareDialog = ({ 
-  open, 
-  onClose, 
-  type, 
-  data, 
-  title = "Share" 
+export const SocialShareDialog = ({
+  open,
+  onClose,
+  type,
+  data,
+  title = "Share"
 }) => {
   return (
     <Dialog

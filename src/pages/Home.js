@@ -397,7 +397,7 @@ const HomePage = () => {
                       Start Sharing Today
                     </Button>
 
-                    <Button
+                    {/* <Button
                       variant="outlined"
                       size="large"
                       startIcon={<PlayArrow />}
@@ -421,7 +421,7 @@ const HomePage = () => {
                       }}
                     >
                       See How It Works
-                    </Button>
+                    </Button> */}
                   </Stack>
 
                   {/* Trust Indicators */}
