@@ -574,7 +574,7 @@ const Navbar = () => {
             {currentUser && (
               <Stack direction="row" spacing={2}>
                 {/* Notifications */}
-                <IconButton
+                {/* <IconButton
                   color="inherit"
                   sx={{
                     width: 52,
@@ -604,7 +604,7 @@ const Navbar = () => {
                   >
                     <Notifications sx={{ color: '#667eea', fontSize: 24 }} />
                   </Badge>
-                </IconButton>
+                </IconButton> */}
 
                 {/* Profile Menu */}
                 <IconButton

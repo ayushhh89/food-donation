@@ -706,7 +706,7 @@ const DonationFeed = () => {
               
               {filteredDonations.length > 0 && (
                 <Stack direction="row" spacing={2}>
-                  <Button
+                  {/* <Button
                     variant="outlined"
                     size="small"
                     startIcon={<MapRounded />}
@@ -721,8 +721,8 @@ const DonationFeed = () => {
                     }}
                   >
                     Map View
-                  </Button>
-                  <Button
+                  </Button> */}
+                  {/* <Button
                     variant="outlined"
                     size="small"
                     startIcon={<EmojiEvents />}
@@ -736,7 +736,7 @@ const DonationFeed = () => {
                     }}
                   >
                     Top Picks
-                  </Button>
+                  </Button> */}
                 </Stack>
               )}
             </Stack>

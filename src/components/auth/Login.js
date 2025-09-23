@@ -1,4 +1,4 @@
-// src/components/auth/Login.js - SIMPLIFIED FIXED VERSION
+// src/components/auth/Login.js - UPDATED WITH ADMIN ROUTING
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -25,13 +25,14 @@ import {
   PersonAdd,
   Security,
   Verified,
-  TrendingUp
+  TrendingUp,
+  AdminPanelSettings
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Login = () => {
-  const { login, currentUser, userProfile, loading: authLoading } = useAuth();
+  const { login, currentUser, userProfile, loading: authLoading, getDashboardRoute } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -43,15 +44,22 @@ const Login = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const from = location.state?.from?.pathname || '/dashboard';
+  const from = location.state?.from?.pathname || getDashboardRoute();
 
-  // Simple redirect when user is fully authenticated
+  // Enhanced redirect when user is fully authenticated with role-based routing
   useEffect(() => {
     if (currentUser && userProfile && !authLoading) {
-      console.log('User fully authenticated, redirecting to:', from);
-      navigate(from, { replace: true });
+      const dashboardRoute = getDashboardRoute();
+      console.log(`User authenticated with role: ${userProfile.role}, redirecting to: ${dashboardRoute}`);
+      
+      // Check if account is active
+      if (userProfile.status === 'suspended') {
+        return; // AuthContext will handle logout
+      }
+      
+      navigate(dashboardRoute, { replace: true });
     }
-  }, [currentUser, userProfile, authLoading, navigate, from]);
+  }, [currentUser, userProfile, authLoading, navigate, getDashboardRoute]);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -92,21 +100,34 @@ const Login = () => {
 
   // Show loading if auth is still processing
   if (authLoading && currentUser) {
+    const role = userProfile?.role;
+    const isAdmin = role === 'admin';
+    
     return (
       <Box
         sx={{
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: isAdmin 
+            ? 'linear-gradient(135deg, #f44336 0%, #ff5722 100%)'
+            : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}
       >
         <Card sx={{ p: 4, textAlign: 'center', minWidth: 300 }}>
-          <CircularProgress size={50} sx={{ mb: 3 }} />
-          <Typography variant="h6">Loading your dashboard...</Typography>
+          <CircularProgress 
+            size={50} 
+            sx={{ 
+              mb: 3,
+              color: isAdmin ? '#f44336' : '#667eea'
+            }} 
+          />
+          <Typography variant="h6">
+            {isAdmin ? 'Loading Admin Console...' : 'Loading your dashboard...'}
+          </Typography>
           <Typography variant="body2" color="text.secondary">
-            Setting up your account
+            {isAdmin ? 'Accessing administrative controls' : 'Setting up your account'}
           </Typography>
         </Card>
       </Box>
@@ -234,7 +255,8 @@ const Login = () => {
                 {[
                   { icon: <Security />, text: 'Secure Login' },
                   { icon: <Verified />, text: 'Verified Platform' },
-                  { icon: <TrendingUp />, text: '850+ Members' }
+                  { icon: <TrendingUp />, text: '850+ Members' },
+                  { icon: <AdminPanelSettings />, text: 'Admin Access' }
                 ].map((item, idx) => (
                   <Chip
                     key={idx}
@@ -463,6 +485,22 @@ const Login = () => {
                   Create New Account
                 </Button>
               </Box>
+            </Box>
+
+            {/* Admin Access Notice */}
+            <Box
+              sx={{
+                mt: 4,
+                p: 2,
+                background: 'rgba(244, 67, 54, 0.1)',
+                border: '1px solid rgba(244, 67, 54, 0.2)',
+                borderRadius: 3,
+                textAlign: 'center'
+              }}
+            >
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                Admin users will be automatically redirected to the admin console
+              </Typography>
             </Box>
           </CardContent>
         </Card>

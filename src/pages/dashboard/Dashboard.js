@@ -1,4 +1,4 @@
-﻿// src/pages/EnhancedDashboard.js
+﻿// src/pages/EnhancedDashboard.js - NAVIGATION FIXED VERSION
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -95,7 +95,7 @@ import {
   Nature
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   collection,
   query,
@@ -106,14 +106,13 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import { format, isToday, isYesterday, differenceInDays, formatDistanceToNow} from 'date-fns';
-import { useEnhancedSocialSharing } from '../../services/socialSharingService';
 
 const Dashboard = () => {
   const { currentUser, userProfile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { shareWithCard } = useEnhancedSocialSharing();
 
   const [loading, setLoading] = useState(true);
   const [animationTrigger, setAnimationTrigger] = useState(false);
@@ -136,14 +135,44 @@ const Dashboard = () => {
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [showInsightsDialog, setShowInsightsDialog] = useState(false);
 
+  // Safe share function
+  const safeShare = (type, data) => {
+    try {
+      const shareUrl = window.location.origin;
+      const shareText = `Check out my impact on FoodShare! ${JSON.stringify(data)}`;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: 'My FoodShare Impact',
+          text: shareText,
+          url: shareUrl
+        });
+      } else {
+        navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+        alert('Impact shared to clipboard!');
+      }
+    } catch (error) {
+      console.error('Share error:', error);
+      alert('Sharing not supported in this browser');
+    }
+  };
+
   useEffect(() => {
     setAnimationTrigger(true);
     
-    if (!currentUser) return;
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    // Redirect admin users to admin dashboard
+    if (userProfile?.role === 'admin') {
+      navigate('/admin/dashboard');
+      return;
+    }
 
     const fetchDashboardData = async () => {
       try {
-        // Simulate enhanced data fetching
         const donationsQuery = query(
           collection(db, 'donations'),
           where(userProfile?.role === 'donor' ? 'donorId' : 'interestedReceivers', 
@@ -161,7 +190,6 @@ const Dashboard = () => {
             expiryDate: doc.data().expiryDate?.toDate() || new Date()
           }));
 
-          // Calculate enhanced stats
           const enhancedStats = {
             totalDonations: donations.length,
             activeDonations: donations.filter(d => d.status === 'available').length,
@@ -176,7 +204,6 @@ const Dashboard = () => {
           setStats(enhancedStats);
           setRecentActivity(donations.slice(0, 5));
 
-          // Find expiring donations
           if (userProfile?.role === 'donor') {
             const now = new Date();
             const expiringSoon = donations.filter(donation => {
@@ -189,11 +216,14 @@ const Dashboard = () => {
           }
 
           setLoading(false);
+        }, (error) => {
+          console.error('Error fetching donations:', error);
+          setLoading(false);
         });
 
         return unsubscribe;
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        console.error('Error setting up dashboard data:', error);
         setLoading(false);
       }
     };
@@ -219,7 +249,7 @@ const Dashboard = () => {
       { id: 1, type: 'milestone', content: 'Community reached 1000 donations!', time: new Date() },
       { id: 2, type: 'tip', content: 'Pro tip: Take good photos to attract more interest', time: new Date() }
     ]);
-  }, [currentUser, userProfile]);
+  }, [currentUser, userProfile, navigate]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -465,7 +495,7 @@ const Dashboard = () => {
                   size="small"
                   onClick={(e) => {
                     e.stopPropagation();
-                    shareWithCard('donation', item);
+                    safeShare('donation', item);
                   }}
                   sx={{
                     minWidth: 'auto',
@@ -591,7 +621,7 @@ const Dashboard = () => {
           borderRadius: 4,
           cursor: 'pointer',
           '&:hover': {
-            transform: 'scale(1.02)',
+            transform : 'scale(1.02)',
             boxShadow: '0 12px 40px rgba(124, 58, 237, 0.4)'
           },
           transition: 'all 0.3s ease'
@@ -790,7 +820,7 @@ const Dashboard = () => {
 
                       <Button
                         variant="contained"
-                        onClick={() => shareWithCard('impact', {
+                        onClick={() => safeShare('impact', {
                           impactData: stats,
                           userName: userProfile?.name || 'FoodShare User'
                         })}
@@ -1027,7 +1057,7 @@ const Dashboard = () => {
                   boxShadow: '0 12px 40px rgba(255, 107, 53, 0.4)'
                 }
               }}
-              onClick={() => navigate('/ngo-partnership')}
+              onClick={() => navigate('/ngo')}
             >
               <CardContent sx={{ p: 3 }}>
                 <Stack direction="row" alignItems="center" spacing={2} mb={2}>
@@ -1114,7 +1144,7 @@ const Dashboard = () => {
 
                   <Button
                     endIcon={<ArrowForward />}
-                    onClick={() => navigate(userProfile?.role === 'donor' ? '/my-donations' : '/my-claims')}
+                    onClick={() => navigate(userProfile?.role === 'donor' ? '/my-donations' : '/browse')}
                     sx={{
                       color: 'white',
                       fontWeight: 700,
@@ -1366,7 +1396,8 @@ const Dashboard = () => {
                         fullWidth
                         variant="outlined"
                         startIcon={<Handshake />}
-                        onClick={() => navigate('/ngo-partnership')}
+                        onClick={() => navigate('/ngo')}
+                        
                         sx={{
                           py: 3,
                           borderRadius: 4,
@@ -1467,7 +1498,7 @@ const Dashboard = () => {
                         fullWidth
                         variant="outlined"
                         startIcon={<Handshake />}
-                        onClick={() => navigate('/ngo-partnership')}
+                        onClick={() => navigate('/ngo')}
                         sx={{
                           py: 3,
                           borderRadius: 4,

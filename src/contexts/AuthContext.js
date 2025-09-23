@@ -1,4 +1,4 @@
-﻿// src/contexts/AuthContext.js - COMPLETE FIXED VERSION
+﻿// src/contexts/AuthContext.js - UPDATED WITH ADMIN SUPPORT
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   createUserWithEmailAndPassword, 
@@ -51,13 +51,16 @@ export function AuthProvider({ children }) {
         uid: user.uid,
         email: user.email,
         name: userData.name,
-        role: userData.role, // 'donor' or 'receiver'
+        role: userData.role, // 'donor', 'receiver', 'volunteer', or 'admin'
         phone: userData.phone || '',
         location: userData.location || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         profileComplete: false,
         isActive: true,
+        status: 'active', // 'active', 'suspended', 'pending'
+        verificationStatus: 'unverified', // 'unverified', 'pending', 'verified'
+        
         // Role-specific fields
         ...(userData.role === 'donor' && {
           organization: userData.organization || '',
@@ -78,6 +81,11 @@ export function AuthProvider({ children }) {
           volunteersDone: 0,
           approvalStatus: 'pending',
           isActive: 0
+        }),
+        ...(userData.role === 'admin' && {
+          permissions: ['manage_users', 'manage_donations', 'manage_reports', 'view_analytics'],
+          lastLoginAt: serverTimestamp(),
+          adminLevel: 'super' // 'super', 'moderator'
         })
       };
 
@@ -111,14 +119,13 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Login user
+  // Login user with enhanced role-based routing
   async function login(email, password) {
     try {
       console.log('Attempting login for:', email);
       const { user } = await signInWithEmailAndPassword(auth, email, password);
       console.log('Firebase auth successful for:', user.uid);
       
-      // Don't show success toast here - let the auth state change handle it
       return user;
     } catch (error) {
       console.error('Login error:', error);
@@ -143,6 +150,9 @@ export function AuthProvider({ children }) {
           break;
         case 'auth/user-disabled':
           errorMessage = 'This account has been disabled.';
+          break;
+        case 'auth/invalid-credential':
+          errorMessage = 'Invalid email or password.';
           break;
       }
       
@@ -243,6 +253,14 @@ export function AuthProvider({ children }) {
         const profile = { id: userDoc.id, ...userDoc.data() };
         console.log('Profile fetched successfully:', profile);
         setUserProfile(profile);
+        
+        // Update last login for admin users
+        if (profile.role === 'admin') {
+          await updateDoc(userRef, {
+            lastLoginAt: serverTimestamp()
+          });
+        }
+        
         return profile;
       } else {
         console.warn('User profile document does not exist for UID:', uid);
@@ -259,10 +277,11 @@ export function AuthProvider({ children }) {
           updatedAt: serverTimestamp(),
           profileComplete: false,
           isActive: true,
+          status: 'active',
+          verificationStatus: 'unverified',
           organizationType: '',
           beneficiaryCount: 0,
-          totalReceived: 0,
-          verificationStatus: 'pending'
+          totalReceived: 0
         };
 
         // Create the profile document
@@ -292,11 +311,17 @@ export function AuthProvider({ children }) {
     return userProfile?.role === requiredRole;
   }
 
+  // Check if user is admin
+  function isAdmin() {
+    return userProfile?.role === 'admin';
+  }
+
   // Check if user is donor
   function isDonor() {
     return userProfile?.role === 'donor';
   }
 
+  // Check if user is volunteer
   function isVolunteer() {
     return userProfile?.role === 'volunteer';
   }
@@ -304,6 +329,33 @@ export function AuthProvider({ children }) {
   // Check if user is receiver
   function isReceiver() {
     return userProfile?.role === 'receiver';
+  }
+
+  // Get dashboard route based on user role
+  function getDashboardRoute() {
+    if (!userProfile) return '/login';
+    
+    switch (userProfile.role) {
+      case 'admin':
+        return '/admin-dashboard';
+      case 'volunteer':
+        return '/volunteer-dashboard';
+      case 'donor':
+      case 'receiver':
+      default:
+        return '/dashboard';
+    }
+  }
+
+  // Check if user has admin permissions
+  function hasAdminPermission(permission) {
+    if (!isAdmin()) return false;
+    return userProfile?.permissions?.includes(permission) || false;
+  }
+
+  // Check if account is active and not suspended
+  function isAccountActive() {
+    return userProfile?.status === 'active' && userProfile?.isActive !== false;
   }
 
   // Update user location
@@ -319,7 +371,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Auth state listener with better error handling
+  // Auth state listener with better error handling and role-based routing
   useEffect(() => {
     console.log('Setting up auth state listener');
     
@@ -337,10 +389,22 @@ export function AuthProvider({ children }) {
           const profile = await fetchUserProfile(user.uid);
           
           if (profile) {
-            console.log('Login flow completed successfully');
+            console.log('Login flow completed successfully for role:', profile.role);
+            
+            // Check if account is suspended
+            if (profile.status === 'suspended') {
+              toast.error('Your account has been suspended. Please contact support.');
+              await signOut(auth);
+              return;
+            }
+            
             // Only show success message on actual login (not page refresh)
             if (!currentUser) {
-              toast.success('Welcome back!');
+              if (profile.role === 'admin') {
+                toast.success('Welcome, Admin!');
+              } else {
+                toast.success('Welcome back!');
+              }
             }
           } else {
             console.warn('Failed to fetch user profile');
@@ -354,6 +418,7 @@ export function AuthProvider({ children }) {
         console.error('Auth state change error:', error);
         setCurrentUser(null);
         setUserProfile(null);
+        toast.error('Authentication error. Please try logging in again.');
       } finally {
         setLoading(false);
         console.log('Auth state processing complete');
@@ -378,9 +443,13 @@ export function AuthProvider({ children }) {
     changePassword,
     fetchUserProfile,
     hasRole,
+    isAdmin,
     isDonor,
     isReceiver,
     isVolunteer,
+    getDashboardRoute,
+    hasAdminPermission,
+    isAccountActive,
     updateUserLocation
   };
 

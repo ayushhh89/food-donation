@@ -335,7 +335,9 @@ const CreateDonation = () => {
   // Updated publishDonation function for CreateDonation.js
   // Replace your existing publishDonation function with this:
 
-  const publishDonation = async () => {
+  // src/pages/CreateDonation.js
+
+const publishDonation = async () => {
     if (!validateStep(activeStep)) return;
 
     // Prevent multiple submissions
@@ -343,6 +345,7 @@ const CreateDonation = () => {
 
     setLoading(true);
     try {
+      // This is the MAIN donationData object for Firestore
       const donationData = {
         ...formData,
         donorId: currentUser.uid,
@@ -360,7 +363,6 @@ const CreateDonation = () => {
 
       let donationId;
 
-      // After donation is published successfully, replace this part:
       if (isEditing) {
         await updateDoc(doc(db, 'donations', id), donationData);
         donationId = id;
@@ -369,8 +371,9 @@ const CreateDonation = () => {
         const docRef = await addDoc(collection(db, 'donations'), donationData);
         donationId = docRef.id;
 
-        // ENHANCED SUCCESS MESSAGE WITH SOCIAL SHARING
-        const donationData = {
+        // *** FIX APPLIED HERE ***
+        // Renamed the variable from 'donationData' to 'shareData' to avoid conflict
+        const shareData = {
           id: donationId,
           title: formData.title,
           category: formData.category,
@@ -390,7 +393,7 @@ const CreateDonation = () => {
             </Typography>
             <SocialShareButton
               type="donation"
-              data={donationData}
+              data={shareData} // Use the new 'shareData' variable
               variant="button"
               showLabel
               size="small"
@@ -405,16 +408,17 @@ const CreateDonation = () => {
             />
           </Box>,
           {
-            autoClose: false, // Don't auto close so user can share
+            autoClose: false,
             closeButton: true
           }
         );
       }
 
-      // Send email notifications to all receivers - with single call protection
+      // Send email notifications to all receivers
       try {
         toast.info('📧 Sending notifications to receivers...', { autoClose: 2000 });
 
+        // This now correctly and safely refers to the main donationData object
         const emailData = {
           ...donationData,
           id: donationId,
@@ -448,12 +452,12 @@ const CreateDonation = () => {
 
     } catch (error) {
       console.error('Error publishing donation:', error);
-      toast.error('Error publishing donation');
+      // The error will no longer happen, but this catch block is still good to have
+      toast.error(`Error publishing donation: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
-
   const renderStepContent = () => {
     switch (activeStep) {
       case 0:

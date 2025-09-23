@@ -1,4 +1,6 @@
 // src/services/ngoService.js
+import { useState, useEffect } from 'react';
+
 import {
   collection,
   doc,
@@ -15,6 +17,9 @@ import {
   increment
 } from 'firebase/firestore';
 import { db } from './firebase';
+
+// React Hook for NGO features
+import { useAuth } from '../contexts/AuthContext';
 
 export class NGOService {
   // Register a new NGO
@@ -280,9 +285,6 @@ export class NGOService {
   }
 }
 
-// React Hook for NGO features
-import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 
 export const useNGOFeatures = () => {
   const { currentUser } = useAuth();
