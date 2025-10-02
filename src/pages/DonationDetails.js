@@ -75,6 +75,7 @@ import { toast } from 'react-toastify';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Chat, ChatBubble } from '@mui/icons-material';
 import { useChatActions } from '../hooks/useChat';
+import { assignRideToVolunteer } from '../services/volunteerService';
 
 
 const DonationDetails = () => {
@@ -220,6 +221,68 @@ const DonationDetails = () => {
           interestedReceivers: arrayUnion(currentUser.uid)
         });
         toast.success('Interest registered! The donor will be notified.');
+      }
+    } catch (error) {
+      console.error('Error updating interest:', error);
+      toast.error('Error updating interest');
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  // ADD THIS NEW FUNCTION after handleShowInterest
+  const handleShowInterestWithVolunteer = async () => {
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    if (userProfile?.role !== 'receiver') {
+      toast.error('Only food receivers can show interest in donations');
+      return;
+    }
+
+    setClaiming(true);
+    try {
+      const donationRef = doc(db, 'donations', donation.id);
+      const isInterested = donation.interestedReceivers?.includes(currentUser.uid);
+
+      if (isInterested) {
+        // Remove interest
+        await updateDoc(donationRef, {
+          interestedReceivers: arrayRemove(currentUser.uid)
+        });
+        toast.success('Interest removed');
+      } else {
+        // Add interest
+        await updateDoc(donationRef, {
+          interestedReceivers: arrayUnion(currentUser.uid)
+        });
+
+        // Try to assign a volunteer
+        const { findAvailableVolunteer, assignRideToVolunteer, calculateDistance } = await import('../services/volunteerService');
+        const availableVolunteer = await findAvailableVolunteer();
+
+        if (availableVolunteer) {
+          const distance = calculateDistance(donation.pickupAddress, userProfile.location?.address || 'Unknown');
+
+          await assignRideToVolunteer({
+            volunteerId: availableVolunteer.uid,
+            donationId: donation.id,
+            donorId: donation.donorId,
+            receiverId: currentUser.uid,
+            foodItem: donation.title,
+            quantity: `${donation.quantity} ${donation.unit}`,
+            pickupLocation: donation.pickupAddress,
+            deliveryLocation: userProfile.location?.address || 'Address not set',
+            distance: distance,
+            notes: donation.pickupInstructions || ''
+          });
+
+          toast.success('Interest registered! A volunteer has been assigned to help with delivery.');
+        } else {
+          toast.success('Interest registered! We will assign a volunteer soon.');
+        }
       }
     } catch (error) {
       console.error('Error updating interest:', error);
@@ -894,7 +957,7 @@ const DonationDetails = () => {
                       variant="contained"
                       size="large"
                       fullWidth
-                      onClick={handleShowInterest}
+                      onClick={handleShowInterestWithVolunteer}  // <-- NEW FUNCTION
                       disabled={claiming}
                       startIcon={
                         claiming ? (

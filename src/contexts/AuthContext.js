@@ -1,7 +1,7 @@
 ﻿// src/contexts/AuthContext.js - UPDATED WITH ADMIN SUPPORT
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  createUserWithEmailAndPassword, 
+import {
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
@@ -10,12 +10,12 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential
 } from 'firebase/auth';
-import { 
-  doc, 
-  setDoc, 
-  getDoc, 
+import {
+  doc,
+  setDoc,
+  getDoc,
   updateDoc,
-  serverTimestamp 
+  serverTimestamp
 } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 import { toast } from 'react-toastify';
@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
   async function register(email, password, userData) {
     try {
       const { user } = await createUserWithEmailAndPassword(auth, email, password);
-      
+
       // Update profile with display name
       await updateProfile(user, {
         displayName: userData.name
@@ -60,7 +60,7 @@ export function AuthProvider({ children }) {
         isActive: true,
         status: 'active', // 'active', 'suspended', 'pending'
         verificationStatus: 'unverified', // 'unverified', 'pending', 'verified'
-        
+
         // Role-specific fields
         ...(userData.role === 'donor' && {
           organization: userData.organization || '',
@@ -78,6 +78,12 @@ export function AuthProvider({ children }) {
           expertiseArea: userData.expertiseArea || '',
           assignedDonors: [],
           assignedReceivers: [],
+          credits: 0,
+          totalRides: 0,
+          completedRides: 0,
+          activeRides: 0,
+          totalDistance: 0,
+          avgRating: 0,
           volunteersDone: 0,
           approvalStatus: 'pending',
           isActive: 0
@@ -91,12 +97,12 @@ export function AuthProvider({ children }) {
 
       await setDoc(doc(db, 'users', user.uid), userDoc);
       setUserProfile(userDoc);
-      
+
       toast.success('Account created successfully!');
       return user;
     } catch (error) {
       console.error('Registration error:', error);
-      
+
       // Better error messages
       let errorMessage = 'Failed to create account. Please try again.';
       switch (error.code) {
@@ -113,7 +119,7 @@ export function AuthProvider({ children }) {
           errorMessage = 'Network error. Please check your internet connection.';
           break;
       }
-      
+
       toast.error(errorMessage);
       throw error;
     }
@@ -125,11 +131,11 @@ export function AuthProvider({ children }) {
       console.log('Attempting login for:', email);
       const { user } = await signInWithEmailAndPassword(auth, email, password);
       console.log('Firebase auth successful for:', user.uid);
-      
+
       return user;
     } catch (error) {
       console.error('Login error:', error);
-      
+
       // Better error messages
       let errorMessage = 'Failed to login. Please try again.';
       switch (error.code) {
@@ -155,7 +161,7 @@ export function AuthProvider({ children }) {
           errorMessage = 'Invalid email or password.';
           break;
       }
-      
+
       toast.error(errorMessage);
       throw error;
     }
@@ -194,10 +200,10 @@ export function AuthProvider({ children }) {
       };
 
       await updateDoc(userRef, updateData);
-      
+
       // Update local state
       setUserProfile(prev => ({ ...prev, ...updates }));
-      
+
       toast.success('Profile updated successfully!');
       return true;
     } catch (error) {
@@ -221,7 +227,7 @@ export function AuthProvider({ children }) {
 
       // Update password
       await updatePassword(currentUser, newPassword);
-      
+
       toast.success('Password updated successfully!');
       return true;
     } catch (error) {
@@ -243,28 +249,28 @@ export function AuthProvider({ children }) {
     }
 
     setProfileLoading(true);
-    
+
     try {
       console.log('Fetching user profile for:', uid);
       const userRef = doc(db, 'users', uid);
       const userDoc = await getDoc(userRef);
-      
+
       if (userDoc.exists()) {
         const profile = { id: userDoc.id, ...userDoc.data() };
         console.log('Profile fetched successfully:', profile);
         setUserProfile(profile);
-        
+
         // Update last login for admin users
         if (profile.role === 'admin') {
           await updateDoc(userRef, {
             lastLoginAt: serverTimestamp()
           });
         }
-        
+
         return profile;
       } else {
         console.warn('User profile document does not exist for UID:', uid);
-        
+
         // Create a basic profile if it doesn't exist (this can happen with existing users)
         const basicProfile = {
           uid: uid,
@@ -287,19 +293,19 @@ export function AuthProvider({ children }) {
         // Create the profile document
         await setDoc(userRef, basicProfile);
         console.log('Created basic profile for existing user');
-        
+
         setUserProfile(basicProfile);
         toast.info('Profile created successfully. Please complete your profile.');
         return basicProfile;
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
-      
+
       // Don't show error toast for permission errors during development
       if (error.code !== 'permission-denied') {
         toast.error('Error loading profile. Please try refreshing the page.');
       }
-      
+
       return null;
     } finally {
       setProfileLoading(false);
@@ -334,7 +340,7 @@ export function AuthProvider({ children }) {
   // Get dashboard route based on user role
   function getDashboardRoute() {
     if (!userProfile) return '/login';
-    
+
     switch (userProfile.role) {
       case 'admin':
         return '/admin-dashboard';
@@ -374,30 +380,30 @@ export function AuthProvider({ children }) {
   // Auth state listener with better error handling and role-based routing
   useEffect(() => {
     console.log('Setting up auth state listener');
-    
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       console.log('Auth state changed:', user?.uid || 'No user');
-      
+
       setLoading(true);
-      
+
       try {
         if (user) {
           setCurrentUser(user);
           console.log('User authenticated, fetching profile...');
-          
+
           // Fetch user profile
           const profile = await fetchUserProfile(user.uid);
-          
+
           if (profile) {
             console.log('Login flow completed successfully for role:', profile.role);
-            
+
             // Check if account is suspended
             if (profile.status === 'suspended') {
               toast.error('Your account has been suspended. Please contact support.');
               await signOut(auth);
               return;
             }
-            
+
             // Only show success message on actual login (not page refresh)
             if (!currentUser) {
               if (profile.role === 'admin') {

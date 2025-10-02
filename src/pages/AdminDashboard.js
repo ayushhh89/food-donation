@@ -120,6 +120,7 @@ import { db } from '../services/firebase';
 import { format, subDays, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 import { toast } from 'react-toastify';
 
+
 const COLORS = ['#667eea', '#764ba2', '#00C853', '#FF8F00', '#f44336', '#9C27B0', '#FF5722', '#795548'];
 
 const AdminDashboard = () => {
@@ -349,6 +350,13 @@ const AdminDashboard = () => {
 
     fetchAdminData();
   }, [currentUser, userProfile]);
+
+
+  const fetchAllVolunteerRides = async () => {
+  const ridesQuery = query(collection(db, 'volunteerRides'));
+  const snapshot = await getDocs(ridesQuery);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
 
   const handleRefreshData = async () => {
     setRefreshing(true);
