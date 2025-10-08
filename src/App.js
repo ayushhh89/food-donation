@@ -29,7 +29,7 @@ import DonationDetails from './pages/DonationDetails';
 import DonationFeed from './components/receiver/DonationFeed';
 import MapContainer from './components/maps/MapContainer';
 import VolunteerDashboard from './pages/dashboard/VolunteerDashboard';
-
+import Achievements from './pages/Achievements';
 // Chat Components
 import ChatInterface from './components/chat/ChatInterface';
 
@@ -38,7 +38,7 @@ import AdminDashboard from './pages/AdminDashboard';
 
 // *** ADD NGO PARTNERSHIP IMPORT ***
 import NGOPartnershipHub from './components/ngo/NGOPartnershipHub';
-import { GamificationService } from './services/gamificationService';
+// import { GamificationService } from './services/gamificationService';
 
 // Role-based redirect component
 const RoleBasedRedirect = ({ children }) => {
@@ -155,11 +155,11 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              <Route path="/achievements" element={
-                <ProtectedRoute>
-                  <GamificationService />
-                </ProtectedRoute>
-              } />
+    <Route path="/achievements" element={
+  <ProtectedRoute>
+    <Achievements />
+  </ProtectedRoute>
+} />
 
               <Route path="/my-donations" element={
                 <ProtectedRoute requireRole="donor">

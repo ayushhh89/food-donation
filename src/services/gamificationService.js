@@ -510,9 +510,8 @@ export class GamificationService {
     };
   }
 }
-
-// Export singleton instance
-export const gamificationService = new GamificationService();
+// Create and export singleton instance
+const gamificationServiceInstance = new GamificationService();
 
 // React hook for gamification
 export const useGamification = (userId) => {
@@ -526,7 +525,7 @@ export const useGamification = (userId) => {
       return;
     }
 
-    const unsubscribe = gamificationService.subscribeToUserGamification(
+    const unsubscribe = gamificationServiceInstance.subscribeToUserGamification(
       userId,
       (data) => {
         setGamificationData(data);
@@ -538,11 +537,11 @@ export const useGamification = (userId) => {
   }, [userId]);
 
   const checkForNewBadges = async (impactData) => {
-    return gamificationService.checkAndAwardBadges(userId, impactData);
+    return gamificationServiceInstance.checkAndAwardBadges(userId, impactData);
   };
 
   const checkForNewAchievements = async (stats) => {
-    return gamificationService.checkAchievements(userId, stats);
+    return gamificationServiceInstance.checkAchievements(userId, stats);
   };
 
   return {
@@ -554,4 +553,8 @@ export const useGamification = (userId) => {
   };
 };
 
-export default gamificationService;
+// Export as named export
+export const gamificationService = gamificationServiceInstance;
+
+// Export as default
+export default gamificationServiceInstance;
