@@ -98,7 +98,7 @@ const Navbar = () => {
     ...(userProfile?.role === 'donor' ? [
       { text: 'Create Donation', icon: <Add />, path: '/create-donation' },
       { text: 'My Donations', icon: <Assignment />, path: '/my-donations' },
-      { text: 'Analytics', icon: <Analytics />, path: '/analytics' }
+      // { text: 'Analytics', icon: <Analytics />, path: '/analytics' }
     ] : []),
     ...(userProfile?.role === 'receiver' ? [
       { text: 'Browse Food', icon: <Search />, path: '/browse' },
