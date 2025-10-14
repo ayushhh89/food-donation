@@ -1724,7 +1724,7 @@ export default Dashboard;
 // import SocialShareButton from '../../components/sharing/SocialShareButton';
 // import DonationTimeline from '../../components/timeline/DonationTimeline';
 // import ImpactTracker from '../../components/impact/ImpactTracker';
-// import { BadgeShowcase, LevelProgress, Leaderboard } from '../../components/components/BadgeShowcase';
+// import { BadgeShowcase, LevelProgress, Leaderboard } from '../../components/BadgeShowcase';
 // import { useRealTimeImpact } from '../../services/impactService';
 // import { useGamification } from '../../services/gamificationService';
 // import { useSocialSharing } from '../../services/socialSharingService';
