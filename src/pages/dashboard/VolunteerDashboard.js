@@ -116,29 +116,30 @@ const VolunteerDashboard = () => {
     if (!currentUser) return;
 
     let unsubscribeRides = null;
+    let unsubscribeUser = null;
 
     const loadVolunteerData = async () => {
       try {
         setLoading(true);
 
-        // Load user profile data
+        // Set up real-time listener for user profile (for credits updates)
         const userDocRef = doc(db, 'users', currentUser.uid);
-        const docSnap = await getDoc(userDocRef);
+        unsubscribeUser = onSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setIsActive(data.isActive === 1 || data.isActive === true);
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setIsActive(data.isActive === 1 || data.isActive === true);
-
-          // Set stats from user profile
-          setStats({
-            totalCredits: data.credits || 0,
-            totalRides: data.totalRides || 0,
-            completedRides: data.completedRides || 0,
-            activeRides: data.activeRides || 0,
-            totalDistance: data.totalDistance || 0,
-            avgRating: data.avgRating || 0
-          });
-        }
+            // Update stats from user profile in real-time
+            setStats(prev => ({
+              ...prev,
+              totalCredits: data.credits || 0,
+              totalRides: data.totalRides || 0,
+              completedRides: data.completedRides || 0,
+              totalDistance: data.totalDistance || 0,
+              avgRating: data.avgRating || 0
+            }));
+          }
+        });
 
         // Set up real-time listener for rides
         const ridesQuery = query(
@@ -175,9 +176,9 @@ const VolunteerDashboard = () => {
             const active = ridesData.find(r => r.status === 'in_progress');
             setActiveRide(active || null);
 
-            // Update active rides count
+            // Update active rides count (includes pending_verification)
             const activeCount = ridesData.filter(r =>
-              r.status === 'assigned' || r.status === 'in_progress'
+              r.status === 'assigned' || r.status === 'in_progress' || r.status === 'pending_verification'
             ).length;
 
             setStats(prev => ({ ...prev, activeRides: activeCount }));
@@ -203,6 +204,10 @@ const VolunteerDashboard = () => {
       if (unsubscribeRides) {
         console.log('Cleaning up rides listener');
         unsubscribeRides();
+      }
+      if (unsubscribeUser) {
+        console.log('Cleaning up user listener');
+        unsubscribeUser();
       }
     };
   }, [currentUser]);
@@ -255,27 +260,31 @@ const VolunteerDashboard = () => {
 
     try {
       const rideRef = doc(db, 'volunteerRides', selectedRide.id);
-      const creditsEarned = selectedRide.credits || 10;
+      const creditsEarned = selectedRide.status === 'completed' ? (selectedRide.creditsAwarded || selectedRide.credits || 10) : (selectedRide.credits || 10);
 
+      // Mark as pending verification - admin or receiver must verify
       await updateDoc(rideRef, {
-        status: 'completed',
+        status: 'pending_verification',
         completedAt: serverTimestamp(),
         completionNotes: completionNotes
       });
 
-      const userRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userRef, {
-        credits: increment(creditsEarned),
-        completedRides: increment(1),
-        activeRides: increment(-1),
-        totalDistance: increment(selectedRide.distance || 0)
-      });
+      // Update donation status
+      if (selectedRide.donationId) {
+        const donationRef = doc(db, 'donations', selectedRide.donationId);
+        await updateDoc(donationRef, {
+          deliveryStatus: 'pending_verification'
+        });
+      }
 
       setCompletionNotes('');
       setCompleteDialog(false);
       setSelectedRide(null);
 
-      toast.success(`Ride completed! +${creditsEarned} credits 🎉`);
+      toast.success(
+        `Ride marked for completion! 🎉 Awaiting verification from receiver or admin. You'll receive ${creditsEarned} credits after verification.`,
+        { autoClose: 6000 }
+      );
     } catch (error) {
       console.error('Error completing ride:', error);
       toast.error('Error completing ride');
@@ -287,6 +296,7 @@ const VolunteerDashboard = () => {
     switch (status) {
       case 'assigned': return '#FF9800';
       case 'in_progress': return '#2196F3';
+      case 'pending_verification': return '#9C27B0';
       case 'completed': return '#4CAF50';
       case 'cancelled': return '#F44336';
       default: return '#9E9E9E';
@@ -298,6 +308,7 @@ const VolunteerDashboard = () => {
     switch (status) {
       case 'assigned': return 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)';
       case 'in_progress': return 'linear-gradient(135deg, #2196F3 0%, #64B5F6 100%)';
+      case 'pending_verification': return 'linear-gradient(135deg, #9C27B0 0%, #BA68C8 100%)';
       case 'completed': return 'linear-gradient(135deg, #4CAF50 0%, #81C784 100%)';
       case 'cancelled': return 'linear-gradient(135deg, #F44336 0%, #E57373 100%)';
       default: return 'linear-gradient(135deg, #9E9E9E 0%, #BDBDBD 100%)';
@@ -459,7 +470,7 @@ const VolunteerDashboard = () => {
                   }}
                 />
                 <Chip
-                  label={`${ride.credits || 10} credits`}
+                  label={`${ride.status === 'completed' ? (ride.creditsAwarded || ride.credits || 10) : (ride.credits || 10)} credits`}
                   size="small"
                   icon={<Star sx={{ fontSize: 16 }} />}
                   sx={{
@@ -1020,7 +1031,7 @@ const VolunteerDashboard = () => {
                       </Typography>
                       <Chip
                         icon={<Star />}
-                        label={`${selectedRide.credits || 10} credits`}
+                        label={`${selectedRide.status === 'completed' ? (selectedRide.creditsAwarded || selectedRide.credits || 10) : (selectedRide.credits || 10)} credits`}
                         sx={{
                           background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
                           color: 'white',

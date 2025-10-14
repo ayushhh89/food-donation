@@ -89,7 +89,7 @@ export const getVolunteerStats = async (volunteerId) => {
 
     const rides = ridesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     const completedRides = rides.filter(r => r.status === 'completed');
-    const activeRides = rides.filter(r => r.status === 'assigned' || r.status === 'in_progress');
+    const activeRides = rides.filter(r => r.status === 'assigned' || r.status === 'in_progress' || r.status === 'pending_verification');
 
     const userData = userDoc.exists() ? userDoc.data() : {};
 
@@ -297,28 +297,36 @@ export const verifyDeliveryCompletion = async (rideId, adminId) => {
  */
 export const confirmDeliveryByReceiver = async (rideId, receiverId) => {
   try {
+    console.log('🔵 START confirmDeliveryByReceiver:', { rideId, receiverId });
+
     const rideRef = doc(db, 'volunteerRides', rideId);
     const rideDoc = await getDoc(rideRef);
 
     if (!rideDoc.exists()) {
+      console.log('❌ Ride not found');
       return { success: false, error: 'Ride not found' };
     }
 
     const rideData = rideDoc.data();
+    console.log('📄 Ride data:', { status: rideData.status, volunteerId: rideData.volunteerId, receiverId: rideData.receiverId });
 
     // Verify the receiver is authorized
     if (rideData.receiverId !== receiverId) {
+      console.log('❌ Unauthorized receiver');
       return { success: false, error: 'Unauthorized: You are not the receiver for this delivery' };
     }
 
     // Check if already confirmed
     if (rideData.status === 'completed') {
+      console.log('❌ Already completed');
       return { success: false, error: 'Delivery already confirmed' };
     }
 
-    const creditsToAward = 5; // Fixed 5 credits for receiver confirmation
+    const creditsToAward = 5;
+    console.log('💰 Credits to award:', creditsToAward);
 
     // Update ride status to completed
+    console.log('🔄 Updating ride...');
     await updateDoc(rideRef, {
       status: 'completed',
       completedAt: serverTimestamp(),
@@ -326,8 +334,10 @@ export const confirmDeliveryByReceiver = async (rideId, receiverId) => {
       confirmedByRole: 'receiver',
       creditsAwarded: creditsToAward
     });
+    console.log('✅ Ride updated');
 
     // Award credits to volunteer
+    console.log('🔄 Updating volunteer credits...', rideData.volunteerId);
     const volunteerRef = doc(db, 'users', rideData.volunteerId);
     await updateDoc(volunteerRef, {
       credits: increment(creditsToAward),
@@ -335,8 +345,10 @@ export const confirmDeliveryByReceiver = async (rideId, receiverId) => {
       activeRides: increment(-1),
       totalDistance: increment(rideData.distance || 0)
     });
+    console.log('✅ Volunteer credits updated');
 
     // Update donation status
+    console.log('🔄 Updating donation...');
     const donationRef = doc(db, 'donations', rideData.donationId);
     await updateDoc(donationRef, {
       status: 'completed',
@@ -344,10 +356,13 @@ export const confirmDeliveryByReceiver = async (rideId, receiverId) => {
       deliveryConfirmedAt: serverTimestamp(),
       deliveryConfirmedBy: receiverId
     });
+    console.log('✅ Donation updated');
 
+    console.log('🎉 SUCCESS! Credits awarded:', creditsToAward);
     return { success: true, creditsAwarded: creditsToAward };
   } catch (error) {
-    console.error('Error confirming delivery:', error);
+    console.error('❌ ERROR in confirmDeliveryByReceiver:', error);
+    console.error('Error details:', { code: error.code, message: error.message });
     return { success: false, error: error.message };
   }
 };

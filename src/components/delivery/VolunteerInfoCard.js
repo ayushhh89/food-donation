@@ -30,7 +30,9 @@ import {
   CheckCircle,
   Info,
   Close,
-  LocalShipping
+  LocalShipping,
+  Person,
+  Verified
 } from '@mui/icons-material';
 import { format, formatDistanceToNow } from 'date-fns';
 import { getDeliveryDetails } from '../../services/deliveryService';
@@ -124,6 +126,7 @@ const VolunteerInfoCard = ({ donationId, userRole, currentUserId }) => {
     switch (status) {
       case 'assigned': return '#FF9800';
       case 'in_progress': return '#2196F3';
+      case 'pending_verification': return '#9C27B0';
       case 'completed': return '#4CAF50';
       case 'cancelled': return '#F44336';
       default: return '#9E9E9E';
@@ -134,6 +137,7 @@ const VolunteerInfoCard = ({ donationId, userRole, currentUserId }) => {
     switch (status) {
       case 'assigned': return 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)';
       case 'in_progress': return 'linear-gradient(135deg, #2196F3 0%, #64B5F6 100%)';
+      case 'pending_verification': return 'linear-gradient(135deg, #9C27B0 0%, #BA68C8 100%)';
       case 'completed': return 'linear-gradient(135deg, #4CAF50 0%, #81C784 100%)';
       case 'cancelled': return 'linear-gradient(135deg, #F44336 0%, #E57373 100%)';
       default: return 'linear-gradient(135deg, #9E9E9E 0%, #BDBDBD 100%)';
@@ -255,6 +259,29 @@ const VolunteerInfoCard = ({ donationId, userRole, currentUserId }) => {
                     Completed {formatDistanceToNow(rideData.completedAt.toDate ? rideData.completedAt.toDate() : rideData.completedAt)} ago
                   </Typography>
                 )}
+              </Alert>
+            )}
+
+            {rideData.status === 'pending_verification' && (
+              <Alert
+                severity="info"
+                icon={<Verified />}
+                sx={{
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%)',
+                  '& .MuiAlert-icon': {
+                    fontSize: '1.5rem'
+                  }
+                }}
+              >
+                <Typography fontWeight={600}>
+                  ⏳ Awaiting Verification
+                </Typography>
+                <Typography variant="body2">
+                  {userRole === 'receiver'
+                    ? 'Please confirm delivery below to award credits to the volunteer'
+                    : 'Delivery completed, awaiting verification'}
+                </Typography>
               </Alert>
             )}
 
@@ -437,7 +464,7 @@ const VolunteerInfoCard = ({ donationId, userRole, currentUserId }) => {
             </Box>
 
             {/* Action Buttons */}
-            {userRole === 'receiver' && rideData.status === 'in_progress' && (
+            {userRole === 'receiver' && (rideData.status === 'in_progress' || rideData.status === 'pending_verification') && (
               <>
                 <Divider />
                 <Button

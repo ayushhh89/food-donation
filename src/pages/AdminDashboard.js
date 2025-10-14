@@ -1,5 +1,6 @@
 // src/pages/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
+import { Person } from '@mui/icons-material';
 import {
   Box,
   Container,
@@ -40,7 +41,8 @@ import {
   useTheme,
   useMediaQuery,
   Fade,
-  Slide
+  Slide,
+  
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -99,7 +101,8 @@ import {
   AreaChart,
   Area,
   Legend,
-  Pie
+  Pie,
+  
 } from 'recharts';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -115,7 +118,8 @@ import {
   updateDoc,
   getDoc,
   getCountFromServer,
-  serverTimestamp
+  serverTimestamp,
+  
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { format, subDays, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
@@ -494,6 +498,7 @@ const AdminDashboard = () => {
     try {
       // Get donor info
       const donorDoc = await getDoc(doc(db, 'users', selectedDonation.donorId));
+      const donorData = donorDoc.exists() ? donorDoc.data() : null;
 
       // Get receiver info - prefer claimedBy, then first interested receiver
       let receiverId = selectedDonation.claimedBy;
@@ -519,30 +524,66 @@ const AdminDashboard = () => {
         donationId: selectedDonation.id,
         donorId: selectedDonation.donorId,
         receiverId: receiverId || 'N/A',
-        donorName: donorDoc.exists() ? donorDoc.data().name : 'Unknown',
+        donorName: donorData?.name || 'Unknown',
         receiverName: receiverData?.name || 'Unknown',
         foodItem: selectedDonation.title,
         quantity: `${selectedDonation.quantity} ${selectedDonation.unit || ''}`,
         pickupLocation: selectedDonation.pickupAddress || selectedDonation.location || 'Unknown',
         deliveryLocation: deliveryLocation,
-        donorContact: donorDoc.exists() ? (donorDoc.data().phone || donorDoc.data().contact || 'N/A') : 'N/A',
+        donorContact: donorData?.phone || donorData?.contact || 'N/A',
         receiverContact: receiverData?.phone || receiverData?.contact || 'N/A',
         notes: selectedDonation.pickupInstructions || ''
       });
 
       if (result.success) {
-        toast.success(`Volunteer assigned successfully! ${result.credits} credits will be awarded upon completion.`);
+        // Enhanced success message with all details
+        toast.success(
+          <Box>
+            <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+              ✅ Delivery Assigned Successfully!
+            </Typography>
+            <Typography variant="caption" display="block">
+              🚴 Volunteer: {selectedVolunteer.name}
+            </Typography>
+            <Typography variant="caption" display="block">
+              🎁 Food: {selectedDonation.title}
+            </Typography>
+            <Typography variant="caption" display="block">
+              📤 From: {donorData?.name}
+            </Typography>
+            <Typography variant="caption" display="block">
+              📥 To: {receiverData?.name}
+            </Typography>
+            <Typography variant="caption" display="block" sx={{ mt: 1, color: '#FFD700' }}>
+              ⭐ {result.credits} credits upon completion
+            </Typography>
+          </Box>,
+          { autoClose: 5000 }
+        );
+
         setAssignDialog(false);
         setSelectedVolunteer(null);
         setSelectedDonation(null);
+
         // Refresh data
-        handleRefreshData();
+        await handleRefreshData();
+
+        // Fetch updated volunteer stats
+        const allVolunteers = await getAllVolunteers();
+        setVolunteers(allVolunteers);
+        const statsPromises = allVolunteers.map(v => getVolunteerStats(v.uid));
+        const statsResults = await Promise.all(statsPromises);
+        const statsMap = {};
+        allVolunteers.forEach((v, i) => {
+          statsMap[v.uid] = statsResults[i];
+        });
+        setVolunteerStats(statsMap);
       } else {
         toast.error(result.error || 'Failed to assign volunteer');
       }
     } catch (error) {
       console.error('Error assigning volunteer:', error);
-      toast.error('Error assigning volunteer');
+      toast.error('Error assigning volunteer: ' + error.message);
     }
   };
 
@@ -1998,47 +2039,36 @@ const AdminDashboard = () => {
                   </Button>
                 </Stack>
                 <Stack spacing={1} sx={{ maxHeight: 400, overflowY: 'auto' }}>
-                  {(() => {
-                    // Debug: Log all donations with their interested receivers
-                    console.log('All donations:', donations.map(d => ({
-                      id: d.id,
-                      title: d.title,
-                      status: d.status,
-                      interestedReceivers: d.interestedReceivers,
-                      assignedVolunteerId: d.assignedVolunteerId
-                    })));
-
-                    const filtered = donations.filter(d => {
+                  {donations.filter(d => {
+                    const hasInterestedReceivers = d.interestedReceivers && Array.isArray(d.interestedReceivers) && d.interestedReceivers.length > 0;
+                    const isAvailable = d.status === 'available' || d.status === 'claimed';
+                    return hasInterestedReceivers && isAvailable;
+                  }).length === 0 && (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography color="text.secondary">
+                        No donations with interested receivers available for assignment
+                      </Typography>
+                    </Box>
+                  )}
+                  {donations
+                    .filter(d => {
                       const hasInterestedReceivers = d.interestedReceivers && Array.isArray(d.interestedReceivers) && d.interestedReceivers.length > 0;
                       const isAvailable = d.status === 'available' || d.status === 'claimed';
-                      // SHOW ALL DONATIONS WITH INTERESTED RECEIVERS (even if already assigned)
-                      // This allows admin to see and potentially reassign
-
-                      // Debug logging for donations with interest
-                      if (hasInterestedReceivers) {
-                        console.log('Donation with interest found:', {
-                          id: d.id,
-                          title: d.title,
-                          interestedCount: d.interestedReceivers.length,
-                          status: d.status,
-                          assignedVolunteerId: d.assignedVolunteerId,
-                          isAvailable,
-                          willShow: hasInterestedReceivers && isAvailable
-                        });
-                      }
-
                       return hasInterestedReceivers && isAvailable;
-                    });
-
-                    console.log('Filtered donations count:', filtered.length);
-                    return filtered;
-                  })()
+                    })
                     .slice(0, 20)
-                    .map((donation) => (
+                    .map((donation) => {
+                      // Get donor info
+                      const donor = users.find(u => u.id === donation.donorId);
+                      // Get first interested receiver info
+                      const firstReceiverId = donation.interestedReceivers?.[0];
+                      const receiver = users.find(u => u.id === firstReceiverId);
+
+                      return (
                       <Paper
                         key={donation.id}
                         sx={{
-                          p: 2,
+                          p: 2.5,
                           cursor: 'pointer',
                           border: selectedDonation?.id === donation.id ? '2px solid #FF9800' : '1px solid #E0E0E0',
                           background: selectedDonation?.id === donation.id ? 'rgba(255, 152, 0, 0.1)' : 'white',
@@ -2049,46 +2079,69 @@ const AdminDashboard = () => {
                         }}
                         onClick={() => setSelectedDonation(donation)}
                       >
-                        <Stack direction="row" alignItems="center" spacing={2}>
-                          <Avatar sx={{ background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)' }}>
-                            <Restaurant />
-                          </Avatar>
-                          <Box flex={1}>
-                            <Typography variant="subtitle1" fontWeight={600}>
-                              {donation.title}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" display="block">
-                              {donation.quantity} {donation.unit} • {donation.status}
-                            </Typography>
-                            <Typography variant="caption" color="primary" fontWeight={600}>
-                              📍 {donation.pickupAddress?.substring(0, 40)}...
-                            </Typography>
-                            <Typography variant="caption" color="success.main" display="block" fontWeight={600}>
-                              👥 {donation.interestedReceivers?.length || 0} interested receiver(s)
-                            </Typography>
-                            {donation.assignedVolunteerId && (
-                              <Typography variant="caption" color="warning.main" display="block" fontWeight={600}>
-                                ⚠️ Already assigned to volunteer
+                        <Stack spacing={2}>
+                          <Stack direction="row" alignItems="center" spacing={2}>
+                            <Avatar sx={{ background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)' }}>
+                              <Restaurant />
+                            </Avatar>
+                            <Box flex={1}>
+                              <Typography variant="subtitle1" fontWeight={700}>
+                                {donation.title}
                               </Typography>
+                              <Typography variant="caption" color="text.secondary" display="block">
+                                {donation.quantity} {donation.unit} • {donation.status}
+                              </Typography>
+                            </Box>
+                            {selectedDonation?.id === donation.id && (
+                              <CheckCircle sx={{ color: '#FF9800' }} />
                             )}
+                          </Stack>
+
+                          <Divider />
+
+                          {/* Donor Info */}
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">
+                              DONOR
+                            </Typography>
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5 }}>
+                              <Person sx={{ fontSize: 16, color: '#667eea' }} />
+                              <Typography variant="body2" fontWeight={600}>
+                                {donor?.name || 'Unknown Donor'}
+                              </Typography>
+                            </Stack>
+                            <Typography variant="caption" color="primary" display="block" sx={{ ml: 3 }}>
+                              📍 {donation.pickupAddress?.substring(0, 50)}...
+                            </Typography>
                           </Box>
-                          {selectedDonation?.id === donation.id && (
-                            <CheckCircle sx={{ color: '#FF9800' }} />
+
+                          {/* Receiver Info */}
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">
+                              RECEIVER (First Interested)
+                            </Typography>
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5 }}>
+                              <Person sx={{ fontSize: 16, color: '#4CAF50' }} />
+                              <Typography variant="body2" fontWeight={600}>
+                                {receiver?.name || 'Unknown Receiver'}
+                              </Typography>
+                            </Stack>
+                            <Typography variant="caption" color="success.main" display="block" fontWeight={600} sx={{ ml: 3 }}>
+                              👥 {donation.interestedReceivers?.length || 0} total interested
+                            </Typography>
+                          </Box>
+
+                          {donation.assignedVolunteerId && (
+                            <Alert severity="warning" sx={{ py: 0.5 }}>
+                              <Typography variant="caption" fontWeight={600}>
+                                ⚠️ Already assigned to volunteer (can reassign)
+                              </Typography>
+                            </Alert>
                           )}
                         </Stack>
                       </Paper>
-                    ))}
-                  {donations.filter(d =>
-                    (d.status === 'available' || d.status === 'claimed') &&
-                    !d.assignedVolunteerId &&
-                    d.interestedReceivers && d.interestedReceivers.length > 0
-                  ).length === 0 && (
-                    <Box sx={{ textAlign: 'center', py: 4 }}>
-                      <Typography color="text.secondary">
-                        No donations with interested receivers available for assignment
-                      </Typography>
-                    </Box>
-                  )}
+                    );
+                    })}
                 </Stack>
               </Box>
             </Stack>
