@@ -76,6 +76,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { Chat, ChatBubble } from '@mui/icons-material';
 import { useChatActions } from '../hooks/useChat';
 import { assignRideToVolunteer } from '../services/volunteerService';
+import VolunteerInfoCard from '../components/delivery/VolunteerInfoCard';
 
 
 const DonationDetails = () => {
@@ -1050,6 +1051,17 @@ const DonationDetails = () => {
                       </Button>
                     )}
                   </Card>
+                )}
+
+                {/* Volunteer Information Card */}
+                {donation && (donation.rideId || donation.assignedVolunteerId) && (isOwner || isInterested) && (
+                  <Box sx={{ mb: 3 }}>
+                    <VolunteerInfoCard
+                      donationId={donation.id}
+                      userRole={userProfile?.role}
+                      currentUserId={currentUser?.uid}
+                    />
+                  </Box>
                 )}
 
                 {/* Enhanced Donor Information */}

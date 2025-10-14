@@ -416,11 +416,30 @@ const AdminDashboard = () => {
 
   const handleRefreshData = async () => {
     setRefreshing(true);
-    // Trigger data refresh
-    setTimeout(() => {
+    try {
+      // Reload donations from Firestore
+      const donationsRef = collection(db, 'donations');
+      const donationsSnapshot = await getDocs(donationsRef);
+      const donationsData = donationsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date(),
+        expiryDate: doc.data().expiryDate?.toDate() || new Date()
+      }));
+      setDonations(donationsData);
+
+      console.log('Refreshed donations:', donationsData.length);
+      console.log('Donations with interested receivers:', donationsData.filter(d =>
+        d.interestedReceivers && d.interestedReceivers.length > 0
+      ).length);
+
       setRefreshing(false);
       toast.success('Data refreshed successfully');
-    }, 2000);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      setRefreshing(false);
+      toast.error('Error refreshing data');
+    }
   };
 
   const handleUserAction = async (userId, action) => {
@@ -473,26 +492,42 @@ const AdminDashboard = () => {
     }
 
     try {
-      // Get donor and receiver info
+      // Get donor info
       const donorDoc = await getDoc(doc(db, 'users', selectedDonation.donorId));
-      const receiverDoc = selectedDonation.claimedBy
-        ? await getDoc(doc(db, 'users', selectedDonation.claimedBy))
-        : null;
+
+      // Get receiver info - prefer claimedBy, then first interested receiver
+      let receiverId = selectedDonation.claimedBy;
+      if (!receiverId && selectedDonation.interestedReceivers && selectedDonation.interestedReceivers.length > 0) {
+        receiverId = selectedDonation.interestedReceivers[0]; // Take first interested receiver
+      }
+
+      const receiverDoc = receiverId ? await getDoc(doc(db, 'users', receiverId)) : null;
+      const receiverData = receiverDoc?.exists() ? receiverDoc.data() : null;
+
+      // Get delivery location from receiver's profile
+      let deliveryLocation = 'Unknown';
+      if (receiverData) {
+        if (receiverData.address) {
+          deliveryLocation = receiverData.address;
+        } else if (receiverData.location?.address) {
+          deliveryLocation = receiverData.location.address;
+        }
+      }
 
       const result = await assignDeliveryToVolunteer({
         volunteerId: selectedVolunteer.uid,
         donationId: selectedDonation.id,
         donorId: selectedDonation.donorId,
-        receiverId: selectedDonation.claimedBy || 'N/A',
+        receiverId: receiverId || 'N/A',
         donorName: donorDoc.exists() ? donorDoc.data().name : 'Unknown',
-        receiverName: receiverDoc?.exists() ? receiverDoc.data().name : 'Unknown',
+        receiverName: receiverData?.name || 'Unknown',
         foodItem: selectedDonation.title,
-        quantity: selectedDonation.quantity,
-        pickupLocation: selectedDonation.pickupAddress || selectedDonation.location,
-        deliveryLocation: selectedDonation.deliveryAddress || 'Unknown',
-        donorContact: donorDoc.exists() ? donorDoc.data().phone : 'N/A',
-        receiverContact: receiverDoc?.exists() ? receiverDoc.data().phone : 'N/A',
-        notes: ''
+        quantity: `${selectedDonation.quantity} ${selectedDonation.unit || ''}`,
+        pickupLocation: selectedDonation.pickupAddress || selectedDonation.location || 'Unknown',
+        deliveryLocation: deliveryLocation,
+        donorContact: donorDoc.exists() ? (donorDoc.data().phone || donorDoc.data().contact || 'N/A') : 'N/A',
+        receiverContact: receiverData?.phone || receiverData?.contact || 'N/A',
+        notes: selectedDonation.pickupInstructions || ''
       });
 
       if (result.success) {
@@ -1949,12 +1984,55 @@ const AdminDashboard = () => {
               <Divider />
 
               <Box>
-                <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-                  Select Donation (Available or Claimed)
-                </Typography>
-                <Stack spacing={1} sx={{ maxHeight: 300, overflowY: 'auto' }}>
-                  {donations
-                    .filter(d => (d.status === 'available' || d.status === 'claimed') && !d.assignedVolunteerId)
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    Select Donation (With Interested Receivers)
+                  </Typography>
+                  <Button
+                    size="small"
+                    startIcon={<Refresh />}
+                    onClick={handleRefreshData}
+                    sx={{ minWidth: 'auto' }}
+                  >
+                    Refresh
+                  </Button>
+                </Stack>
+                <Stack spacing={1} sx={{ maxHeight: 400, overflowY: 'auto' }}>
+                  {(() => {
+                    // Debug: Log all donations with their interested receivers
+                    console.log('All donations:', donations.map(d => ({
+                      id: d.id,
+                      title: d.title,
+                      status: d.status,
+                      interestedReceivers: d.interestedReceivers,
+                      assignedVolunteerId: d.assignedVolunteerId
+                    })));
+
+                    const filtered = donations.filter(d => {
+                      const hasInterestedReceivers = d.interestedReceivers && Array.isArray(d.interestedReceivers) && d.interestedReceivers.length > 0;
+                      const isAvailable = d.status === 'available' || d.status === 'claimed';
+                      // SHOW ALL DONATIONS WITH INTERESTED RECEIVERS (even if already assigned)
+                      // This allows admin to see and potentially reassign
+
+                      // Debug logging for donations with interest
+                      if (hasInterestedReceivers) {
+                        console.log('Donation with interest found:', {
+                          id: d.id,
+                          title: d.title,
+                          interestedCount: d.interestedReceivers.length,
+                          status: d.status,
+                          assignedVolunteerId: d.assignedVolunteerId,
+                          isAvailable,
+                          willShow: hasInterestedReceivers && isAvailable
+                        });
+                      }
+
+                      return hasInterestedReceivers && isAvailable;
+                    });
+
+                    console.log('Filtered donations count:', filtered.length);
+                    return filtered;
+                  })()
                     .slice(0, 20)
                     .map((donation) => (
                       <Paper
@@ -1979,9 +2057,20 @@ const AdminDashboard = () => {
                             <Typography variant="subtitle1" fontWeight={600}>
                               {donation.title}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {donation.quantity} {donation.unit} • Status: {donation.status}
+                            <Typography variant="caption" color="text.secondary" display="block">
+                              {donation.quantity} {donation.unit} • {donation.status}
                             </Typography>
+                            <Typography variant="caption" color="primary" fontWeight={600}>
+                              📍 {donation.pickupAddress?.substring(0, 40)}...
+                            </Typography>
+                            <Typography variant="caption" color="success.main" display="block" fontWeight={600}>
+                              👥 {donation.interestedReceivers?.length || 0} interested receiver(s)
+                            </Typography>
+                            {donation.assignedVolunteerId && (
+                              <Typography variant="caption" color="warning.main" display="block" fontWeight={600}>
+                                ⚠️ Already assigned to volunteer
+                              </Typography>
+                            )}
                           </Box>
                           {selectedDonation?.id === donation.id && (
                             <CheckCircle sx={{ color: '#FF9800' }} />
@@ -1989,10 +2078,14 @@ const AdminDashboard = () => {
                         </Stack>
                       </Paper>
                     ))}
-                  {donations.filter(d => (d.status === 'available' || d.status === 'claimed') && !d.assignedVolunteerId).length === 0 && (
+                  {donations.filter(d =>
+                    (d.status === 'available' || d.status === 'claimed') &&
+                    !d.assignedVolunteerId &&
+                    d.interestedReceivers && d.interestedReceivers.length > 0
+                  ).length === 0 && (
                     <Box sx={{ textAlign: 'center', py: 4 }}>
                       <Typography color="text.secondary">
-                        No donations available for assignment
+                        No donations with interested receivers available for assignment
                       </Typography>
                     </Box>
                   )}

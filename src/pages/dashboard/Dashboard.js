@@ -114,6 +114,15 @@ const Dashboard = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  // Redirect volunteers to their dedicated dashboard
+  useEffect(() => {
+    if (userProfile?.role === 'volunteer') {
+      navigate('/volunteer-dashboard', { replace: true });
+    } else if (userProfile?.role === 'admin') {
+      navigate('/admin-dashboard', { replace: true });
+    }
+  }, [userProfile, navigate]);
+
   const [loading, setLoading] = useState(true);
   const [animationTrigger, setAnimationTrigger] = useState(false);
   const [stats, setStats] = useState({
