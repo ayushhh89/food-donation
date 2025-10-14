@@ -298,12 +298,23 @@ const CreateDonation = () => {
   const saveDraft = async () => {
     setLoading(true);
     try {
+      // Validate that we have expiry date and time before creating Date object
+      let expiryDate = null;
+      if (formData.expiryDate && formData.expiryTime) {
+        const dateStr = `${formData.expiryDate}T${formData.expiryTime}`;
+        const parsedDate = new Date(dateStr);
+        // Check if date is valid
+        if (!isNaN(parsedDate.getTime())) {
+          expiryDate = parsedDate;
+        }
+      }
+
       const donationData = {
         ...formData,
         donorId: currentUser.uid,
         donorName: userProfile?.name || currentUser?.displayName || 'Unknown User',
         donorEmail: userProfile?.email || currentUser?.email || '',
-        expiryDate: new Date(`${formData.expiryDate}T${formData.expiryTime}`),
+        expiryDate: expiryDate, // Will be null if not set, which is fine for drafts
         status: 'draft',
         isDraft: true,
         interestedReceivers: [],

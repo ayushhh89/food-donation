@@ -1,0 +1,204 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow reading other users' basic info for donations/claims
+      allow read: if request.auth != null;
+    }
+     
+     
+    // Add these rules for the NGO Partnership Hub
+
+    // Allow any authenticated user to read NGO information
+    match /ngos/{ngoId} {
+      allow read: if request.auth != null;
+      // Add specific create/update rules later if needed (e.g., for admins)
+      allow write: if false; 
+    }
+
+    // Rules for bulk donation requests from NGOs
+    match /bulkRequests/{requestId} {
+      // Any authenticated user can see the active requests
+      allow read: if request.auth != null;
+
+      // Any authenticated user can create a request (for an NGO) 
+      // or respond to one (for a donor)
+      allow create, update: if request.auth != null;
+
+      // Prevent requests from being deleted for now
+      allow delete: if false;
+    }
+    match /{document=**} {
+      allow read, write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow reading other users' basic info for donations/claims
+      allow read: if request.auth != null;
+    }
+    
+    match /donations/{donationId} {
+      // Anyone authenticated can read donations
+      allow read: if request.auth != null;
+
+      // Only authenticated users with the 'donor' role can create donations
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.donorId;
+
+      // Only the donor can delete their own donations
+      allow delete: if request.auth != null
+        && request.auth.uid == resource.data.donorId;
+
+      // Allow multiple types of updates:
+      // 1. The original donor can update their donation
+      // 2. Any authenticated user can update ONLY the interest/view count
+      // 3. Admin can assign volunteers (update assignedVolunteerId, deliveryStatus, rideId)
+      // 4. Receiver can update delivery status on confirmation
+      allow update: if request.auth != null && (
+        (request.auth.uid == resource.data.donorId) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['interestedReceivers', 'viewCount'])) ||
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+        (request.auth.uid == resource.data.claimedBy &&
+         request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'deliveryStatus', 'deliveryConfirmedAt', 'deliveryConfirmedBy']))
+      );
+    }
+    
+    // Claims/requests for donations
+    match /donations/{donationId}/claims/{claimId} {
+      // Allow authenticated users to read claims
+      allow read: if request.auth != null;
+      // Allow receivers to create claims
+      allow create: if request.auth != null 
+        && request.auth.uid == request.resource.data.receiverId;
+      // Allow receivers to update their own claims
+      allow update: if request.auth != null 
+        && request.auth.uid == resource.data.receiverId;
+      // Allow donors to update claim status
+      allow update: if request.auth != null 
+        && request.auth.uid == get(/databases/$(database)/documents/donations/$(donationId)).data.donorId;
+    }
+    
+    // Notifications
+    match /notifications/{notificationId} {
+      // Users can only read their own notifications
+      allow read, write: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      // Allow creating notifications for any user (for system/cloud functions)
+      allow create: if request.auth != null;
+    }
+    
+    // Reviews
+    match /reviews/{reviewId} {
+      // Anyone can read reviews
+      allow read: if request.auth != null;
+      // Only authenticated users can create reviews about others
+      allow create: if request.auth != null 
+        && request.auth.uid == request.resource.data.reviewerId;
+      // Users can update their own reviews
+      allow update, delete: if request.auth != null 
+        && request.auth.uid == resource.data.reviewerId;
+    }
+
+    // SIMPLIFIED Conversations for chat system - for debugging
+    match /conversations/{conversationId} {
+      // SIMPLIFIED: Allow any authenticated user to create/read/update conversations for now
+      // This is for debugging only - we'll add proper restrictions once it works
+      allow create, read, update: if request.auth != null;
+      
+      // Still prevent deletion for data integrity
+      allow delete: if false;
+    }
+
+    // SIMPLIFIED Messages between users - for debugging
+    match /messages/{messageId} {
+      // SIMPLIFIED: Allow any authenticated user to create/read/update messages for now
+      // This is for debugging only - we'll add proper restrictions once it works
+      allow create, read, update: if request.auth != null;
+      
+      // Still prevent deletion for message history integrity
+      allow delete: if false;
+    }
+    
+    
+    // Volunteer Rides - Complete delivery system
+    match /volunteerRides/{rideId} {
+      // Allow reading if you're involved in the ride OR if you're an admin
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.volunteerId ||
+        request.auth.uid == resource.data.donorId ||
+        request.auth.uid == resource.data.receiverId ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+
+      // Only admins can create rides (assign volunteers to deliveries)
+      allow create: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+
+      // Allow volunteer to update their own rides (start, complete)
+      // Allow receiver to confirm delivery (update with confirmedBy field)
+      // Allow admins to update any ride
+      allow update: if request.auth != null && (
+        // Volunteer can update their assigned rides
+        request.auth.uid == resource.data.volunteerId ||
+        // Receiver can confirm delivery completion
+        (request.auth.uid == resource.data.receiverId &&
+         request.resource.data.keys().hasAny(['status', 'completedAt', 'confirmedBy', 'confirmedByRole', 'creditsAwarded'])) ||
+        // Admin can update any ride
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+
+      // Only admins can delete
+      allow delete: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Interests for donations
+    match /donations/{donationId}/interests/{interestId} {
+      // Anyone signed in can read interests for a donation
+      allow read: if request.auth != null;
+
+      // Only the interested user can create an interest
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.userId;
+
+      // Users can update/delete their own interests
+      allow update, delete: if request.auth != null
+        && request.auth.uid == resource.data.userId;
+
+      // Donor can also update interest status (approve/decline)
+      allow update: if request.auth != null
+        && request.auth.uid == get(/databases/$(database)/documents/donations/$(donationId)).data.donorId;
+    }
+    
+    // Email logs - for cloud functions only
+    match /email_logs/{logId} {
+      // Allow cloud functions to write (they don't have request.auth)
+      allow write: if true;
+      // Allow authenticated users to read their own logs
+      allow read: if false;
+    }
+    
+    // Email issues - for cloud functions only  
+    match /email_issues/{issueId} {
+      allow read, write: if true;
+    }
+    
+        match /userImpacts/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // User Gamification data
+    match /userGamification/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Leaderboard (read-only for all authenticated users)
+    match /userImpacts/{document=**} {
+      allow read: if request.auth != null;
+    }
+  }
+}

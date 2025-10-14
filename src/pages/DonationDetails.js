@@ -793,7 +793,7 @@ const DonationDetails = () => {
                           {format(donation.expiryDate, 'MMM d, yyyy HH:mm')}
                           {timeRemaining && (
                             <Box component="span" sx={{ display: 'block', fontSize: '0.9em', mt: 0.5 }}>
-                              ⏰ {timeRemaining.text} remaining
+                              ⏰ {timeRemaining.text} {timeRemaining.expired ? '' : 'remaining'}
                             </Box>
                           )}
                         </Typography>

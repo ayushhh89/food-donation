@@ -80,9 +80,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import { format, formatDistanceToNow } from 'date-fns';
-import { toast } from 'react-toastify';
-import { createTestRideForVolunteer } from '../../../src/utils/createTestRides';
-import { getDocs } from 'firebase/firestore'; 
+import { toast } from 'react-toastify'; 
 
 
 const VolunteerDashboard = () => {
@@ -915,34 +913,6 @@ const VolunteerDashboard = () => {
 
                     <Divider sx={{ background: 'rgba(255,255,255,0.2)' }} />
 
-
-                    <Button
-                      variant="outlined"
-                      onClick={() => createTestRideForVolunteer(currentUser.uid)}
-                      sx={{ mb: 2 }}
-                    >
-                      Create Test Ride (For Testing)
-                    </Button>
-
-
-                    <Button
-                      variant="outlined"
-                      onClick={async () => {
-                        const ridesQuery = query(
-                          collection(db, 'volunteerRides'),
-                          where('volunteerId', '==', currentUser.uid)
-                        );
-                        const snapshot = await getDocs(ridesQuery);
-                        console.log('Manual query - Total rides found:', snapshot.docs.length);
-                        snapshot.docs.forEach(doc => {
-                          console.log('Ride:', doc.id, doc.data());
-                        });
-                        toast.info(`Found ${snapshot.docs.length} rides in database`);
-                      }}
-                      sx={{ mb: 2, ml: 2 }}
-                    >
-                      Debug: Check Rides
-                    </Button>
                     <Box>
                       <Stack direction="row" justifyContent="space-between">
                         <Typography sx={{ color: 'rgba(255,255,255,0.9)' }}>
